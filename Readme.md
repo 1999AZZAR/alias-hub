@@ -19,10 +19,10 @@ Here’s an overview of the `.alias` files and their purposes:
 
 ## 🚀 How to Use
 
-### 1. Clone the Repository
+### 1. Clone the Repository (put on your home dir to make it ease).
 Clone the repository to your local machine:
 ```bash
-git clone <repository_url>
+git clone https://github.com/1999AZZAR/alias-hub
 cd alias-hub
 ```
 
