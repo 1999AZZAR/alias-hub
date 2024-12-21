@@ -1,4 +1,4 @@
-# Aliases Collection
+# Alias-hub the Aliases Collection
 
 Welcome to the `aliases` collection! This repository organizes shell aliases into categories, making it easy for anyone to streamline their workflows. Simply source the aliases you need and start saving time on repetitive tasks.
 
@@ -16,6 +16,9 @@ Here’s an overview of the `.alias` files and their purposes:
 - **`Network_Management.alias`**: Tools and commands for managing networks.
 - **`Search_Utilities.alias`**: Aliases for search-related tasks (grep, find, etc.).
 - **`System_Management.alias`**: Commands to manage your system efficiently.
+- **`Docker.alias`**: Specific aliases for Docker management task.
+- **`Github.alias`**: Aliases for git related task.
+- **`Python.alias`**: Python3 aliases for coding, debugging, and development-related.
 
 ## 🚀 How to Use
 
