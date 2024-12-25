@@ -50,3 +50,16 @@ alias linecount='wc -l'                      # Count lines
 alias charcount='wc -m'                      # Count characters
 alias sort-uniq='sort | uniq -c | sort -nr'  # Sort and count unique lines
 alias diff-sort='diff <(sort file1) <(sort file2)'  # Compare sorted files
+
+# Aliases list
+# Alias to list all alias files with their contents
+alias alias-list='for file in "$ALIASES_DIR"/*.alias; do
+    echo -e "\n\033[1;34m=== ${file##*/} ===\033[0m";
+    cat "$file";
+done'
+
+# Alias to just show the names of alias files
+alias alias-files='echo -e "\033[1;32mAvailable alias files:\033[0m" && ls -1 "$ALIASES_DIR"/*.alias | xargs -n1 basename'
+
+# Alias to count total number of aliases
+alias alias-count='echo "Total aliases: $(grep -h "^alias" "$ALIASES_DIR"/*.alias | wc -l)"'
