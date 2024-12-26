@@ -52,11 +52,23 @@ alias sort-uniq='sort | uniq -c | sort -nr'  # Sort and count unique lines
 alias diff-sort='diff <(sort file1) <(sort file2)'  # Compare sorted files
 
 # Aliases list
-# Alias to list all alias files with their contents
-alias alias-list='for file in "$ALIASES_DIR"/*.alias; do
-    echo -e "\n\033[1;34m=== ${file##*/} ===\033[0m";
-    cat "$file";
-done'
+# Alias to list all alias files or a specific one with its contents
+alias alias-list='function _alias_list() {
+    if [[ -n "$1" ]]; then
+        FILE=$(find "$ALIASES_DIR" -iname "$(echo "$1".alias)" 2>/dev/null | head -n 1)
+        if [[ -f "$FILE" ]]; then
+            echo -e "\n\033[1;34m=== ${FILE##*/} ===\033[0m"
+            cat "$FILE"
+        else
+            echo -e "\033[1;31mError: File $1.alias not found in $ALIASES_DIR\033[0m"
+        fi
+    else
+        for file in "$ALIASES_DIR"/*.alias; do
+            echo -e "\n\033[1;34m=== ${file##*/} ===\033[0m"
+            cat "$file"
+        done
+    fi
+}; _alias_list'
 
 # Alias to just show the names of alias files
 alias alias-files='echo -e "\033[1;32mAvailable alias files:\033[0m" && ls -1 "$ALIASES_DIR"/*.alias | xargs -n1 basename'
