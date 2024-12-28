@@ -1,7 +1,7 @@
 # Docker Aliases
 # ----------------------------
 
-# Docker Shortcuts
+### Docker Shortcuts
 alias dps='docker ps'                        # List running containers
 alias dpsa='docker ps -a'                    # List all containers (including stopped)
 alias dimg='docker images'                   # List images

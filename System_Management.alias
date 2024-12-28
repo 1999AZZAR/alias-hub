@@ -125,10 +125,10 @@ alias auth-log='sudo tail -f /var/log/auth.log' # Authentication log
 alias ssl-cert='sudo openssl x509 -text -in'    # Check SSL certificate
 
 # System Backup
-alias backup-home='tar -czf home-backup-$(date +%Y%m%d).tar.gz ~/'  # Backup home
 alias backup-system='sudo tar -czf system-backup-$(date +%Y%m%d).tar.gz --exclude=/proc --exclude=/sys --exclude=/tmp --exclude=/media --exclude=/mnt --exclude=/run /'  # System backup
-alias backup-list='ls -lh *backup*.tar.gz'    # List backups
-alias backup-extract='tar -xzf'               # Extract backup
+alias backup-home='tar -czf home-backup-$(date +%Y%m%d).tar.gz ~/'  # Backup home
+alias backup-list='ls -lh *backup*.tar.gz'                          # List backups
+alias backup-extract='tar -xzf'                                     # Extract backup
 
 # User Management
 alias adduser='sudo useradd -m'           # Add a new user
