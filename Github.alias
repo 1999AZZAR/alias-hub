@@ -4,6 +4,7 @@
 ### Git Shortcuts
 alias gc='git commit -a -m'                  # Commit all changes
 alias ga='git add'                           # Stage files
+alias gas='git submodule add'                # Adding submodules
 alias gp='git push'                          # Push changes
 alias gu='git pull'                          # Pull changes
 alias gcl='git clone'                        # Clone repository
