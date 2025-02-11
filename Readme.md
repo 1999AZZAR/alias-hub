@@ -27,7 +27,9 @@ Here’s a summary of the `.alias` files included in this repository:
 ### Manual Installation
 
 #### 1. Clone the Repository
+
 Clone the repository to your local machine:
+
 ```bash
 cd ~  # Navigate to your home directory
 git clone https://github.com/1999AZZAR/alias-hub
@@ -35,10 +37,13 @@ cd alias-hub
 ```
 
 #### 2. Source the Aliases
+
 To use the aliases, source them in your shell configuration file:
 
 ##### For Bash:
+
 Add the following lines to your `~/.bashrc`:
+
 ```bash
 # Load aliases from Alias Hub
 ALIASES_DIR="$HOME/alias-hub"
@@ -48,7 +53,9 @@ done
 ```
 
 ##### For Zsh:
+
 Add the following lines to your `~/.zshrc`:
+
 ```bash
 # Load aliases from Alias Hub
 ALIASES_DIR="$HOME/alias-hub"
@@ -58,14 +65,18 @@ done
 ```
 
 #### 3. Reload Your Shell
+
 Apply the changes by reloading your shell configuration:
+
 ```bash
 source ~/.bashrc  # For Bash
 source ~/.zshrc   # For Zsh
 ```
 
 ### Automatic Installation
+
 Run the following command to install and source the aliases automatically:
+
 ```bash
 wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh | bash
 ```
@@ -77,10 +88,12 @@ wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.s
 Take your terminal to the next level with these tools and plugins:
 
 ### Install Oh My Bash/Oh My Zsh
+
 - **[Oh My Bash](https://github.com/ohmybash/oh-my-bash):** A framework for managing Bash configurations.
 - **[Oh My Zsh](https://ohmyz.sh):** A popular Zsh framework with an extensive plugin ecosystem.
 
 To install:
+
 ```bash
 # Install Oh My Bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)"
@@ -90,11 +103,14 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 ```
 
 ### Recommended Plugins
+
 Enhance functionality with these plugins:
+
 - **`zsh-autosuggestions`**: Displays command suggestions as you type.
 - **`zsh-syntax-highlighting`**: Highlights syntax for better readability.
 
 To use these plugins, update your `.zshrc`:
+
 ```bash
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 ```
@@ -108,6 +124,7 @@ Install plugins via a plugin manager like `antigen` or `zinit`.
 The `global.alias` file is designed for user-specific aliases. Add your personalized shortcuts here to make them always accessible.
 
 Example:
+
 ```bash
 alias gs='git status'
 alias ll='ls -lah'
@@ -134,4 +151,3 @@ We welcome contributions! Here’s how you can help:
 ---
 
 Enjoy an optimized and productive terminal experience with Alias Hub!
-
