@@ -1,0 +1,71 @@
+# ─── Odoo Management Aliases ──────────────────────────────────────────────
+# Place in ~/.aliases/Odoo.alias and source from your shell init script
+
+odoo() {
+    local SERVICE="odoo16"
+    local URL="http://localhost:8069"
+    local COLOR_GREEN="\033[1;32m"
+    local COLOR_YELLOW="\033[1;33m"
+    local COLOR_RED="\033[1;31m"
+    local COLOR_RESET="\033[0m"
+
+    is_active() {
+        systemctl is-active --quiet "$SERVICE"
+    }
+
+    case "$1" in
+        ""|start)
+            if is_active; then
+                echo -e "${COLOR_YELLOW}Odoo is already running. Opening UI...${COLOR_RESET}"
+            else
+                echo -e "${COLOR_GREEN}Starting Odoo16...${COLOR_RESET}"
+                sudo systemctl start "$SERVICE"
+            fi
+            xdg-open "$URL" >/dev/null 2>&1 &
+            ;;
+        -s|--stop|stop)
+            echo -e "${COLOR_RED}Stopping Odoo16...${COLOR_RESET}"
+            sudo systemctl stop "$SERVICE"
+            ;;
+        -r|--restart|restart)
+            echo -e "${COLOR_YELLOW}Restarting Odoo16...${COLOR_RESET}"
+            sudo systemctl restart "$SERVICE"
+            ;;
+        -e|--enable|enable)
+            echo -e "${COLOR_GREEN}Enabling Odoo16 to start on boot...${COLOR_RESET}"
+            sudo systemctl enable "$SERVICE"
+            ;;
+        -d|--disable|disable)
+            echo -e "${COLOR_RED}Disabling Odoo16 from boot...${COLOR_RESET}"
+            sudo systemctl disable "$SERVICE"
+            ;;
+        -l|--logs|logs)
+            echo -e "${COLOR_GREEN}Tailing Odoo16 logs (Ctrl+C to exit)...${COLOR_RESET}"
+            journalctl -fu "$SERVICE"
+            ;;
+        -st|--status|status)
+            echo -e "${COLOR_YELLOW}Checking status of Odoo16...${COLOR_RESET}"
+            systemctl status "$SERVICE"
+            ;;
+        -v|--venv)
+            echo -e "${COLOR_GREEN}Activating Odoo Python virtual environment...${COLOR_RESET}"
+            source /opt/odoo/venv/bin/activate
+            ;;
+        -h|--help|help)
+            echo -e "${COLOR_GREEN}Odoo Management Helper${COLOR_RESET}"
+            echo -e "  ${COLOR_YELLOW}odoo${COLOR_RESET}             → Start Odoo and open UI"
+            echo -e "  ${COLOR_YELLOW}odoo -s${COLOR_RESET}          → Stop Odoo"
+            echo -e "  ${COLOR_YELLOW}odoo -r${COLOR_RESET}          → Restart Odoo"
+            echo -e "  ${COLOR_YELLOW}odoo -e${COLOR_RESET}          → Enable on boot"
+            echo -e "  ${COLOR_YELLOW}odoo -d${COLOR_RESET}          → Disable on boot"
+            echo -e "  ${COLOR_YELLOW}odoo -l${COLOR_RESET}          → Show logs"
+            echo -e "  ${COLOR_YELLOW}odoo -st${COLOR_RESET}         → Show status"
+            echo -e "  ${COLOR_YELLOW}odoo -v${COLOR_RESET}          → Activate Python venv"
+            echo -e "  ${COLOR_YELLOW}odoo -h${COLOR_RESET}          → Show this help"
+            ;;
+        *)
+            echo -e "${COLOR_RED}Unknown command: $1${COLOR_RESET}"
+            odoo -h
+            ;;
+    esac
+}
