@@ -12,6 +12,7 @@ alias apt-fix='sudo apt --fix-broken install'                                 # 
 alias apt-clean='sudo apt clean && sudo apt autoclean && sudo apt autoremove' # Clean package cache
 alias sai='sudo apt install'                                                  # Shorthand for sudo apt install
 alias sar='sudo apt remove'                                                   # Shorthand for sudo apt remove
+alias safu='apt list --upgradable 2>/dev/null | tail -n +2 | cut -d/ -f1 | xargs sudo apt install -y'
 alias snap='sudo snap'                                                        # Shorthand for sudo snap
 alias snap-list='snap list'                                                   # List snap packages
 alias snap-find='snap find'                                                   # Find snap packages
