@@ -3,6 +3,7 @@
 
 # System Updates & Package Management
 alias update='sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y && sudo snap refresh && flatpak update -y'
+alias dis-update='sudo apt update && sudo apt upgrade -y && sudo apt dist-upgrade -y && sudo do-release-upgrade'
 alias apt='sudo apt'                                                          # Shorthand for sudo apt
 alias apt-search='apt search'                                                 # Search packages
 alias apt-show='apt show'                                                     # Show package details
