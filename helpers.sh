@@ -1,5 +1,8 @@
 # helpers.sh: centralized functions for alias-hub (sourced, no shebang)
 
+# Remove alias eval to avoid overriding built-in eval
+unalias eval 2>/dev/null
+
 # apt wrapper (with sudo)
 apt() { sudo apt "$@"; }
 
@@ -9,14 +12,14 @@ snap() { sudo snap "$@"; }
 # docker wrapper
 docker_cmd() { docker "$@"; }
 
-# Docker wrapper: generic docker function
-d() { docker "$@"; }
+# Docker shortcut alias
+alias d='docker'
 
 # flatpak wrapper
 flatpak() { flatpak "$@"; }
 
-# Kubernetes wrapper
-k() { kubectl "$@"; }
+# Kubernetes shortcut alias
+alias k='kubectl'
 
 # IDF wrapper (for ESP-IDF commands)
 idf() { idf.py "$@"; }
@@ -33,17 +36,31 @@ dis_update() { apt update && apt upgrade -y && apt dist-upgrade -y && sudo do-re
 # Plymouth boot splash
 boot_splash() { sudo plymouthd; sudo plymouth --show-splash; for ((i=0; i<5; i++)); do sleep 1; sudo plymouth --update=test$i; done; sudo plymouth --quit; }
 
-# ASCII art wrapper: use figlet or fallback to local loopers
+# ASCII art wrapper: use looper.sh for options, else figlet if available
 ascii() {
   local od="$(pwd)"
+  # default: random loop if no args
+  if [ $# -eq 0 ]; then
+    cd /usr/ascii && bash loopers.sh -r && cd "$od"
+    return
+  fi
+  # if first arg is an option, pass through to loopers.sh
+  if [[ "$1" == -* ]]; then
+    cd /usr/ascii && bash loopers.sh "$@" && cd "$od"
+    return
+  fi
+  # for text input, use figlet if available
   if command -v figlet >/dev/null; then
     echo "$*" | figlet
-  elif [ -f "${ALIASES_DIR}/looper.sh" ]; then
-    cd "${ALIASES_DIR}" && bash looper.sh "$@" && cd "$od"
-  else
-    echo "Error: no ASCII art engine found (install figlet or add looper.sh to ${ALIASES_DIR})"
-    return 1
+    return
   fi
+  # fallback to looper
+  if [ -f "/usr/ascii/loopers.sh" ]; then
+    cd /usr/ascii && bash loopers.sh "$@" && cd "$od"
+    return
+  fi
+  echo "Error: no ASCII art engine found (install figlet or add loopers.sh to /usr/ascii)"
+  return 1
 }
 
 # Prevent pip recursion
