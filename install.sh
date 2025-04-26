@@ -26,7 +26,7 @@ chmod +x "$ALIASES_DIR/helpers.sh"
 # Install required packages
 echo "Installing required packages..."
 sudo apt update && \
-sudo apt install -y exa htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full unrar rar curl nmap speedtest-cli lsof python3-pip python3-venv docker.io snapd flatpak
+sudo apt install -y eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full unrar rar curl nmap speedtest-cli lsof python3-pip python3-venv docker.io snapd flatpak
 
 # Step 2: Configure aliases in shell rc file
 echo "Configuring shell to use aliases..."

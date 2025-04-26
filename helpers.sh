@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-# helpers.sh: centralized functions for alias-hub
+# helpers.sh: centralized functions for alias-hub (sourced, no shebang)
 
 # apt wrapper (with sudo)
 apt() { sudo apt "$@"; }
@@ -10,8 +9,20 @@ snap() { sudo snap "$@"; }
 # docker wrapper
 docker_cmd() { docker "$@"; }
 
+# Docker wrapper: generic docker function
+d() { docker "$@"; }
+
 # flatpak wrapper
 flatpak() { flatpak "$@"; }
+
+# Kubernetes wrapper
+k() { kubectl "$@"; }
+
+# IDF wrapper (for ESP-IDF commands)
+idf() { idf.py "$@"; }
+
+# ESPTool wrapper (for ESP32 tools)
+esptool() { esptool.py "$@"; }
 
 # System update
 update() { apt update && apt upgrade -y && apt autoremove -y && snap refresh && flatpak update -y; }
@@ -22,8 +33,18 @@ dis_update() { apt update && apt upgrade -y && apt dist-upgrade -y && sudo do-re
 # Plymouth boot splash
 boot_splash() { sudo plymouthd; sudo plymouth --show-splash; for ((i=0; i<5; i++)); do sleep 1; sudo plymouth --update=test$i; done; sudo plymouth --quit; }
 
-# ASCII art wrapper
-ascii() { original_dir=$(pwd); cd /usr/ascii/ || { echo "Error: /usr/ascii/ directory not found."; return 1; }; ./loopers.sh "$@"; cd "$original_dir" || { echo "Error: Unable to return to the original directory."; return 1; }; }
+# ASCII art wrapper: use figlet or fallback to local loopers
+ascii() {
+  local od="$(pwd)"
+  if command -v figlet >/dev/null; then
+    echo "$*" | figlet
+  elif [ -f "${ALIASES_DIR}/looper.sh" ]; then
+    cd "${ALIASES_DIR}" && bash looper.sh "$@" && cd "$od"
+  else
+    echo "Error: no ASCII art engine found (install figlet or add looper.sh to ${ALIASES_DIR})"
+    return 1
+  fi
+}
 
 # Prevent pip recursion
 pip() { command pip "$@" --break-system-packages; }
@@ -80,4 +101,41 @@ findc() { find . -type f -exec grep -l "$1" {} \;; }
 rename_ext() {
   if [ $# -ne 2 ]; then echo "Usage: rename-ext old_extension new_extension"; return 1; fi
   find . -name "*.$1" -exec bash -c 'mv "$1" "${1%.$2}.$3"' - {} "$1" "$2" \;
+}
+
+# Auto-completion for alias-list command
+_alias_list_completions() {
+  local current_word="${COMP_WORDS[COMP_CWORD]}"
+  local matches
+  if [ -d "${ALIASES_DIR}" ]; then
+    matches=$(compgen -W "$(find "${ALIASES_DIR}" -name "*.alias" -type f -printf "%f\n" | sed 's/\.alias$//')" -- "${current_word}")
+    COMPREPLY=(${matches})
+  fi
+}
+
+# Enable completion for alias-list
+complete -F _alias_list_completions alias-list
+
+# Curl wrapper
+cw() { curl -s "$@"; }
+
+# Weather and info
+weather() { cw wttr.in/"${1:-}"; }
+moon() { cw wttr.in/Moon; }
+horo() { cw "http://horoscope-api.herokuapp.com/horoscope/today/$(date +%A)"; }
+
+# News feeds
+hn() { cw https://hn.algolia.com/api/v1/search?query=front_page | jq .; }
+trending_coins() { cw https://api.coingecko.com/api/v3/search/trending | jq .; }
+
+# Random fun generator
+fun() {
+  case "$1" in
+    dice) echo $((RANDOM % 6 + 1)) ;;
+    coin) echo $((RANDOM % 2 == 0 ? "Heads" : "Tails")) ;;
+    color) echo "[38;5;$((RANDOM%256))m█[0m" ;;
+    quote) cw http://quotes.stormconsultancy.co.uk/random.json | jq -r .quote ;;
+    joke) cw https://icanhazdadjoke.com/ | jq -r .joke ;;
+    *) echo "Usage: fun {dice|coin|color|quote|joke}" ;;
+  esac
 }

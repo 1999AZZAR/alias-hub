@@ -1,15 +1,15 @@
 # Development Tools Aliases
 # ----------------------------
 
-### Kubernetes Shortcuts
-alias k='kubectl'                            # Shorten kubectl command
-alias kctx='kubectl config use-context'      # Switch contexts
-alias kns='kubectl config set-context --current --namespace' # Set namespace
-alias kget='kubectl get'                     # Get Kubernetes resources
-alias kdesc='kubectl describe'               # Describe resources
-alias kdel='kubectl delete'                  # Delete resources
-alias klogs='kubectl logs'                   # View pod logs
-alias kexec='kubectl exec -it'               # Exec into a pod
+### Kubernetes Shortcuts (via helper k())
+# alias k() defined in helpers.sh
+alias kctx='k config use-context'      # Switch contexts
+alias kns='k config set-context --current --namespace' # Set namespace
+alias kget='k get'                     # Get Kubernetes resources
+alias kdesc='k describe'               # Describe resources
+alias kdel='k delete'                  # Delete resources
+alias klogs='k logs'                   # View pod logs
+alias kexec='k exec -it'               # Exec into a pod
 
 ### AI Development
 alias aiderg='aider --model gemini/gemini-1.5-pro-latest'  # Use Aider AI

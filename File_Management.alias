@@ -1,14 +1,9 @@
 # File Management & Operations
 # ----------------------------
 
-### Archive handling aliases (simplified, now use extract() function)
-alias untar='extract'                        # Use the extract function
-alias unzip='extract'                        # Use the extract function
-
-# Create archive aliases (now use archive() function)
-alias maketar='archive'                      # Create TAR archive
-alias makezip='archive'                      # Create ZIP archive
-alias make7z='archive'                       # Create 7zip archive
+### Archive & compression
+alias x='extract'                             # extract any archive
+alias arc='archive'                           # create any archive
 
 ### Modern ls replacement with icons
 alias ls='exa --icons --group-directories-first'
@@ -70,6 +65,10 @@ alias append='cat >> '                       # Append to file
 alias view='less'                            # View file content
 
 ### Directory helpers
+alias mkcd='mkcd'                              # make directory & cd
+alias back='back'                              # go back in directory
+alias findc='findc'                            # find content in files
+alias rename-ext='rename_ext'                  # rename file extensions
 
 ### Archive handling functions
 # Extract various archive formats

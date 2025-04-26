@@ -26,23 +26,22 @@ alias troll='echo "Your system will self-destruct in 10 seconds... kidding!"'  #
 alias shake='echo "Terminal shake activated!" | pv -qL 20 | lolcat'            # Fun shaking effect
 alias hidden='echo "You found the hidden alias!" | cowsay | lolcat'            # Hidden fun message
 
-### Weather and Fun Info
-alias weather='curl wttr.in'                                                          # Show weather forecast
-alias moon='curl wttr.in/Moon'                                                        # Current moon phase
-alias horo='curl -s "http://horoscope-api.herokuapp.com/horoscope/today/$(date +%A)"' # Daily horoscope
+### Weather and Fun Info (via helpers)
+alias weather='weather'    # Show weather forecast (optionally: weather [location])
+alias moon='moon'          # Current moon phase
+alias horo='horo'          # Daily horoscope
 
-### Random Generators
-alias roll-dice='echo $((RANDOM % 6 + 1))'                                                      # Roll a six-sided die
-alias flip-coin='echo $((RANDOM % 2 == 0 ? "Heads" : "Tails"))'                                 # Flip a coin
-alias random-quote='curl -s http://quotes.stormconsultancy.co.uk/random.json | jq -r .quote'    # Get a random quote
-alias joke='curl -s https://icanhazdadjoke.com/ | jq -r ".joke"'                                # Fetch a random dad joke
-alias quote='curl -s https://api.quotable.io/random | jq -r ".content + \" — \" + .author"'     # Fetch a random quote
-alias random-color='echo "\e[38;5;$((RANDOM%256))m█\e[0m"'                                      # Display a random colored block
+### Random Generators (via fun helper)
+alias roll-dice='fun dice'      # Roll a six-sided die
+alias flip-coin='fun coin'      # Flip a coin
+alias random-quote='fun quote'  # Get a random quote
+alias joke='fun joke'           # Fetch a random dad joke
+alias random-color='fun color'  # Display a random colored block
 
-### Reddit and News
-alias reddit='tuir'                                                                             # Terminal Reddit browser
-alias hackernews='curl -s https://hn.algolia.com/api/v1/search?query=front_page | jq .'         # Hacker News feed
-alias trending='curl -s https://api.coingecko.com/api/v3/search/trending | jq .'                # Trending cryptocurrencies
+### Reddit and News (via helpers)
+alias reddit='tuir'            # Terminal Reddit browser
+alias hackernews='hn'          # Hacker News feed
+alias trending='trending_coins' # Trending cryptocurrencies
 
 ### Terminal Music and Video
 alias music='ncmpcpp'                               # Terminal music player
