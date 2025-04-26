@@ -1,6 +1,15 @@
 # File Management & Operations
 # ----------------------------
 
+### Archive handling aliases (simplified, now use extract() function)
+alias untar='extract'                        # Use the extract function
+alias unzip='extract'                        # Use the extract function
+
+# Create archive aliases (now use archive() function)
+alias maketar='archive'                      # Create TAR archive
+alias makezip='archive'                      # Create ZIP archive
+alias make7z='archive'                       # Create 7zip archive
+
 ### Modern ls replacement with icons
 alias ls='exa --icons --group-directories-first'
 alias ll='exa -l --icons --group-directories-first'     # Long list
@@ -38,19 +47,6 @@ alias small='find . -type f -size -100k'     # Find files under 100KB
 alias empty='find . -type f -empty'          # Find empty files
 alias dirsize='du -sh * | sort -hr'          # Directory sizes, sorted
 
-### Archive handling
-alias unrar='unrar e -r'                     # Extract RAR with recursion
-alias untar='tar -zxvf'                      # Extract TAR
-alias untargz='tar -xvzf'                    # Extract TAR.GZ
-alias unzip='unzip -q'                       # Quiet unzip
-alias ungzip='gunzip'                        # Extract GZIP
-alias unbzip2='bunzip2'                      # Extract BZIP2
-alias un7z='7z x'                            # Extract 7zip
-alias maketar='tar -czvf'                    # Create TAR archive
-alias makezip='zip -r'                       # Create ZIP archive
-alias make7z='7z a'                          # Create 7zip archive
-alias makebz2='tar -cjvf'                    # Create BZIP2 archive
-
 ### File permissions and ownership
 alias mx='chmod a+x'                         # Make executable
 alias 000='chmod 000'                        # None
@@ -60,3 +56,25 @@ alias 755='chmod 755'                        # User all, group/other read/execut
 alias 777='chmod 777'                        # All all
 alias www='sudo chown www-data:www-data'     # Web server ownership
 alias own='sudo chown $USER:$USER'           # Take ownership
+
+### File searching and content viewing
+alias ff='find . -type f -name'              # Find files by name
+alias fd='find . -type d -name'              # Find directories by name
+alias grep='grep --color=auto'               # Colorize grep
+alias count='wc -l'                          # Count lines
+alias dus='du -sh * | sort -h'               # Sort by human-readable size
+
+### Quick file operations
+alias touchx='touch && chmod +x'             # Create and make executable
+alias append='cat >> '                       # Append to file
+alias view='less'                            # View file content
+
+### Directory helpers
+
+### Archive handling functions
+# Extract various archive formats
+# Create archives based on extension
+# Show files after changing directory
+# Go back x directories
+
+### File operations with safety and information

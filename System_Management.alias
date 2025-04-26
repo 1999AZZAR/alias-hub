@@ -2,9 +2,8 @@
 # ----------------------------
 
 # System Updates & Package Management
-alias update='sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y && sudo snap refresh && flatpak update -y'
-alias dis-update='sudo apt update && sudo apt upgrade -y && sudo apt dist-upgrade -y && sudo do-release-upgrade'
-alias apt='sudo apt'                                                          # Shorthand for sudo apt
+alias update='update'
+alias dis-update='dis_update'
 alias apt-search='apt search'                                                 # Search packages
 alias apt-show='apt show'                                                     # Show package details
 alias apt-installed='apt list --installed'                                    # List installed packages
@@ -14,7 +13,6 @@ alias apt-clean='sudo apt clean && sudo apt autoclean && sudo apt autoremove' # 
 alias sai='sudo apt install'                                                  # Shorthand for sudo apt install
 alias sar='sudo apt remove'                                                   # Shorthand for sudo apt remove
 alias safu='apt list --upgradable 2>/dev/null | tail -n +2 | cut -d/ -f1 | xargs sudo apt install -y'
-alias snap='sudo snap'                                                        # Shorthand for sudo snap
 alias snap-list='snap list'                                                   # List snap packages
 alias snap-find='snap find'                                                   # Find snap packages
 alias flatpak-list='flatpak list'                                             # List flatpak packages

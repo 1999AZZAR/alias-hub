@@ -20,6 +20,14 @@ unzip -q alias-hub.zip -d "$HOME"
 mv "$HOME/alias-hub-master" "$ALIASES_DIR"
 rm alias-hub.zip
 
+# Make helper functions executable
+chmod +x "$ALIASES_DIR/helpers.sh"
+
+# Install required packages
+echo "Installing required packages..."
+sudo apt update && \
+sudo apt install -y exa htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full unrar rar curl nmap speedtest-cli lsof python3-pip python3-venv docker.io snapd flatpak
+
 # Step 2: Configure aliases in shell rc file
 echo "Configuring shell to use aliases..."
 SHELL_RC=""
@@ -34,7 +42,7 @@ fi
 
 # Add sourcing script to the shell rc file
 if ! grep -q "ALIASES_DIR=\"$ALIASES_DIR\"" "$SHELL_RC"; then
-    echo -e "\n## Custom aliases\nALIASES_DIR=\"$ALIASES_DIR\"\nfor file in \"\$ALIASES_DIR\"/*.alias; do source \"\$file\"; done" >> "$SHELL_RC"
+    echo -e "\n## Custom aliases\nALIASES_DIR=\"$ALIASES_DIR\"\nsource \"\$ALIASES_DIR/helpers.sh\"\nfor file in \"\$ALIASES_DIR\"/*.alias; do source \"\$file\"; done" >> "$SHELL_RC"
     echo "Aliases configured in $SHELL_RC."
 else
     echo "Aliases are already configured in $SHELL_RC."
