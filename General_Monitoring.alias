@@ -18,8 +18,8 @@ perfmonitor()    { perf stat -e task-clock,cycles,instructions,cache-references,
 processlog()     { ps auxf --sort=-%cpu,-%mem | head -n "${1:-20}"; }
 
 ### Process and Resource Monitoring
-htop()    { htop "$@"; }
-top()     { top "$@"; }
+alias htop='clear && bash --noprofile --norc -c "htop; clear"'
+alias top='clear && bash --noprofile --norc -c "htop; clear"'
 bashtop(){ bashtop "$@"; }
 glances(){ glances "$@"; }
 gotop()   { gotop "$@"; }
