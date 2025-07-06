@@ -2,7 +2,7 @@
 # ----------------------------
 
 # System Updates & Package Management
-alias update='update'
+
 alias dis-update='dis_update'
 alias apt-search='apt search'                                                 # Search packages
 alias apt-show='apt show'                                                     # Show package details

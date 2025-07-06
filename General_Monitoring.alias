@@ -2,7 +2,6 @@
 # ----------------------------
 
 ### General System Information
-sysinfo()    { neofetch "$@"; }
 cpuinfo()    { lscpu "$@"; }
 meminfo()    { free -h "$@"; }
 diskinfo()   { lsblk -f "$@"; }
@@ -76,7 +75,6 @@ pingtest() { ping google.com -c 4 "$@"; }
 speedtest() { speedtest-cli "$@"; }
 nettop() { htop --sort NET_IO "$@"; }
 ipinfo() { ip a "$@"; }
-traceroute() { traceroute google.com "$@"; }
 macinfo() { ip link show "$@"; }
 routes() { ip route show "$@"; }
 tcpdump() { sudo tcpdump -i any "$@"; }
@@ -86,9 +84,7 @@ bwmon() { bmon "$@"; }
 neterror() { dmesg | grep -i network "$@"; }
 wireless() { iwconfig "$@"; }
 
-### Docker and Containers
-dockerstats() { docker stats "$@"; }
-dockertop() { docker top $(docker ps -q) "$@"; }
+
 kubeinfo() { kubectl top nodes "$@"; }
 kubecontinfo() { kubectl top pods "$@"; }
 

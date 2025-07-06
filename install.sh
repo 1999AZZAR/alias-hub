@@ -23,10 +23,23 @@ rm alias-hub.zip
 # Make helper functions executable
 chmod +x "$ALIASES_DIR/helpers.sh"
 
+# Step 1.5: Download and configure neofetch_ascii for ascii function
+NEOFETCH_ASCII_REPO_URL="https://github.com/1999AZZAR/neofetch_ascii/archive/refs/heads/main.zip"
+ASCII_SCRIPTS_DIR="$ALIASES_DIR/ascii-scripts"
+
+echo "Downloading neofetch_ascii scripts..."
+wget -q -O neofetch_ascii.zip "$NEOFETCH_ASCII_REPO_URL"
+unzip -q neofetch_ascii.zip -d "/tmp"
+mkdir -p "$ASCII_SCRIPTS_DIR"
+mv "/tmp/neofetch_ascii-main/loopers.sh" "$ASCII_SCRIPTS_DIR/loopers.sh"
+chmod +x "$ASCII_SCRIPTS_DIR/loopers.sh"
+rm -rf /tmp/neofetch_ascii-main
+rm neofetch_ascii.zip
+
 # Install required packages
 echo "Installing required packages..."
 sudo apt update && \
-sudo apt install -y eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full unrar rar curl nmap speedtest-cli lsof python3-pip python3-venv docker.io snapd flatpak
+sudo apt install -y eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full unrar rar curl nmap speedtest-cli lsof python3-pip python3-venv snapd flatpak
 
 # Step 2: Configure aliases in shell rc file
 echo "Configuring shell to use aliases..."

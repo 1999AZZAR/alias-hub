@@ -3,31 +3,40 @@
 
 ### Python Shortcuts
 alias py='python3'                           # Shortcut for Python 3
-alias pipu='pip install --upgrade'           # Upgrade packages
+alias pyrun='python3'                        # Run a Python script
+
+### Dependency Management (pip)
+alias pipu='pip install --upgrade'           # Upgrade pip and common tools
 alias pipr='pip install -r requirements.txt' # Install from requirements file
-
-### Virtual Environment Management
-alias venv-create='python3 -m venv .venv'       # Create virtual environment
-alias venv-activate='source .venv/bin/activate' # Activate virtual environment
-alias venv-deactivate='deactivate'              # Deactivate virtual environment
-alias venv-remove='rm -rf .venv'                # Remove virtual environment
-
-### Local Development Server
-alias pyserve='python3 -m http.server 8000'                         # Start simple HTTP server (default port: 8000)
-alias pyserve-https='python3 -m http.server 443 --bind 127.0.0.1'   # Serve HTTPS (custom setup)
-
-### Testing & Linting
-alias pytest='python3 -m pytest'             # Run tests with Pytest
-alias pytest-verbose='pytest -v'             # Run tests with verbose output
-alias pylint='python3 -m pylint'             # Run Pylint on code
-alias black='python3 -m black'               # Format code with Black
-alias isort='python3 -m isort .'             # Sort imports with isort
-alias mypy='python3 -m mypy'                 # Run MyPy type checker
-
-### Dependency Management
-alias pip-freeze='pip freeze > requirements.txt'    # Freeze dependencies
+alias pip-freeze='pip freeze > requirements.txt'    # Freeze dependencies to requirements.txt
 alias pip-check='pip check'                         # Check for dependency conflicts
 alias pip-outdated='pip list --outdated'            # List outdated packages
+alias pip-uninstall-all='pip freeze | xargs pip uninstall -y' # WARNING: Uninstalls ALL Python packages. Use with extreme caution!
+
+### Virtual Environment Management
+alias venv-c='python3 -m venv .venv'        # Create virtual environment in .venv
+alias venv-a='source .venv/bin/activate'    # Activate virtual environment
+alias venv-d='deactivate'                   # Deactivate virtual environment
+alias venv-r='rm -rf .venv'                 # Remove virtual environment
+alias venv-up='venv-c && venv-a'            # Create and activate venv
+alias venv-re='venv-r && venv-c && venv-a'  # Remove, create, and activate venv
+
+### Local Development Server
+alias pyserve='python3 -m http.server 8000' # Start simple HTTP server (default port: 8000)
+
+### Code Formatting & Linting
+alias black='python3 -m black .'             # Format code with Black
+alias isort='python3 -m isort .'             # Sort imports with isort
+alias pyfmt='black . && isort .'             # Format code with Black and isort
+alias pylint='python3 -m pylint'             # Run Pylint on code
+alias mypy='python3 -m mypy'                 # Run MyPy type checker
+alias pysort-check='isort --check-only .'    # Check if imports are sorted
+
+### Testing & Coverage
+alias pytest='python3 -m pytest'             # Run tests with Pytest
+alias pytest-verbose='pytest -v'             # Run tests with verbose output
+alias pytest-cov='pytest --cov=.'            # Run tests with coverage
+alias pycov='coverage run -m pytest && coverage report -m' # Run coverage with pytest and report
 
 ### Common Development Commands
 alias pydebug='python3 -m pdb'                # Debug Python script
@@ -35,23 +44,21 @@ alias pyprofile='python3 -m cProfile -s time' # Profile Python code
 alias pycompile='python3 -m compileall .'     # Compile all Python files
 alias pyshell='python3 -i'                    # Start interactive Python shell
 alias pyspeed='python3 -m timeit'             # Measure execution time of code snippets
+alias pycache-clean='find . -name __pycache__ -exec rm -rf {} +' # Remove __pycache__ folders
 
 ### Notebook Shortcuts
 alias jn='jupyter notebook'                   # Start Jupyter Notebook
 alias jl='jupyter lab'                        # Start Jupyter Lab
 alias nbconvert='jupyter nbconvert --to html' # Convert notebooks to HTML
 
-### Package Management
-alias pip-uninstall-all='pip freeze | xargs pip uninstall -y'   # Uninstall all packages
-alias pyenv-list='pyenv versions'                               # List Python versions (if pyenv is used)
-alias pyenv-global='pyenv global'                               # Set global Python version
+### Package Publishing
+alias pypack='python3 setup.py sdist bdist_wheel' # Package Python project
+alias pypublish='twine upload dist/*'             # Publish Python package to PyPI
 
-### Extended Utilities (Optional)
-alias pysort-check='isort --check-only .'                           # Check if imports are sorted
-alias pytest-cov='pytest --cov=.'                                   # Run tests with coverage
-alias pip-review='pip-review --local'                               # Review and update outdated packages
-alias pycache-clean='find . -name __pycache__ -exec rm -rf {} +'    # Remove __pycache__ folders
-alias pycov='coverage run -m pytest && coverage report -m'          # Run coverage with pytest
-alias pypack='python3 setup.py sdist bdist_wheel'                   # Package Python project
-alias pypublish='twine upload dist/*'                               # Publish Python package to PyPI
-alias pydeps-tree='pipdeptree'                                      # Display dependency tree
+### Pyenv Integration (if pyenv is used)
+alias pyenv-list='pyenv versions'             # List Python versions
+alias pyenv-global='pyenv global'             # Set global Python version
+
+### Extended Utilities (Optional - may require additional installs)
+alias pip-review='pip-review --local'         # Review and update outdated packages (requires `pip install pip-review`)
+alias pydeps-tree='pipdeptree'                # Display dependency tree (requires `pip install pipdeptree`)

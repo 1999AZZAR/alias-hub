@@ -16,7 +16,7 @@ alias aiderg='aider --model gemini/gemini-1.5-pro-latest'  # Use Aider AI
 alias ollama-run='ollama run'                # Quick Ollama model run
 alias whisper='whisper-ctranslate2'          # Speech-to-text shortcut
 alias train='python train.py'                # Start training
-alias eval='python evaluate.py'              # Evaluate model
+alias evaluate='python evaluate.py'              # Evaluate model
 
 ### Android Development
 alias scrcpy="scrcpy -b 8M --window-title='Pixel' --max-fps=55 --no-audio"
