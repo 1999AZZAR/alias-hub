@@ -4,6 +4,34 @@ Welcome to **Alias Hub**! This repository organizes a comprehensive collection o
 
 ---
 
+## 🚀 Getting Started
+
+### One-Liner Installation
+
+Run one of the following commands in your terminal to install or update Alias Hub. The script will automatically detect your shell and set everything up.
+
+**Using `curl` (Recommended):**
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
+```
+
+**Using `wget`:**
+```bash
+sh -c "$(wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
+```
+
+The installer will:
+1.  Clone or update the repository to `~/alias-hub`.
+2.  Set up Neofetch with a custom configuration and ASCII art.
+3.  Source the aliases into your `.bashrc` or `.zshrc`.
+4.  Install necessary packages like `eza`, `htop`, and `neofetch`.
+
+### Updating
+
+To update to the latest version, simply run the installation command again. The script will automatically pull the latest changes.
+
+---
+
 ## 🗂 File Overview
 
 Here’s a summary of the `.alias` files included in this repository:
@@ -19,67 +47,6 @@ Here’s a summary of the `.alias` files included in this repository:
 - **`Postgres.alias`**: Database management aliases for PostgreSQL users.
 - **`Search_Utilities.alias`**: Commands for efficient searching using tools like `grep` and `find`.
 - **`System_Management.alias`**: System administration shortcuts to manage processes, updates, and more.
-
----
-
-## 🚀 Getting Started
-
-### Manual Installation
-
-#### 1. Clone the Repository
-
-Clone the repository to your local machine:
-
-```bash
-cd ~  # Navigate to your home directory
-git clone https://github.com/1999AZZAR/alias-hub
-cd alias-hub
-```
-
-#### 2. Source the Aliases
-
-To use the aliases, source them in your shell configuration file:
-
-##### For Bash:
-
-Add the following lines to your `~/.bashrc`:
-
-```bash
-# Load aliases from Alias Hub
-ALIASES_DIR="$HOME/alias-hub"
-for file in "$ALIASES_DIR"/*.alias; do
-  source "$file"
-done
-```
-
-##### For Zsh:
-
-Add the following lines to your `~/.zshrc`:
-
-```bash
-# Load aliases from Alias Hub
-ALIASES_DIR="$HOME/alias-hub"
-for file in "$ALIASES_DIR"/*.alias; do
-  source "$file"
-done
-```
-
-#### 3. Reload Your Shell
-
-Apply the changes by reloading your shell configuration:
-
-```bash
-source ~/.bashrc  # For Bash
-source ~/.zshrc   # For Zsh
-```
-
-### Automatic Installation
-
-Run the following command to install and source the aliases automatically:
-
-```bash
-wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh | bash
-```
 
 ---
 

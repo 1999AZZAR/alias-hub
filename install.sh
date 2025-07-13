@@ -5,7 +5,7 @@
 # and reloads your shell.
 
 # --- Configuration ---
-REPO_URL="https://github.com/1999AZZAR/alias-hub/archive/refs/heads/master.zip"
+REPO_URL="https://github.com/1999AZZAR/alias-hub.git"
 ALIASES_DIR="$HOME/alias-hub"
 NEOFETCH_ASCII_INSTALLER_URL="https://raw.githubusercontent.com/1999AZZAR/neofetch_ascii/master/install.sh"
 
@@ -30,23 +30,21 @@ command_exists() {
 # --- Main Script ---
 
 # Step 1: Check for dependencies
-print_info "Checking for required tools (wget, unzip, git, curl)..."
-for cmd in wget unzip git curl; do
+print_info "Checking for required tools (git, curl)..."
+for cmd in git curl; do
     if ! command_exists "$cmd"; then
-        print_error "$cmd is not installed. Please install it and try again."
+        # Recommend installing build-essential or base-devel for a complete environment
+        print_error "$cmd is not installed. Please install it (e.g., sudo apt install $cmd) and try again."
     fi
 done
 
-# Step 2: Download and extract the alias-hub repository
-if [ -d "$ALIASES_DIR" ]; then
-    print_info "Alias Hub directory already exists at $ALIASES_DIR. Skipping download."
+# Step 2: Clone or update the alias-hub repository
+if [ -d "$ALIASES_DIR/.git" ]; then
+    print_info "Alias Hub directory already exists. Pulling latest changes..."
+    (cd "$ALIASES_DIR" && git pull) || print_warning "Failed to pull latest changes. Continuing with existing version."
 else
-    print_info "Downloading the aliases collection..."
-    TMP_ZIP="/tmp/alias-hub.zip"
-    wget -q -O "$TMP_ZIP" "$REPO_URL" || print_error "Failed to download repository."
-    unzip -q "$TMP_ZIP" -d "$HOME" || print_error "Failed to unzip repository."
-    mv "$HOME/alias-hub-master" "$ALIASES_DIR" || print_error "Failed to move repository."
-    rm "$TMP_ZIP"
+    print_info "Cloning the aliases collection..."
+    git clone --depth 1 "$REPO_URL" "$ALIASES_DIR" || print_error "Failed to clone repository."
 fi
 
 # Make helper scripts executable
