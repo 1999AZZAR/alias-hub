@@ -7,7 +7,7 @@
 # --- Configuration ---
 REPO_URL="https://github.com/1999AZZAR/alias-hub/archive/refs/heads/master.zip"
 ALIASES_DIR="$HOME/alias-hub"
-NEOFETCH_ASCII_REPO_URL="https://github.com/1999AZZAR/neofetch_ascii.git"
+NEOFETCH_ASCII_INSTALLER_URL="https://raw.githubusercontent.com/1999AZZAR/neofetch_ascii/master/install.sh"
 
 # --- Helper Functions ---
 print_info() {
@@ -30,8 +30,8 @@ command_exists() {
 # --- Main Script ---
 
 # Step 1: Check for dependencies
-print_info "Checking for required tools (wget, unzip, git)..."
-for cmd in wget unzip git; do
+print_info "Checking for required tools (wget, unzip, git, curl)..."
+for cmd in wget unzip git curl; do
     if ! command_exists "$cmd"; then
         print_error "$cmd is not installed. Please install it and try again."
     fi
@@ -71,22 +71,11 @@ fi
 print_info "Copying new neofetch config from alias-hub..."
 cp "$SOURCE_NEOFETCH_CONFIG" "$DEST_NEOFETCH_CONFIG"
 
-# Step 4: Set up Neofetch ASCII art using its dedicated installer
-print_info "Setting up Neofetch ASCII art..."
-TMP_NEOFETCH_ASCII_DIR="/tmp/neofetch_ascii"
-
-if [ -d "$TMP_NEOFETCH_ASCII_DIR" ]; then
-    rm -rf "$TMP_NEOFETCH_ASCII_DIR"
+# Step 4: Set up Neofetch ASCII art using the remote installer
+print_info "Setting up Neofetch ASCII art by running the remote installer..."
+if ! curl -sSL "$NEOFETCH_ASCII_INSTALLER_URL" | bash; then
+    print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
 fi
-
-print_info "Cloning Neofetch ASCII art repository to temporary directory..."
-git clone --depth 1 "$NEOFETCH_ASCII_REPO_URL" "$TMP_NEOFETCH_ASCII_DIR" || print_error "Failed to clone neofetch_ascii repository."
-
-print_info "Running the installer from the neofetch_ascii repository..."
-(cd "$TMP_NEOFETCH_ASCII_DIR" && chmod +x install.sh && ./install.sh) || print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
-
-print_info "Cleaning up temporary Neofetch ASCII directory..."
-rm -rf "$TMP_NEOFETCH_ASCII_DIR"
 
 # Step 5: Install required packages
 print_info "Installing required packages (eza, htop, etc.)..."
@@ -123,7 +112,18 @@ fi
 
 # Step 7: Add autocompletion for alias-list command
 print_info "Configuring autocompletion for alias-list..."
-AUTO_COMPLETE_CODE="\n# Auto-completion for alias-list command (only for .alias files)\n_alias_list_completions() {\n    local current_word\n    current_word=\"\${COMP_WORDS[COMP_CWORD]}\"\n    local alias_files_no_ext\n    alias_files_no_ext=\$(find \"\$ALIASES_DIR\" -maxdepth 1 -type f -name '*.alias' -exec basename {} .alias \\\;)\n    COMPREPLY=(\$(compgen -W \"\$alias_files_no_ext\" -- \"\$current_word\"))\n}\n# Enable completion for alias-list\ncomplete -F _alias_list_completions alias-list\n"
+AUTO_COMPLETE_CODE="
+# Auto-completion for alias-list command (only for .alias files)
+_alias_list_completions() {
+    local current_word
+    current_word=\"\${COMP_WORDS[COMP_CWORD]}\"
+    local alias_files_no_ext
+    alias_files_no_ext=\$(find \"\$ALIASES_DIR\" -maxdepth 1 -type f -name '*.alias' -exec basename {} .alias \\\;)
+    COMPREPLY=(\$(compgen -W \"\$alias_files_no_ext\" -- \"\$current_word\"))
+}
+# Enable completion for alias-list
+complete -F _alias_list_completions alias-list
+"
 if ! grep -q "_alias_list_completions" "$SHELL_RC"; then
     echo -e "$AUTO_COMPLETE_CODE" >> "$SHELL_RC"
     echo "# --- End Alias Hub Configuration ---" >> "$SHELL_RC"
