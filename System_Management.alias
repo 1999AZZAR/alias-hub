@@ -137,3 +137,7 @@ alias adduser='sudo useradd -m'           # Add a new user
 alias deluser='sudo userdel -r'           # Delete a user and their home directory
 alias passwd='sudo passwd'                # Change a user's password
 alias listusers='cut -d: -f1 /etc/passwd' # List all users
+
+# Battery Management
+alias fullcharge='sudo tlp fullcharge'    # charge Battery to 100 percen
+alias chargeone='sudo tlp chargeonce'     # charge now
