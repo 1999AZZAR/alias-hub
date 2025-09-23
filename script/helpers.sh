@@ -149,13 +149,25 @@ boot_splash() {
     echo "Error: plymouthd or plymouth command not found. Cannot run boot splash." >&2
     return 1
   fi
-  sudo plymouthd
+
+  # Check if plymouth is already running
+  if pgrep plymouthd &>/dev/null; then
+    echo "Notice: plymouthd is already running." >&2
+    return 1
+  fi
+
+  echo "Starting plymouth boot splash test..."
+  sudo plymouthd --mode=boot
+  sleep 2  # Give plymouthd time to start
   sudo plymouth --show-splash
+
   for ((i = 0; i < 5; i++)); do
     sleep 1
-    sudo plymouth --update=test$i
+    sudo plymouth --update="test$i"
   done
+
   sudo plymouth --quit
+  echo "Plymouth boot splash test completed."
 }
 
 # ==============================================================================
@@ -348,23 +360,6 @@ cd() {
   fi
 }
 
-# Unified back: no arg = toggle, arg = levels
-# back() {
-#   if [ -z "$1" ]; then
-#     builtin cd - || return $?
-#   else
-#     local dirs="cd "
-#     for ((i = 0; i < $1; i++)); do dirs+="../"; done
-#     eval "$dirs" || return $?
-#   fi
-#   if command -v ls &>/dev/null; then
-#     ls --color=auto --group-directories-first
-#   else
-#     echo "Warning: ls command not found." >&2
-#     return 1
-#   fi
-# }
-
 # mkdir and cd helper
 mkcd() {
   if ! command -v mkdir &>/dev/null; then
@@ -397,7 +392,7 @@ rename_ext() {
     echo "Error: find command not found." >&2
     return 1
   fi
-  find . -name "*.$1" -exec bash -c 'mv "$1" "${1%.$2}.$3"' - {} "$1" "$2" \;
+  find . -name "*.$1" -exec bash -c 'mv "$0" "${0%.$1}.$2"' {} "$1" "$2" \;
 }
 
 # Curl wrapper
@@ -430,7 +425,7 @@ hn() {
 }
 trending_coins() {
   if ! command -v jq &>/dev/null; then
-    echo "Error: jq command not found. Please2 install jq." >&2
+    echo "Error: jq command not found. Please install jq." >&2
     return 1
   fi
   cw https://api.coingecko.com/api/v3/search/trending | jq .
