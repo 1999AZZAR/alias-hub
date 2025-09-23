@@ -349,21 +349,21 @@ cd() {
 }
 
 # Unified back: no arg = toggle, arg = levels
-back() {
-  if [ -z "$1" ]; then
-    builtin cd - || return $?
-  else
-    local dirs="cd "
-    for ((i = 0; i < $1; i++)); do dirs+="../"; done
-    eval "$dirs" || return $?
-  fi
-  if command -v ls &>/dev/null; then
-    ls --color=auto --group-directories-first
-  else
-    echo "Warning: ls command not found." >&2
-    return 1
-  fi
-}
+# back() {
+#   if [ -z "$1" ]; then
+#     builtin cd - || return $?
+#   else
+#     local dirs="cd "
+#     for ((i = 0; i < $1; i++)); do dirs+="../"; done
+#     eval "$dirs" || return $?
+#   fi
+#   if command -v ls &>/dev/null; then
+#     ls --color=auto --group-directories-first
+#   else
+#     echo "Warning: ls command not found." >&2
+#     return 1
+#   fi
+# }
 
 # mkdir and cd helper
 mkcd() {
