@@ -5,64 +5,69 @@
 #
 # Original Author: Azzar Budiyanto (via FREA)
 # Refined by: Gemini
-# Version: 2.1
+# Version: 3.0
 #
 # This script provides a comprehensive update for Debian-based systems.
-# It automatically elevates its own privileges using 'sudo' if not run as root.
-# It handles APT, Snap, and Flatpak package managers, automatically
-# detecting their presence and only running updates if they are in use.
-# It also includes a cleanup step for orphaned packages.
+# It automatically elevates privileges, handles APT, Snap, Flatpak, and
+# firmware updates, and notifies the user if a reboot is required.
 #
-# Usage:
-# 1. Grant execute permissions: chmod +x update_system.sh
-# 2. Execute the script:        ./update_system.sh
-#    (It will automatically prompt for a sudo password if needed)
+# Enhancements in v3.0:
+# - Added `set -e` and `set -o pipefail` for robustness.
+# - Added firmware update step using `fwupdmgr`.
+# - Added a check to notify the user if a reboot is required.
+# - Standardized color scheme and output style.
 # ==============================================================================
+
+# --- Settings & Colors ---
+set -e
+set -o pipefail
+
+C_RESET='[0m'
+C_GREEN='[0;32m'
+C_YELLOW='[0;33m'
+C_BLUE='[0;34m'
+C_BOLD='[1m'
 
 # --- Auto-elevate to root if not already ---
 if [[ $EUID -ne 0 ]]; then
-    echo "This script requires root privileges. Attempting to re-run with sudo..."
-    # Re-execute the script with sudo, passing along all original arguments.
-    sudo "$0" "$@"
-    # Exit the original, non-privileged script with the exit code of the sudo command.
+    echo -e "${C_YELLOW}This script requires root privileges. Attempting to re-run with sudo...${C_RESET}"
+    exec sudo "$0" "$@"
     exit $?
 fi
 
-# --- Configuration & Styling ---
-COLOR_GREEN='\033[0;32m'
-COLOR_BLUE='\033[0;34m'
-COLOR_YELLOW='\033[1;33m'
-COLOR_NC='\033[0m' # No Color
-
 # --- Header ---
-echo -e "${COLOR_BLUE}=================================================="
-echo -e "  Smart System Update (v2.1)                  "
-echo -e "  (Running with root privileges)              "
-echo -e "==================================================${COLOR_NC}"
+echo -e "${C_BOLD}==================================================${C_RESET}"
+echo -e "${C_BOLD}  Smart System Update (v3.0)                  ${C_RESET}"
+echo -e "${C_BOLD}  (Running with root privileges)              ${C_RESET}"
+echo -e "${C_BOLD}==================================================${C_RESET}"
 sleep 1
 
 echo "Starting the comprehensive system update process..."
-echo "--------------------------------------------------"
+echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
 sleep 1
 
 # --- 1. APT Package Management ---
-echo -e "${COLOR_GREEN}[1/3] Handling APT packages...${COLOR_NC}"
+echo -e "
+${C_BOLD}${C_BLUE}[1/4] Handling APT packages...${C_RESET}"
 
-# Update package lists and upgrade installed packages
-echo "-> Running 'apt update' and 'apt upgrade'..."
-apt update && apt upgrade -y
+echo "-> Running 'apt update'..."
+apt-get update -y
+
+echo "-> Running 'apt upgrade'..."
+apt-get upgrade -y
 echo "-> Standard APT upgrade complete."
 echo ""
 
 # Attempt to install packages held back by phasing
 echo "-> Checking for phased or held-back packages..."
-UPGRADABLE_PACKAGES=$(apt list --upgradable 2>/dev/null | awk -F/ 'NR>1 {print $1}' | tr '\n' ' ')
+# Use xargs to handle the list of packages cleanly
+UPGRADABLE_PACKAGES=$(apt list --upgradable 2>/dev/null | awk -F/ 'NR>1 {print $1}' | xargs)
 
 if [ -n "$UPGRADABLE_PACKAGES" ]; then
-    echo -e "   ${COLOR_YELLOW}Found upgradable packages held back: $UPGRADABLE_PACKAGES${COLOR_NC}"
+    echo -e "   ${C_YELLOW}Found upgradable packages held back: $UPGRADABLE_PACKAGES${C_RESET}"
     echo "   -> Attempting to install them directly..."
-    apt install -y $UPGRADABLE_PACKAGES
-    echo "   -> Direct installation/upgrade complete."
+    apt-get install -y $UPGRADABLE_PACKAGES
+    echo -e "   ${C_GREEN}-> Direct installation/upgrade complete.${C_RESET}"
 else
     echo "   -> No phased or held-back packages detected."
 fi
@@ -70,43 +75,66 @@ echo ""
 
 # Clean up unused packages and their configuration files
 echo "-> Cleaning up orphaned packages ('apt autoremove')..."
-apt --purge autoremove -y
-echo "-> APT cleanup complete."
-echo "--------------------------------------------------"
+apt-get --purge autoremove -y
+echo -e "${C_GREEN}APT cleanup complete.${C_RESET}"
+echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
 
 # --- 2. Snap Package Management (Conditional) ---
-echo -e "${COLOR_GREEN}[2/3] Handling Snap packages...${COLOR_NC}"
+echo -e "
+${C_BOLD}${C_BLUE}[2/4] Handling Snap packages...${C_RESET}"
 if command -v snap &>/dev/null; then
-    # Check if there are any snaps installed before trying to refresh
     if [[ $(snap list | wc -l) -gt 1 ]]; then
         echo "-> Snap is installed and packages detected. Refreshing..."
         snap refresh
-        echo "-> Snap refresh complete."
+        echo -e "${C_GREEN}Snap refresh complete.${C_RESET}"
     else
-        echo -e "-> ${COLOR_YELLOW}Info: Snap command is present, but no packages are installed. Skipping.${COLOR_NC}"
+        echo -e "${C_YELLOW}Info: Snap command is present, but no packages are installed. Skipping.${C_RESET}"
     fi
 else
-    echo -e "-> ${COLOR_YELLOW}Info: Snap not found on this system. Skipping.${COLOR_NC}"
+    echo -e "${C_YELLOW}Info: Snap not found on this system. Skipping.${C_RESET}"
 fi
-echo "--------------------------------------------------"
+echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
 
 # --- 3. Flatpak Package Management (Conditional) ---
-echo -e "${COLOR_GREEN}[3/3] Handling Flatpak packages...${COLOR_NC}"
+echo -e "
+${C_BOLD}${C_BLUE}[3/4] Handling Flatpak packages...${C_RESET}"
 if command -v flatpak &>/dev/null; then
-    # Check if there are any flatpaks installed before trying to update
     if [[ $(flatpak list --app | wc -l) -gt 0 ]]; then
         echo "-> Flatpak is installed and applications detected. Updating..."
         flatpak update -y
-        echo "-> Flatpak update complete."
+        echo -e "${C_GREEN}Flatpak update complete.${C_RESET}"
     else
-        echo -e "-> ${COLOR_YELLOW}Info: Flatpak command is present, but no applications are installed. Skipping.${COLOR_NC}"
+        echo -e "${C_YELLOW}Info: Flatpak command is present, but no applications are installed. Skipping.${C_RESET}"
     fi
 else
-    echo -e "-> ${COLOR_YELLOW}Info: Flatpak not found on this system. Skipping.${COLOR_NC}"
+    echo -e "${C_YELLOW}Info: Flatpak not found on this system. Skipping.${C_RESET}"
 fi
-echo "--------------------------------------------------"
+echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
 
-# --- Final Report ---
-echo -e "${COLOR_BLUE}=================================================="
-echo -e "  System update process has completed successfully! "
-echo -e "==================================================${COLOR_NC}"
+# --- 4. Firmware Updates (Conditional) ---
+echo -e "
+${C_BOLD}${C_BLUE}[4/4] Handling Firmware updates...${C_RESET}"
+if command -v fwupdmgr &>/dev/null; then
+    echo "-> Checking for firmware updates with fwupdmgr..."
+    fwupdmgr get-updates
+    echo "-> Applying available firmware updates..."
+    fwupdmgr update -y
+    echo -e "${C_GREEN}Firmware update process complete.${C_RESET}"
+else
+    echo -e "${C_YELLOW}Info: fwupdmgr not found. Skipping firmware updates.${C_RESET}"
+fi
+echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
+
+
+# --- Final Report & Reboot Check ---
+echo -e "
+${C_BOLD}${C_GREEN}✅ All update processes have completed!${C_RESET}"
+
+if [ -f /var/run/reboot-required ]; then
+    echo -e "
+${C_BOLD}${C_YELLOW}**************************************************${C_RESET}"
+    echo -e "${C_BOLD}${C_YELLOW}*                                                *${C_RESET}"
+    echo -e "${C_BOLD}${C_YELLOW}*      REBOOT REQUIRED to apply all updates.     *${C_RESET}"
+    echo -e "${C_BOLD}${C_YELLOW}*                                                *${C_RESET}"
+    echo -e "${C_BOLD}${C_YELLOW}**************************************************${C_RESET}"
+fi
