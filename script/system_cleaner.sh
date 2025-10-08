@@ -116,11 +116,11 @@ fi
 # --- [3] System Logs & Temporary Files ---
 echo -e "\n${C_BOLD}${C_BLUE}[3/7] Cleaning logs and temporary files...${C_RESET}"
 
-# Combine find operations for efficiency
-find /var/log -type f \( -name "*.gz" -o -name "*.1" -o -name "*.old" \) -delete
-journalctl --vacuum-time=2weeks >/dev/null 2>&1
-find /tmp -type f -mtime +7 -delete
-find /var/tmp -type f -mtime +7 -delete
+# Combine find operations for efficiency, making them robust to errors
+find /var/log -type f \( -name "*.gz" -o -name "*.1" -o -name "*.old" \) -delete 2>/dev/null || true
+journalctl --vacuum-time=2weeks >/dev/null 2>&1 || true
+find /tmp -type f -mtime +7 -delete 2>/dev/null || true
+find /var/tmp -type f -mtime +7 -delete 2>/dev/null || true
 echo -e "${C_GREEN}Logs and temporary files have been cleaned.${C_RESET}"
 
 # --- [4] User-Level Caches ---
@@ -152,7 +152,8 @@ clean_symlinks_safe() {
     fi
 
     echo "  >> Checking: $dir (Timeout: $timeout_duration)"
-    if ! timeout "$timeout_duration" find "$dir" -xtype l -delete; then
+    # Redirect stderr to avoid flooding the log with "Permission denied" for protected directories.
+    if ! timeout "$timeout_duration" find "$dir" -xtype l -delete 2>/dev/null; then
         local exit_code=$?
         if [[ $exit_code -eq 124 ]]; then
             echo -e "  ${C_YELLOW}!! Timeout reached while checking $dir. It might be a large or slow directory.${C_RESET}"

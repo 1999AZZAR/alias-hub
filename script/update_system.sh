@@ -101,7 +101,14 @@ ${C_BOLD}${C_BLUE}[3/4] Handling Flatpak packages...${C_RESET}"
 if command -v flatpak &>/dev/null; then
     if [[ $(flatpak list --app | wc -l) -gt 0 ]]; then
         echo "-> Flatpak is installed and applications detected. Updating..."
-        flatpak update -y
+        # Attempt to update, but if it fails, run repair and try again.
+        # This handles cases where the Flatpak installation is corrupted.
+        if ! flatpak update -y; then
+            echo -e "   ${C_YELLOW}Flatpak update failed. Attempting to repair and retry...${C_RESET}"
+            flatpak repair
+            echo "   -> Retrying Flatpak update..."
+            flatpak update -y
+        fi
         echo -e "${C_GREEN}Flatpak update complete.${C_RESET}"
     else
         echo -e "${C_YELLOW}Info: Flatpak command is present, but no applications are installed. Skipping.${C_RESET}"
