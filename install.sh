@@ -79,7 +79,7 @@ fi
 print_info "Installing required packages (eza, htop, etc.)..."
 if command_exists apt; then
     sudo apt update && \
-    sudo apt install -y eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full unrar rar curl nmap speedtest-cli lsof python3-pip python3-venv snapd flatpak
+    sudo apt install -y at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip python3-venv snapd flatpak
 else
     print_warning "apt package manager not found. Skipping package installation. Please install them manually."
 fi
