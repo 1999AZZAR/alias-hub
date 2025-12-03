@@ -2,146 +2,168 @@
 
 # ==============================================================================
 # Smart System Update Script
-#
 # Original Author: Azzar Budiyanto (via FREA)
 # Refined by: Gemini
-# Version: 3.0
+# Version: 3.2
 #
-# This script provides a comprehensive update for Debian-based systems.
-# It automatically elevates privileges, handles APT, Snap, Flatpak, and
-# firmware updates, and notifies the user if a reboot is required.
+# Comprehensive system update for Debian-based systems.
+# Handles APT, Snap, Flatpak, and Firmware.
 #
-# Enhancements in v3.0:
-# - Added `set -e` and `set -o pipefail` for robustness.
-# - Added firmware update step using `fwupdmgr`.
-# - Added a check to notify the user if a reboot is required.
-# - Standardized color scheme and output style.
+# Refinements in v3.2:
+# - Added Dry Run mode (-d / --dry-run).
+# - Better error handling for fwupdmgr.
+# - Improved formatting and checks.
+# - Added help flag.
 # ==============================================================================
 
-# --- Settings & Colors ---
+# --- Settings ---
 set -e
 set -o pipefail
 
-C_RESET='[0m'
-C_GREEN='[0;32m'
-C_YELLOW='[0;33m'
-C_BLUE='[0;34m'
-C_BOLD='[1m'
+# --- Colors ---
+C_RESET='\033[0m'
+C_GREEN='\033[0;32m'
+C_YELLOW='\033[0;33m'
+C_BLUE='\033[0;34m'
+C_RED='\033[0;31m'
+C_BOLD='\033[1m'
 
-# --- Auto-elevate to root if not already ---
+# --- Variables ---
+DRY_RUN=false
+FULL_UPGRADE=false
+
+# --- Usage ---
+usage() {
+    echo -e "${C_BOLD}Usage:${C_RESET} $0 [OPTIONS]"
+    echo
+    echo "Options:"
+    echo "  -d, --dry-run     Simulate update process."
+    echo "  -f, --full        Perform a full upgrade (dist-upgrade) instead of safe upgrade."
+    echo "  -h, --help        Show this help message."
+    echo
+    exit 0
+}
+
+# --- Parse Arguments ---
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -d|--dry-run) DRY_RUN=true ;;
+        -f|--full) FULL_UPGRADE=true ;;
+        -h|--help) usage ;;
+        *) echo -e "${C_RED}Unknown parameter: $1${C_RESET}"; usage ;;
+    esac
+    shift
+done
+
+# --- Root Check ---
 if [[ $EUID -ne 0 ]]; then
-    echo -e "${C_YELLOW}This script requires root privileges. Attempting to re-run with sudo...${C_RESET}"
-    exec sudo "$0" "$@"
-    exit $?
-fi
-
-# --- Header ---
-echo -e "${C_BOLD}==================================================${C_RESET}"
-echo -e "${C_BOLD}  Smart System Update (v3.0)                  ${C_RESET}"
-echo -e "${C_BOLD}  (Running with root privileges)              ${C_RESET}"
-echo -e "${C_BOLD}==================================================${C_RESET}"
-sleep 1
-
-echo "Starting the comprehensive system update process..."
-echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
-sleep 1
-
-# --- 1. APT Package Management ---
-echo -e "
-${C_BOLD}${C_BLUE}[1/4] Handling APT packages...${C_RESET}"
-
-echo "-> Running 'apt update'..."
-apt-get update -y
-
-echo "-> Running 'apt upgrade'..."
-apt-get upgrade -y
-echo "-> Standard APT upgrade complete."
-echo ""
-
-# Attempt to install packages held back by phasing
-echo "-> Checking for phased or held-back packages..."
-# Use xargs to handle the list of packages cleanly
-UPGRADABLE_PACKAGES=$(apt list --upgradable 2>/dev/null | awk -F/ 'NR>1 {print $1}' | xargs)
-
-if [ -n "$UPGRADABLE_PACKAGES" ]; then
-    echo -e "   ${C_YELLOW}Found upgradable packages held back: $UPGRADABLE_PACKAGES${C_RESET}"
-    echo "   -> Attempting to install them directly..."
-    apt-get install -y $UPGRADABLE_PACKAGES
-    echo -e "   ${C_GREEN}-> Direct installation/upgrade complete.${C_RESET}"
-else
-    echo "   -> No phased or held-back packages detected."
-fi
-echo ""
-
-# Clean up unused packages and their configuration files
-echo "-> Cleaning up orphaned packages ('apt autoremove')..."
-apt-get --purge autoremove -y
-echo -e "${C_GREEN}APT cleanup complete.${C_RESET}"
-echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
-
-# --- 2. Snap Package Management (Conditional) ---
-echo -e "
-${C_BOLD}${C_BLUE}[2/4] Handling Snap packages...${C_RESET}"
-if command -v snap &>/dev/null; then
-    if [[ $(snap list | wc -l) -gt 1 ]]; then
-        echo "-> Snap is installed and packages detected. Refreshing..."
-        snap refresh
-        echo -e "${C_GREEN}Snap refresh complete.${C_RESET}"
+    if [ "$DRY_RUN" = true ]; then
+        echo -e "${C_YELLOW}Dry run active (non-root).${C_RESET}"
     else
-        echo -e "${C_YELLOW}Info: Snap command is present, but no packages are installed. Skipping.${C_RESET}"
+        echo -e "${C_YELLOW}Root required. Elevating...${C_RESET}"
+        exec sudo "$0" "$@" "${ARGS[@]}"
+        exit $?
     fi
-else
-    echo -e "${C_YELLOW}Info: Snap not found on this system. Skipping.${C_RESET}"
 fi
-echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
 
-# --- 3. Flatpak Package Management (Conditional) ---
-echo -e "
-${C_BOLD}${C_BLUE}[3/4] Handling Flatpak packages...${C_RESET}"
-if command -v flatpak &>/dev/null; then
-    if [[ $(flatpak list --app | wc -l) -gt 0 ]]; then
-        echo "-> Flatpak is installed and applications detected. Updating..."
-        # Attempt to update, but if it fails, run repair and try again.
-        # This handles cases where the Flatpak installation is corrupted.
-        if ! flatpak update -y; then
-            echo -e "   ${C_YELLOW}Flatpak update failed. Attempting to repair and retry...${C_RESET}"
-            flatpak repair
-            echo "   -> Retrying Flatpak update..."
-            flatpak update -y
+# --- Helper ---
+run_cmd() {
+    if [ "$DRY_RUN" = true ]; then
+        echo -e "  ${C_YELLOW}[DRY-RUN]${C_RESET} $@"
+    else
+        eval "$@"
+    fi
+}
+
+log_header() { echo -e "\n${C_BOLD}${C_BLUE}[$1] $2${C_RESET}"; }
+
+# --- Start ---
+echo -e "${C_BOLD}==================================================${C_RESET}"
+echo -e "${C_BOLD}  Smart System Update (v3.2)                  ${C_RESET}"
+if [ "$DRY_RUN" = true ]; then
+    echo -e "${C_YELLOW}  *** DRY RUN MODE ***                        ${C_RESET}"
+fi
+echo -e "${C_BOLD}==================================================${C_RESET}"
+sleep 1
+
+# --- 1. APT ---
+log_header "1/4" "Handling APT packages..."
+
+run_cmd "apt-get update -y"
+
+if [ "$FULL_UPGRADE" = true ]; then
+    echo "-> Running 'apt dist-upgrade'..."
+    run_cmd "apt-get dist-upgrade -y"
+else
+    echo "-> Running 'apt upgrade'..."
+    run_cmd "apt-get upgrade -y"
+    
+    # Check for held back packages (only relevant if not doing dist-upgrade)
+    if [ "$DRY_RUN" = false ]; then
+        echo "-> Checking for phased/held packages..."
+        UPGRADABLE=$(apt list --upgradable 2>/dev/null | awk -F/ 'NR>1 {print $1}' | xargs)
+        if [ -n "$UPGRADABLE" ]; then
+             echo -e "   ${C_YELLOW}Held back: $UPGRADABLE${C_RESET}"
+             echo "   -> Installing held packages..."
+             run_cmd "apt-get install -y $UPGRADABLE"
         fi
-        echo -e "${C_GREEN}Flatpak update complete.${C_RESET}"
+    fi
+fi
+
+echo "-> Cleaning up..."
+run_cmd "apt-get autoremove --purge -y"
+
+# --- 2. Snap ---
+log_header "2/4" "Handling Snap packages..."
+if command -v snap &>/dev/null; then
+    run_cmd "snap refresh"
+else
+    echo "Snap not installed."
+fi
+
+# --- 3. Flatpak ---
+log_header "3/4" "Handling Flatpak packages..."
+if command -v flatpak &>/dev/null; then
+    if [ "$DRY_RUN" = true ]; then
+        echo "  [DRY-RUN] Would update flatpaks."
     else
-        echo -e "${C_YELLOW}Info: Flatpak command is present, but no applications are installed. Skipping.${C_RESET}"
+        if ! flatpak update -y; then
+             echo -e "   ${C_YELLOW}Update failed, attempting repair...${C_RESET}"
+             flatpak repair
+             flatpak update -y
+        fi
     fi
 else
-    echo -e "${C_YELLOW}Info: Flatpak not found on this system. Skipping.${C_RESET}"
+    echo "Flatpak not installed."
 fi
-echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
 
-# --- 4. Firmware Updates (Conditional) ---
-echo -e "
-${C_BOLD}${C_BLUE}[4/4] Handling Firmware updates...${C_RESET}"
+# --- 4. Firmware ---
+log_header "4/4" "Handling Firmware updates..."
 if command -v fwupdmgr &>/dev/null; then
-    echo "-> Checking for firmware updates with fwupdmgr..."
-    fwupdmgr get-updates
-    echo "-> Applying available firmware updates..."
-    fwupdmgr update -y
-    echo -e "${C_GREEN}Firmware update process complete.${C_RESET}"
+    if [ "$DRY_RUN" = true ]; then
+         echo "  [DRY-RUN] Would check and update firmware."
+    else
+         echo "-> Checking for updates..."
+         # fwupdmgr get-updates returns 2 if no updates, 0 if success, 1 if error
+         if fwupdmgr get-updates; then
+             echo "-> Applying updates..."
+             fwupdmgr update -y || true
+         else
+             code=$?
+             if [ $code -eq 2 ]; then
+                 echo "-> No firmware updates available."
+             else
+                 echo -e "${C_YELLOW}-> Firmware check returned code $code (ignoring).${C_RESET}"
+             fi
+         fi
+    fi
 else
-    echo -e "${C_YELLOW}Info: fwupdmgr not found. Skipping firmware updates.${C_RESET}"
+    echo "fwupdmgr not installed."
 fi
-echo -e "${C_BOLD}--------------------------------------------------${C_RESET}"
 
-
-# --- Final Report & Reboot Check ---
-echo -e "
-${C_BOLD}${C_GREEN}✅ All update processes have completed!${C_RESET}"
+# --- Final ---
+echo -e "\n${C_BOLD}${C_GREEN}✅ Update complete!${C_RESET}"
 
 if [ -f /var/run/reboot-required ]; then
-    echo -e "
-${C_BOLD}${C_YELLOW}**************************************************${C_RESET}"
-    echo -e "${C_BOLD}${C_YELLOW}*                                                *${C_RESET}"
-    echo -e "${C_BOLD}${C_YELLOW}*      REBOOT REQUIRED to apply all updates.     *${C_RESET}"
-    echo -e "${C_BOLD}${C_YELLOW}*                                                *${C_RESET}"
-    echo -e "${C_BOLD}${C_YELLOW}**************************************************${C_RESET}"
+    echo -e "${C_RED}${C_BOLD}*** REBOOT REQUIRED ***${C_RESET}"
 fi
