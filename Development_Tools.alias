@@ -1,38 +1,551 @@
-# Development Tools Aliases
-# ----------------------------
+# ==============================================================================
+# Development Tools - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive development tools for modern software development
+# Includes Kubernetes, Android, Node.js, Docker, Cloud, CI/CD, and more
+#
+# Sections:
+# - Kubernetes Operations (PRESERVED)
+# - Docker Development
+# - Android Development (PRESERVED + Enhanced)
+# - iOS Development
+# - Node.js/NPM Development (PRESERVED + Enhanced)
+# - React/Vue/Angular Development
+# - Python Development Tools
+# - Database Development
+# - API Development & Testing
+# - Cloud Development (AWS/GCP/Azure)
+# - CI/CD & DevOps
+# - Testing Frameworks
+# - Build Tools & Task Runners
+# - IDE & Editor Tools
+# - Version Control (non-Git)
+# - Collaboration & Communication
+# - Monitoring & Debugging
+# - Deployment Tools
+# - Security & Code Quality
+#
+# ==============================================================================
 
-### Kubernetes Shortcuts (via helper k())
-# alias k() defined in helpers.sh
-alias kctx='k config use-context'      # Switch contexts
-alias kns='k config set-context --current --namespace' # Set namespace
-alias kget='k get'                     # Get Kubernetes resources
-alias kdesc='k describe'               # Describe resources
-alias kdel='k delete'                  # Delete resources
-alias klogs='k logs'                   # View pod logs
-alias kexec='k exec -it'               # Exec into a pod
+# ==============================================================================
+# KUBERNETES OPERATIONS (PRESERVED - Your K8s Shortcuts)
+# ==============================================================================
 
-### AI Development
-alias aiderg='aider --model gemini/gemini-1.5-pro-latest'  # Use Aider AI
-alias ollama-run='ollama run'                # Quick Ollama model run
-alias whisper='whisper-ctranslate2'          # Speech-to-text shortcut
-alias train='python train.py'                # Start training
-alias evaluate='python evaluate.py'              # Evaluate model
+### Kubernetes Shortcuts (via helper k()) (ALL PRESERVED)
+alias kctx='k config use-context'      # PRESERVED - Switch contexts
+alias kns='k config set-context --current --namespace' # PRESERVED - Set namespace
+alias kget='k get'                     # PRESERVED - Get Kubernetes resources
+alias kdesc='k describe'               # PRESERVED - Describe resources
+alias kdel='k delete'                  # PRESERVED - Delete resources
+alias klogs='k logs'                   # PRESERVED - View pod logs
+alias kexec='k exec -it'               # PRESERVED - Exec into a pod
 
-### Android Development
-alias scrcpy="scrcpy -b 8M --window-title='Pixel' --max-fps=55 --no-audio"
-alias ex-scrcpy='/home/azzar/Documents/script/scrcpy-scripts/virtual_display.sh'
-alias adb-restart='adb kill-server && adb start-server'  # Restart ADB
-alias adb-screenshot='adb exec-out screencap -p > screen-$(date +%s).png'  # Take screenshot
-alias adb-record='adb shell screenrecord /sdcard/recording.mp4'  # Record screen
+### Advanced Kubernetes Operations
+alias kctx-list='k config get-contexts'              # List all contexts
+alias kctx-current='k config current-context'        # Show current context
+alias kns-list='k get namespaces'                    # List namespaces
+alias kns-create='k create namespace'                # Create namespace
+alias kapply='k apply -f'                            # Apply manifest
+alias kcreate='k create'                             # Create resources
+alias kedit='k edit'                                 # Edit resources inline
+alias kscale='k scale'                               # Scale deployments
+alias krollout='k rollout'                           # Manage rollouts
+alias krollout-status='k rollout status'             # Check rollout status
+alias krollout-restart='k rollout restart'           # Restart rollout
+alias kport-forward='k port-forward'                 # Port forwarding
+alias kproxy='k proxy'                               # Start proxy server
+alias ktop='k top'                                   # Resource usage
+alias ktop-nodes='k top nodes'                       # Node resource usage
+alias ktop-pods='k top pods'                         # Pod resource usage
 
-### Node.js/NPM Shortcuts
-alias ni='npm install'                       # Install dependencies
-alias nr='npm run'                           # Run scripts
-alias ns='npm start'                         # Start the app
-alias nt='npm test'                          # Run tests
-alias nl='npm list --depth=0'                # List installed packages
+### Kubernetes Development Tools
+alias kdebug='k debug'                               # Debug containers
+alias kdiff='k diff'                                 # Diff manifests
+alias kexplain='k explain'                           # Explain resources
+alias kapi-resources='k api-resources'               # List API resources
+alias kapi-versions='k api-versions'                 # List API versions
+alias kcluster-info='k cluster-info'                 # Cluster information
+alias kversion='k version --short'                   # Version information
 
-### Additional Tools
-alias poetry='poetry'                         # Shortcut for Poetry
-alias tox='tox'                               # Run tests in isolated environments
-alias pyinstaller='pyinstaller --onefile'     # Create standalone executables
+### Helm (Kubernetes Package Manager)
+alias hinstall='helm install'                        # Install chart
+alias hupgrade='helm upgrade'                        # Upgrade release
+alias huninstall='helm uninstall'                    # Uninstall release
+alias hlist='helm list'                              # List releases
+alias hrepo-add='helm repo add'                      # Add repository
+alias hrepo-update='helm repo update'                # Update repositories
+alias hsearch='helm search'                          # Search charts
+
+### Kustomize
+alias kustomize-build='kustomize build'             # Build kustomization
+alias kustomize-edit='kustomize edit'               # Edit kustomization
+
+# ==============================================================================
+# DOCKER DEVELOPMENT
+# ==============================================================================
+
+### Docker Container Management
+alias docker-ps='docker ps'                         # List containers
+alias docker-psa='docker ps -a'                     # List all containers
+alias docker-images='docker images'                 # List images
+alias docker-run='docker run -it --rm'              # Run container interactively
+alias docker-exec='docker exec -it'                 # Execute in running container
+alias docker-logs='docker logs'                     # Show container logs
+alias docker-stop='docker stop'                     # Stop container
+alias docker-start='docker start'                   # Start container
+alias docker-restart='docker restart'               # Restart container
+alias docker-rm='docker rm'                         # Remove container
+alias docker-rmi='docker rmi'                       # Remove image
+alias docker-build='docker build -t'                # Build image with tag
+
+### Docker Development Workflow
+alias docker-compose-up='docker-compose up -d'      # Start services
+alias docker-compose-down='docker-compose down'    # Stop services
+alias docker-compose-logs='docker-compose logs -f' # Follow logs
+alias docker-compose-build='docker-compose build'  # Build services
+alias docker-compose-exec='docker-compose exec'    # Execute in service
+alias docker-clean='docker system prune -f'        # Clean unused resources
+alias docker-clean-all='docker system prune -a -f' # Clean everything
+
+### Docker Development Tools
+alias docker-dev='docker run -it --rm -v $(pwd):/app -w /app' # Development container
+alias docker-python='docker run -it --rm python:3.9' # Python development
+alias docker-node='docker run -it --rm node:18'     # Node.js development
+alias docker-postgres='docker run -d --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 postgres:13' # PostgreSQL
+alias docker-mysql='docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 mysql:8' # MySQL
+alias docker-redis='docker run -d --name redis -p 6379:6379 redis:7' # Redis
+
+# ==============================================================================
+# ANDROID DEVELOPMENT (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Android Development (PRESERVED)
+alias scrcpy="scrcpy -b 8M --window-title='Pixel' --max-fps=55 --no-audio"  # PRESERVED - Screen mirroring
+alias ex-scrcpy='/home/azzar/Documents/script/scrcpy-scripts/virtual_display.sh'  # PRESERVED - Extended scrcpy
+alias adb-restart='adb kill-server && adb start-server'  # PRESERVED - Restart ADB
+alias adb-screenshot='adb exec-out screencap -p > screen-$(date +%s).png'  # PRESERVED - Take screenshot
+alias adb-record='adb shell screenrecord /sdcard/recording.mp4'  # PRESERVED - Record screen
+
+### Advanced Android Development
+alias adb-devices='adb devices'                     # List devices
+alias adb-install='adb install'                     # Install APK
+alias adb-uninstall='adb uninstall'                 # Uninstall app
+alias adb-push='adb push'                           # Push file to device
+alias adb-pull='adb pull'                           # Pull file from device
+alias adb-shell='adb shell'                         # Open shell on device
+alias adb-logcat='adb logcat'                       # View device logs
+alias adb-bugreport='adb bugreport'                 # Generate bug report
+alias adb-reboot='adb reboot'                       # Reboot device
+alias adb-reboot-recovery='adb reboot recovery'     # Reboot to recovery
+alias adb-reboot-bootloader='adb reboot bootloader' # Reboot to bootloader
+
+### Android Studio & Build Tools
+alias gradle-clean='gradle clean'                   # Clean Gradle build
+alias gradle-build='gradle build'                   # Build project
+alias gradle-test='gradle test'                     # Run tests
+alias gradle-install='gradle installDebug'          # Install debug build
+alias gradle-release='gradle assembleRelease'       # Build release APK
+
+### Android Emulators
+alias emulator-list='emulator -list-avds'           # List AVDs
+alias emulator-start='emulator -avd'                # Start emulator
+alias emulator-stop='adb emu kill'                  # Stop emulator
+
+# ==============================================================================
+# iOS DEVELOPMENT
+# ==============================================================================
+
+### Xcode & iOS Tools
+alias xcode-select='xcode-select --print-path'       # Show active Xcode
+alias xcode-switch='sudo xcode-select -s'            # Switch Xcode version
+alias ios-simulator='xcrun simctl list devices'      # List simulators
+alias ios-simulator-boot='xcrun simctl boot'         # Boot simulator
+alias ios-simulator-shutdown='xcrun simctl shutdown' # Shutdown simulator
+
+### CocoaPods
+alias pod-install='pod install'                      # Install pods
+alias pod-update='pod update'                        # Update pods
+alias pod-outdated='pod outdated'                    # Show outdated pods
+alias pod-clean='rm -rf Pods && pod install'         # Clean and reinstall
+
+### iOS Build Tools
+alias fastlane-beta='fastlane beta'                  # Deploy beta
+alias fastlane-release='fastlane release'            # Deploy release
+alias ios-build='xcodebuild -workspace'              # Build workspace
+alias ios-test='xcodebuild test'                     # Run tests
+
+# ==============================================================================
+# NODE.JS/NPM DEVELOPMENT (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Node.js/NPM Shortcuts (ALL PRESERVED)
+alias ni='npm install'                       # PRESERVED - Install dependencies
+alias nr='npm run'                           # PRESERVED - Run scripts
+alias ns='npm start'                         # PRESERVED - Start the app
+alias nt='npm test'                          # PRESERVED - Run tests
+alias nl='npm list --depth=0'                # PRESERVED - List installed packages
+
+### Advanced NPM Operations
+alias nci='npm ci'                           # Clean install (production)
+alias nrd='npm run dev'                      # Development mode
+alias nrb='npm run build'                    # Build project
+alias nrl='npm run lint'                     # Run linter
+alias nrf='npm run format'                   # Format code
+alias nrt='npm run test:watch'               # Watch mode tests
+alias nru='npm update'                       # Update packages
+alias nra='npm audit'                        # Security audit
+alias nraf='npm audit fix'                   # Fix security issues
+alias npr='npm publish'                      # Publish package
+alias npl='npm pack'                         # Create package tarball
+
+### NPX Shortcuts
+alias npx-create='npx create-'               # Create new project
+alias npx-serve='npx serve'                  # Serve directory
+alias npx-http-server='npx http-server'      # HTTP server
+alias npx-live-server='npx live-server'      # Live reload server
+
+### Yarn (if available)
+alias yarn-install='yarn install'            # Install dependencies
+alias yarn-add='yarn add'                    # Add package
+alias yarn-dev='yarn dev'                    # Development mode
+alias yarn-build='yarn build'                # Build project
+alias yarn-test='yarn test'                  # Run tests
+
+### PNPM (if available)
+alias pnpm-install='pnpm install'            # Install dependencies
+alias pnpm-add='pnpm add'                    # Add package
+alias pnpm-dev='pnpm dev'                    # Development mode
+alias pnpm-build='pnpm build'                # Build project
+
+# ==============================================================================
+# REACT/VUE/ANGULAR DEVELOPMENT
+# ==============================================================================
+
+### React Development
+alias create-react-app='npx create-react-app'      # Create React app
+alias react-scripts-start='npm start'             # Start React app
+alias react-scripts-build='npm run build'         # Build React app
+alias react-scripts-test='npm test'               # Test React app
+alias react-scripts-eject='npm run eject'         # Eject from CRA
+
+### Vue.js Development
+alias vue-create='vue create'                     # Create Vue project
+alias vue-serve='npm run serve'                   # Serve Vue app
+alias vue-build='npm run build'                   # Build Vue app
+alias vue-lint='npm run lint'                     # Lint Vue code
+
+### Angular Development
+alias ng-new='ng new'                             # Create Angular app
+alias ng-serve='ng serve'                          # Serve Angular app
+alias ng-build='ng build'                          # Build Angular app
+alias ng-test='ng test'                            # Test Angular app
+alias ng-generate='ng generate'                    # Generate components
+
+### Frontend Build Tools
+alias webpack-dev='webpack --mode development'     # Development build
+alias webpack-prod='webpack --mode production'     # Production build
+alias parcel-build='parcel build'                  # Parcel build
+alias rollup-build='rollup -c'                     # Rollup build
+alias vite-dev='vite'                              # Vite development
+alias vite-build='vite build'                      # Vite build
+
+# ==============================================================================
+# PYTHON DEVELOPMENT TOOLS (Enhanced)
+# ==============================================================================
+
+### Python Tools (PRESERVED + Enhanced)
+alias poetry='poetry'                         # PRESERVED - Poetry shortcut
+alias tox='tox'                               # PRESERVED - Test environments
+alias pyinstaller='pyinstaller --onefile'     # PRESERVED - Standalone executables
+
+### Advanced Python Tools
+alias pipenv-install='pipenv install'          # Pipenv install
+alias pipenv-shell='pipenv shell'              # Pipenv shell
+alias pipenv-run='pipenv run'                  # Run in Pipenv
+alias conda-create='conda create -n'           # Create conda environment
+alias conda-activate='conda activate'          # Activate conda env
+alias conda-deactivate='conda deactivate'      # Deactivate conda env
+
+### Python Build Tools
+alias setuptools-build='python setup.py build' # Setuptools build
+alias setuptools-install='python setup.py install' # Install package
+alias setuptools-develop='python setup.py develop' # Development install
+alias twine-upload='twine upload dist/*'       # Upload to PyPI
+
+# ==============================================================================
+# DATABASE DEVELOPMENT
+# ==============================================================================
+
+### PostgreSQL
+alias psql-connect='psql -h localhost -U'       # Connect to PostgreSQL
+alias psql-list-db='psql -l'                    # List databases
+alias psql-dump='pg_dump'                       # Dump database
+alias psql-restore='pg_restore'                 # Restore database
+
+### MySQL
+alias mysql-connect='mysql -h localhost -u'     # Connect to MySQL
+alias mysql-dump='mysqldump'                    # Dump database
+alias mysql-import='mysql <'                    # Import database
+
+### MongoDB
+alias mongo-connect='mongo'                     # Connect to MongoDB
+alias mongodump='mongodump'                     # Dump MongoDB
+alias mongorestore='mongorestore'               # Restore MongoDB
+
+### Redis
+alias redis-cli='redis-cli'                     # Redis CLI
+alias redis-monitor='redis-cli monitor'         # Monitor Redis commands
+
+### SQLite
+alias sqlite3='sqlite3'                         # SQLite CLI
+alias sqlite-dump='sqlite3 $1 .dump > $2'       # Dump SQLite database
+alias sqlite-schema='sqlite3 $1 .schema'        # Show schema
+
+# ==============================================================================
+# API DEVELOPMENT & TESTING
+# ==============================================================================
+
+### HTTP Tools
+alias curl-json='curl -H "Content-Type: application/json"' # JSON requests
+alias curl-post='curl -X POST'                  # POST request
+alias curl-get='curl -X GET'                    # GET request
+alias curl-put='curl -X PUT'                    # PUT request
+alias curl-delete='curl -X DELETE'              # DELETE request
+
+### API Testing Tools
+alias httpie='http'                             # HTTPie for API testing
+alias httpie-json='http --json'                 # JSON formatted requests
+alias postman='postman'                         # Postman
+alias insomnia='insomnia'                       # Insomnia
+
+### REST API Tools
+alias jq='jq'                                   # JSON processor
+alias json-pp='python -m json.tool'             # Pretty print JSON
+alias xml-format='xmllint --format'             # Format XML
+
+### GraphQL
+alias gql-playground='gql playground'           # GraphQL playground
+alias gql-codegen='gql codegen'                 # Generate GraphQL code
+
+# ==============================================================================
+# CLOUD DEVELOPMENT (AWS/GCP/Azure)
+# ==============================================================================
+
+### AWS CLI
+alias aws-configure='aws configure'             # Configure AWS
+alias aws-s3-ls='aws s3 ls'                     # List S3 buckets
+alias aws-s3-cp='aws s3 cp'                     # Copy to/from S3
+alias aws-ec2-list='aws ec2 describe-instances' # List EC2 instances
+alias aws-lambda-deploy='aws lambda update-function-code' # Deploy Lambda
+
+### Google Cloud
+alias gcloud-auth='gcloud auth login'           # Authenticate
+alias gcloud-config='gcloud config set project' # Set project
+alias gcloud-deploy='gcloud app deploy'         # Deploy to App Engine
+alias gcloud-logs='gcloud app logs tail'        # View logs
+
+### Azure CLI
+alias az-login='az login'                       # Login to Azure
+alias az-account='az account set'               # Set subscription
+alias az-deploy='az webapp up'                  # Deploy web app
+alias az-logs='az webapp log tail'              # View logs
+
+### Cloud Storage
+alias rclone-config='rclone config'             # Configure rclone
+alias rclone-ls='rclone ls'                     # List remote files
+alias rclone-copy='rclone copy'                 # Copy files
+alias rclone-sync='rclone sync'                 # Sync directories
+
+# ==============================================================================
+# CI/CD & DEVOPS
+# ==============================================================================
+
+### GitHub Actions
+alias gh-workflow-run='gh workflow run'         # Run workflow
+alias gh-workflow-list='gh workflow list'       # List workflows
+alias gh-workflow-view='gh workflow view'       # View workflow
+
+### GitLab CI
+alias glab-ci-status='glab ci status'           # CI status
+alias glab-ci-lint='glab ci lint'               # Lint CI config
+
+### Jenkins
+alias jenkins-cli='java -jar jenkins-cli.jar'   # Jenkins CLI
+alias jenkins-build='curl -X POST $JENKINS_URL/job/$JOB/build' # Trigger build
+
+### Docker CI/CD
+alias docker-push='docker push'                 # Push image
+alias docker-pull='docker pull'                 # Pull image
+alias docker-tag='docker tag'                   # Tag image
+
+# ==============================================================================
+# TESTING FRAMEWORKS
+# ==============================================================================
+
+### JavaScript Testing
+alias jest='npx jest'                          # Jest test runner
+alias jest-watch='npx jest --watch'            # Jest watch mode
+alias jest-coverage='npx jest --coverage'      # Jest coverage
+alias cypress='npx cypress open'               # Cypress e2e testing
+
+### Python Testing
+alias pytest-cov='pytest --cov'                # Pytest coverage
+alias pytest-html='pytest --html=report.html'  # HTML reports
+alias coverage-report='coverage report'        # Coverage report
+
+### Other Testing
+alias selenium='python -m selenium'            # Selenium testing
+alias playwright='npx playwright test'         # Playwright testing
+alias cucumber='cucumber-js'                   # Cucumber BDD
+
+# ==============================================================================
+# BUILD TOOLS & TASK RUNNERS
+# ==============================================================================
+
+### Make
+alias make='make'                              # Run make
+alias make-clean='make clean'                  # Clean build
+alias make-install='make install'              # Install
+alias make-test='make test'                    # Run tests
+
+### Task (Go task runner)
+alias task='task'                              # Run task
+alias task-list='task --list'                  # List tasks
+alias task-clean='task clean'                  # Clean
+
+### Just (Rust task runner)
+alias just='just'                              # Run justfile
+alias just-list='just --list'                  # List recipes
+
+### GNU Autotools
+alias autoreconf='autoreconf -fiv'             # Generate configure
+alias configure='configure'                    # Configure build
+alias make-dist='make dist'                    # Create distribution
+
+# ==============================================================================
+# IDE & EDITOR TOOLS
+# ==============================================================================
+
+### VS Code
+alias code='code'                              # Open in VS Code
+alias code-insiders='code-insiders'            # Open in VS Code Insiders
+alias code-diff='code --diff'                  # Diff two files
+alias code-add='code --add'                    # Add folder to workspace
+
+### Vim/Neovim
+alias vim='vim'                                # Vim editor
+alias nvim='nvim'                              # Neovim editor
+alias vimdiff='vimdiff'                        # Vim diff
+
+### Emacs
+alias emacs='emacs'                            # Emacs editor
+alias emacsclient='emacsclient'                # Emacs client
+
+### JetBrains IDEs
+alias idea='idea.sh'                           # IntelliJ IDEA
+alias pycharm='pycharm.sh'                     # PyCharm
+alias webstorm='webstorm.sh'                   # WebStorm
+alias goland='goland.sh'                       # GoLand
+
+# ==============================================================================
+# VERSION CONTROL (Non-Git)
+# ==============================================================================
+
+### Mercurial
+alias hg-status='hg status'                    # Mercurial status
+alias hg-commit='hg commit'                    # Mercurial commit
+alias hg-push='hg push'                        # Mercurial push
+alias hg-pull='hg pull'                        # Mercurial pull
+
+### SVN
+alias svn-status='svn status'                  # SVN status
+alias svn-commit='svn commit'                  # SVN commit
+alias svn-update='svn update'                  # SVN update
+alias svn-add='svn add'                        # SVN add
+
+# ==============================================================================
+# COLLABORATION & COMMUNICATION
+# ==============================================================================
+
+### Slack
+alias slack='slack'                            # Open Slack
+alias slack-status='slack status'              # Set status
+
+### Discord
+alias discord='discord'                        # Open Discord
+
+### Microsoft Teams
+alias teams='teams'                            # Open Teams
+
+### Zoom
+alias zoom='zoom'                              # Open Zoom
+
+# ==============================================================================
+# MONITORING & DEBUGGING
+# ==============================================================================
+
+### System Monitoring
+alias htop='htop'                              # Process monitor
+alias iotop='iotop'                            # I/O monitor
+alias nethogs='nethogs'                        # Network monitor
+alias glances='glances'                        # System monitor
+
+### Network Debugging
+alias wireshark='wireshark'                    # Packet analyzer
+alias tcpdump='tcpdump'                        # Command-line packet analyzer
+alias nmap='nmap'                              # Network scanner
+alias mtr='mtr'                                # Network diagnostic tool
+
+### Application Debugging
+alias strace='strace'                          # System call tracer
+alias ltrace='ltrace'                          # Library call tracer
+alias gdb='gdb'                                # GNU debugger
+alias valgrind='valgrind'                      # Memory debugger
+
+# ==============================================================================
+# DEPLOYMENT TOOLS
+# ==============================================================================
+
+### Heroku
+alias heroku-login='heroku login'              # Login to Heroku
+alias heroku-create='heroku create'            # Create Heroku app
+alias heroku-deploy='git push heroku main'     # Deploy to Heroku
+alias heroku-logs='heroku logs --tail'         # View Heroku logs
+
+### Vercel
+alias vercel-login='vercel login'              # Login to Vercel
+alias vercel-deploy='vercel --prod'            # Deploy to Vercel
+alias vercel-dev='vercel dev'                  # Local development
+
+### Netlify
+alias netlify-login='netlify login'            # Login to Netlify
+alias netlify-deploy='netlify deploy --prod'   # Deploy to Netlify
+alias netlify-dev='netlify dev'                # Local development
+
+### Railway
+alias railway-login='railway login'            # Login to Railway
+alias railway-deploy='railway up'              # Deploy to Railway
+
+# ==============================================================================
+# SECURITY & CODE QUALITY
+# ==============================================================================
+
+### Security Tools
+alias bandit='bandit'                          # Python security linter
+alias safety='safety check'                    # Dependency security check
+alias trivy='trivy'                            # Container vulnerability scanner
+alias snyk='snyk test'                         # Security testing
+
+### Code Quality
+alias sonar-scanner='sonar-scanner'            # SonarQube scanner
+alias codescene='codescene'                    # CodeScene analysis
+alias lizard='lizard'                          # Code complexity analyzer
+
+### License Checking
+alias licensee='licensee'                      # Detect licenses
+alias fossology='fossology'                    # License scanning
+
+# ==============================================================================
+# END OF DEVELOPMENT TOOLS
+# ==============================================================================

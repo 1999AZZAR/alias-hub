@@ -1,64 +1,421 @@
-# Python Aliases
-# ----------------------------
+# ==============================================================================
+# Python Development - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive Python development aliases for efficient coding, testing, and deployment
+# Includes package management, testing, debugging, data science, and specialized tools
+#
+# Sections:
+# - Python Execution (PRESERVED)
+# - Advanced Package Management
+# - Virtual Environment Management (PRESERVED + Enhanced)
+# - Code Quality & Formatting (PRESERVED + Enhanced)
+# - Testing & Coverage (PRESERVED + Enhanced)
+# - Debugging & Profiling (PRESERVED + Enhanced)
+# - Development Servers & Tools
+# - Data Science & ML Tools
+# - Web Development
+# - Documentation & Publishing
+# - Performance & Optimization
+# - Security & Code Analysis
+# - Environment Management
+# - Deployment & DevOps
+# - Specialized Tools
+#
+# ==============================================================================
 
-### Python Shortcuts
-alias py='python3'                           # Shortcut for Python 3
-alias pyrun='python3'                        # Run a Python script
+# ==============================================================================
+# PYTHON EXECUTION (PRESERVED - Your Python Shortcuts)
+# ==============================================================================
 
-### Dependency Management (pip)
-alias pipu='pip install --upgrade'           # Upgrade pip and common tools
-alias pipr='pip install -r requirements.txt' # Install from requirements file
-alias pip-freeze='pip freeze > requirements.txt'    # Freeze dependencies to requirements.txt
-alias pip-check='pip check'                         # Check for dependency conflicts
-alias pip-outdated='pip list --outdated'            # List outdated packages
-alias pip-uninstall-all='pip freeze | xargs pip uninstall -y' # WARNING: Uninstalls ALL Python packages. Use with extreme caution!
+### Python Shortcuts (ALL PRESERVED)
+alias py='python3'                           # PRESERVED - Shortcut for Python 3
+alias pyrun='python3'                        # PRESERVED - Run a Python script
 
-### Virtual Environment Management
-alias venv-c='python3 -m venv .venv'        # Create virtual environment in .venv
-alias venv-a='source .venv/bin/activate'    # Activate virtual environment
-alias venv-d='deactivate'                   # Deactivate virtual environment
-alias venv-r='rm -rf .venv'                 # Remove virtual environment
-alias venv-up='venv-c && venv-a'            # Create and activate venv
-alias venv-re='venv-r && venv-c && venv-a'  # Remove, create, and activate venv
+### Advanced Python Execution
+alias py2='python2'                          # Python 2 (if available)
+alias pyo='python3 -O'                       # Optimized execution (remove assertions)
+alias pyoo='python3 -OO'                     # Extra optimized (remove docstrings too)
+alias pyi='python3 -i'                       # Interactive mode after script
+alias pym='python3 -m'                       # Run module as script
+alias pyu='python3 -u'                       # Unbuffered stdout/stderr
+alias pyv='python3 --version'                # Show Python version
+alias pyV='python3 -c "import sys; print(sys.version)"' # Detailed version info
+alias py-path='python3 -c "import sys; print(\"\n\".join(sys.path))"' # Python path
 
-### Local Development Server
-alias pyserve='python3 -m http.server 8000' # Start simple HTTP server (default port: 8000)
+# ==============================================================================
+# ADVANCED PACKAGE MANAGEMENT (Enhanced)
+# ==============================================================================
 
-### Code Formatting & Linting
-alias black='python3 -m black .'             # Format code with Black
-alias isort='python3 -m isort .'             # Sort imports with isort
-alias pyfmt='black . && isort .'             # Format code with Black and isort
-alias pylint='python3 -m pylint'             # Run Pylint on code
-alias mypy='python3 -m mypy'                 # Run MyPy type checker
-alias pysort-check='isort --check-only .'    # Check if imports are sorted
+### Dependency Management (PRESERVED + Enhanced)
+alias pipu='pip install --upgrade'           # PRESERVED - Upgrade packages
+alias pipr='pip install -r requirements.txt' # PRESERVED - Install from requirements
+alias pip-freeze='pip freeze > requirements.txt'    # PRESERVED - Freeze dependencies
+alias pip-check='pip check'                         # PRESERVED - Check conflicts
+alias pip-outdated='pip list --outdated'            # PRESERVED - List outdated
 
-### Testing & Coverage
-alias pytest='python3 -m pytest'             # Run tests with Pytest
-alias pytest-verbose='pytest -v'             # Run tests with verbose output
-alias pytest-cov='pytest --cov=.'            # Run tests with coverage
-alias pycov='coverage run -m pytest && coverage report -m' # Run coverage with pytest and report
+### Advanced pip Operations
+alias pip-install='pip install'                     # Basic install
+alias pip-install-user='pip install --user'         # Install for user only
+alias pip-install-dev='pip install -e .'            # Install in development mode
+alias pip-install-quiet='pip install --quiet'       # Quiet install
+alias pip-install-force='pip install --force-reinstall' # Force reinstall
+alias pip-install-no-deps='pip install --no-deps'   # Install without dependencies
+alias pip-install-pre='pip install --pre'           # Include pre-releases
+alias pip-list='pip list'                           # List installed packages
+alias pip-list-json='pip list --format=json'        # List in JSON format
+alias pip-show='pip show'                           # Show package details
+alias pip-search='pip search'                       # Search packages (deprecated)
+alias pip-download='pip download'                   # Download packages without installing
 
-### Common Development Commands
-alias pydebug='python3 -m pdb'                # Debug Python script
-alias pyprofile='python3 -m cProfile -s time' # Profile Python code
-alias pycompile='python3 -m compileall .'     # Compile all Python files
-alias pyshell='python3 -i'                    # Start interactive Python shell
-alias pyspeed='python3 -m timeit'             # Measure execution time of code snippets
-alias pycache-clean='find . -name __pycache__ -exec rm -rf {} +' # Remove __pycache__ folders
+### Package Maintenance
+alias pip-clean-cache='pip cache purge'             # Clean pip cache
+alias pip-info='pip show'                           # Package information
+alias pip-deps='pip show | grep -E "Requires|Required-by"' # Show dependencies
+alias pip-tree='pipdeptree'                         # Dependency tree (requires pipdeptree)
+alias pip-review='pip-review --local --interactive' # Interactive package updates
 
-### Notebook Shortcuts
-alias jn='jupyter notebook'                   # Start Jupyter Notebook
-alias jl='jupyter lab'                        # Start Jupyter Lab
-alias nbconvert='jupyter nbconvert --to html' # Convert notebooks to HTML
+### Requirements Management
+alias req-install='pip install -r requirements.txt' # Install requirements
+alias req-freeze='pip freeze > requirements.txt'    # Freeze to requirements
+alias req-dev-install='pip install -r requirements-dev.txt' # Install dev requirements
+alias req-test-install='pip install -r requirements-test.txt' # Install test requirements
+alias req-check='pip check'                         # Check requirements compatibility
 
-### Package Publishing
-alias pypack='python3 setup.py sdist bdist_wheel' # Package Python project
-alias pypublish='twine upload dist/*'             # Publish Python package to PyPI
+### DANGER ZONE - Use with extreme caution!
+alias pip-uninstall-all='pip freeze | xargs pip uninstall -y' # PRESERVED - WARNING: Uninstalls ALL packages!
 
-### Pyenv Integration (if pyenv is used)
-alias pyenv-list='pyenv versions'             # List Python versions
-alias pyenv-global='pyenv global'             # Set global Python version
+# ==============================================================================
+# VIRTUAL ENVIRONMENT MANAGEMENT (PRESERVED + Enhanced)
+# ==============================================================================
 
-### Extended Utilities (Optional - may require additional installs)
-alias pip-review='pip-review --local'         # Review and update outdated packages (requires `pip install pip-review`)
-alias pydeps-tree='pipdeptree'                # Display dependency tree (requires `pip install pipdeptree`)
+### Virtual Environment Management (ALL PRESERVED)
+alias venv-c='python3 -m venv .venv'        # PRESERVED - Create virtual environment
+alias venv-a='source .venv/bin/activate'    # PRESERVED - Activate virtual environment
+alias venv-d='deactivate'                   # PRESERVED - Deactivate virtual environment
+alias venv-r='rm -rf .venv'                 # PRESERVED - Remove virtual environment
+alias venv-up='venv-c && venv-a'            # PRESERVED - Create and activate venv
+alias venv-re='venv-r && venv-c && venv-a'  # PRESERVED - Remove, create, and activate venv
+
+### Advanced Virtual Environment Management
+alias venv-list='ls -la | grep venv'               # List virtual environments
+alias venv-cd='cd .venv'                           # Enter venv directory
+alias venv-info='which python && python --version' # Show active venv info
+alias venv-packages='pip list'                     # List packages in current venv
+alias venv-export='pip freeze > requirements.txt'  # Export venv packages
+alias venv-clone='python3 -m venv --copies'         # Clone current venv
+alias venv-clear='pip uninstall -y -r <(pip freeze)' # Clear all packages from venv
+
+### Multiple Virtual Environments
+alias venv-prod='python3 -m venv venv-prod'         # Production environment
+alias venv-dev='python3 -m venv venv-dev'           # Development environment
+alias venv-test='python3 -m venv venv-test'         # Testing environment
+alias venv-prod-a='source venv-prod/bin/activate'   # Activate production env
+alias venv-dev-a='source venv-dev/bin/activate'     # Activate development env
+alias venv-test-a='source venv-test/bin/activate'   # Activate testing env
+
+# ==============================================================================
+# CODE QUALITY & FORMATTING (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Code Formatting & Linting (ALL PRESERVED)
+alias black='python3 -m black .'             # PRESERVED - Format with Black
+alias isort='python3 -m isort .'             # PRESERVED - Sort imports
+alias pyfmt='black . && isort .'             # PRESERVED - Format with Black and isort
+alias pylint='python3 -m pylint'             # PRESERVED - Run Pylint
+alias mypy='python3 -m mypy'                 # PRESERVED - Run MyPy
+alias pysort-check='isort --check-only .'    # PRESERVED - Check import sorting
+
+### Advanced Code Quality Tools
+alias flake8='python3 -m flake8'                     # Code style checking
+alias bandit='python3 -m bandit'                     # Security linting
+alias safety='python3 -m safety check'               # Security vulnerability checking
+alias radon-cc='python3 -m radon cc'                 # Cyclomatic complexity
+alias radon-mi='python3 -m radon mi'                 # Maintainability index
+alias radon-raw='python3 -m radon raw'               # Raw metrics
+alias autopep8='python3 -m autopep8'                 # Automatic PEP8 fixes
+alias yapf='python3 -m yapf'                         # Yet Another Python Formatter
+alias pyupgrade='python3 -m pyupgrade'               # Upgrade Python syntax
+
+### Import Management
+alias isort-check='isort --check-only --diff'       # Check import sorting
+alias isort-fix='isort --atomic'                    # Fix imports atomically
+alias unused-imports='python3 -m pip install unused && python3 -m unused' # Find unused imports
+
+### Code Analysis
+alias pyright='pyright'                              # Microsoft's Python type checker
+alias pytype='python3 -m pytype'                     # Google's Python type checker
+alias vulture='python3 -m vulture'                   # Find unused code
+alias dead='python3 -m dead'                         # Find dead code
+
+# ==============================================================================
+# TESTING & COVERAGE (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Testing & Coverage (ALL PRESERVED)
+alias pytest='python3 -m pytest'             # PRESERVED - Run tests with Pytest
+alias pytest-verbose='pytest -v'             # PRESERVED - Verbose test output
+alias pytest-cov='pytest --cov=.'            # PRESERVED - Coverage with pytest
+alias pycov='coverage run -m pytest && coverage report -m' # PRESERVED - Coverage report
+
+### Advanced Testing
+alias pytest-fast='pytest -x'                        # Stop on first failure
+alias pytest-quiet='pytest -q'                       # Quiet output
+alias pytest-parallel='pytest -n auto'               # Parallel test execution
+alias pytest-slow='pytest --durations=10'            # Show slowest tests
+alias pytest-debug='pytest --pdb'                    # Debug on failures
+alias pytest-html='pytest --html=report.html'        # HTML test report
+alias pytest-xml='pytest --junitxml=report.xml'      # XML test report
+
+### Test Coverage Analysis
+alias coverage-report='coverage report'              # Text coverage report
+alias coverage-html='coverage html && xdg-open htmlcov/index.html' # HTML coverage report
+alias coverage-xml='coverage xml'                    # XML coverage report
+alias coverage-erase='coverage erase'                # Clear coverage data
+
+### Alternative Test Runners
+alias unittest='python3 -m unittest discover'         # Standard unittest
+alias nose='python3 -m nose2'                         # Nose2 test runner
+alias doctest='python3 -m doctest'                    # Run doctests
+
+# ==============================================================================
+# DEBUGGING & PROFILING (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Common Development Commands (PRESERVED + Enhanced)
+alias pydebug='python3 -m pdb'                # PRESERVED - Debug Python script
+alias pyprofile='python3 -m cProfile -s time' # PRESERVED - Profile Python code
+alias pycompile='python3 -m compileall .'     # PRESERVED - Compile all Python files
+alias pyshell='python3 -i'                    # PRESERVED - Interactive Python shell
+alias pyspeed='python3 -m timeit'             # PRESERVED - Measure execution time
+alias pycache-clean='find . -name __pycache__ -exec rm -rf {} +' # PRESERVED - Remove __pycache__
+
+### Advanced Debugging
+alias pdb-post-mortem='python3 -m pdb -c continue'   # Post-mortem debugging
+alias pdb-break='python3 -c "import pdb; pdb.set_trace()"' # Insert breakpoint
+alias ipdb='python3 -m ipdb'                         # Enhanced IPython debugger
+alias pudb='python3 -m pudb'                         # Visual debugger
+alias wdb='python3 -m wdb'                           # Web debugger
+
+### Profiling & Performance
+alias pyprof='python3 -m cProfile'                    # Basic profiling
+alias pyprof-stats='python3 -m pstats'                # Profile statistics
+alias memory-prof='python3 -m memory_profiler'       # Memory profiling
+alias line-prof='python3 -m line_profiler'            # Line-by-line profiling
+alias py-spy='py-spy top --pid'                       # Live profiling
+
+### Code Inspection
+alias pyinspect='python3 -c "import inspect; help(inspect)"' # Inspect module
+alias pydis='python3 -m dis'                         # Disassemble bytecode
+alias pyast='python3 -c "import ast; print(ast.dump(ast.parse(open(\"\$1\").read())))"' # AST viewer
+
+# ==============================================================================
+# DEVELOPMENT SERVERS & TOOLS
+# ==============================================================================
+
+### Local Development Server (PRESERVED + Enhanced)
+alias pyserve='python3 -m http.server 8000' # PRESERVED - Simple HTTP server
+alias pyserve-port='python3 -m http.server' # HTTP server with custom port
+alias pyserve-dir='python3 -c "import http.server; import socketserver; import os; os.chdir(\"\$1\"); handler = http.server.SimpleHTTPRequestHandler; httpd = socketserver.TCPServer((\"\", 8000), handler); print(\"Serving at port 8000\"); httpd.serve_forever()"' # Serve specific directory
+
+### Web Frameworks
+alias django-run='python3 manage.py runserver'       # Django development server
+alias flask-run='python3 -m flask run'               # Flask development server
+alias fastapi-run='python3 -m uvicorn main:app --reload' # FastAPI development server
+alias tornado-run='python3 app.py'                   # Tornado server
+
+### API Testing
+alias httpie='http'                                  # HTTPie for API testing
+alias curl-json='curl -H "Content-Type: application/json"' # JSON requests
+alias postman='postman'                              # Postman alternative
+
+# ==============================================================================
+# DATA SCIENCE & ML TOOLS
+# ==============================================================================
+
+### Jupyter Notebook (PRESERVED + Enhanced)
+alias jn='jupyter notebook'                   # PRESERVED - Start Jupyter Notebook
+alias jl='jupyter lab'                        # PRESERVED - Start Jupyter Lab
+alias nbconvert='jupyter nbconvert --to html' # PRESERVED - Convert to HTML
+
+### Advanced Jupyter Operations
+alias jn-port='jupyter notebook --port'              # Custom port
+alias jn-no-browser='jupyter notebook --no-browser'  # No browser launch
+alias jl-dark='jupyter lab --theme=JupyterLab Dark'  # Dark theme
+alias nbconvert-pdf='jupyter nbconvert --to pdf'     # Convert to PDF
+alias nbconvert-slides='jupyter nbconvert --to slides' # Convert to slides
+
+### Data Science Libraries
+alias numpy-test='python3 -c "import numpy as np; print(\"NumPy version:\", np.__version__)"' # NumPy version
+alias pandas-test='python3 -c "import pandas as pd; print(\"Pandas version:\", pd.__version__)"' # Pandas version
+alias matplotlib-test='python3 -c "import matplotlib; print(matplotlib.__version__)"' # Matplotlib version
+alias sklearn-test='python3 -c "import sklearn; print(sklearn.__version__)"' # Scikit-learn version
+
+### ML Tools
+alias tensorboard='tensorboard --logdir'             # TensorBoard for ML
+alias mlflow-ui='mlflow ui'                          # MLflow UI
+alias dvc-init='dvc init'                            # Initialize DVC
+alias dvc-add='dvc add'                              # Add file to DVC tracking
+
+# ==============================================================================
+# WEB DEVELOPMENT
+# ==============================================================================
+
+### Django Commands
+alias dj-run='python3 manage.py runserver'           # Run Django server
+alias dj-migrate='python3 manage.py migrate'         # Run migrations
+alias dj-makemigrations='python3 manage.py makemigrations' # Make migrations
+alias dj-shell='python3 manage.py shell'             # Django shell
+alias dj-dbshell='python3 manage.py dbshell'         # Database shell
+alias dj-static='python3 manage.py collectstatic'    # Collect static files
+alias dj-test='python3 manage.py test'               # Run Django tests
+
+### Flask Commands
+alias flask-init='export FLASK_APP=app.py'           # Set Flask app
+alias flask-debug='export FLASK_DEBUG=1'             # Enable debug mode
+alias flask-shell='python3 -m flask shell'           # Flask shell
+
+### FastAPI Commands
+alias fastapi-docs='python3 -c "import uvicorn; uvicorn.run(\"main:app\", host=\"0.0.0.0\", port=8000, reload=True)"' # Run with docs
+
+# ==============================================================================
+# DOCUMENTATION & PUBLISHING
+# ==============================================================================
+
+### Documentation Tools
+alias sphinx-build='sphinx-build -b html docs build/html' # Build Sphinx docs
+alias sphinx-serve='python3 -m http.server 8000 -d build/html' # Serve docs locally
+alias mkdocs-serve='mkdocs serve'                  # Serve MkDocs
+alias pdoc='pdoc --html --output-dir docs .'       # Generate HTML docs
+alias pydoc='python3 -m pydoc'                     # Built-in documentation
+
+### Package Publishing (PRESERVED + Enhanced)
+alias pypack='python3 setup.py sdist bdist_wheel' # PRESERVED - Package Python project
+alias pypublish='twine upload dist/*'             # PRESERVED - Publish to PyPI
+
+### Advanced Publishing
+alias twine-check='twine check dist/*'            # Check distribution
+alias twine-test='twine upload --repository testpypi dist/*' # Upload to test PyPI
+alias setup-check='python3 setup.py check'        # Check setup.py
+alias build-clean='rm -rf build/ dist/ *.egg-info/' # Clean build artifacts
+
+# ==============================================================================
+# PERFORMANCE & OPTIMIZATION
+# ==============================================================================
+
+### Performance Analysis
+alias pytrace='python3 -m trace --trace'           # Trace execution
+alias pyhotshot='python3 -m hotshot'               # Hotshot profiler
+alias pyvmprof='python3 -m vmprof'                 # VM profiler
+alias pychainsaw='python3 -m chainsaw'             # Call graph profiler
+
+### Memory Analysis
+alias pymem='python3 -m tracemalloc'               # Trace memory allocations
+alias pyheap='python3 -m heapy'                    # Heap analysis
+alias pymemory='python3 -c "import psutil; import os; print(f\"Memory usage: {psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024:.2f} MB\")"' # Memory usage
+
+### Code Optimization
+alias pyoptimize='python3 -m py_compile -O'        # Optimize bytecode
+alias pyobfuscate='python3 -m pyminifier'          # Code obfuscation
+alias pycompress='python3 -m zipapp'               # Create executable zip
+
+# ==============================================================================
+# SECURITY & CODE ANALYSIS
+# ==============================================================================
+
+### Security Tools
+alias safety-check='safety check'                  # Check for vulnerabilities
+alias bandit-scan='bandit -r .'                    # Security scanning
+alias dlint='python3 -m dlint'                     # Duplicate code detection
+alias pyflakes='python3 -m pyflakes'               # Simple static analysis
+
+### Code Quality Metrics
+alias radon-cc='radon cc .'                        # Cyclomatic complexity
+alias radon-mi='radon mi .'                        # Maintainability index
+alias radon-hal='radon hal .'                      # Halstead metrics
+alias coala='coala --ci'                           # Comprehensive analysis
+
+### License Checking
+alias licensee='licensee'                          # Detect license
+alias liccheck='liccheck'                          # Check license compatibility
+
+# ==============================================================================
+# ENVIRONMENT MANAGEMENT
+# ==============================================================================
+
+### Pyenv Integration (PRESERVED + Enhanced)
+alias pyenv-list='pyenv versions'             # PRESERVED - List Python versions
+alias pyenv-global='pyenv global'             # PRESERVED - Set global Python version
+alias pyenv-local='pyenv local'              # Set local Python version
+alias pyenv-shell='pyenv shell'              # Set shell-specific Python
+alias pyenv-install='pyenv install'          # Install Python version
+alias pyenv-uninstall='pyenv uninstall'      # Uninstall Python version
+alias pyenv-update='pyenv update'            # Update pyenv
+
+### Conda/Miniconda Integration
+alias conda-env-list='conda env list'         # List conda environments
+alias conda-env-create='conda env create'     # Create conda environment
+alias conda-env-activate='conda activate'     # Activate conda environment
+alias conda-env-deactivate='conda deactivate' # Deactivate conda environment
+alias conda-install='conda install'           # Install packages with conda
+
+### Poetry (Modern Python packaging)
+alias poetry-init='poetry init'               # Initialize Poetry project
+alias poetry-add='poetry add'                 # Add dependency
+alias poetry-install='poetry install'         # Install dependencies
+alias poetry-shell='poetry shell'             # Activate Poetry shell
+alias poetry-build='poetry build'             # Build package
+alias poetry-publish='poetry publish'         # Publish package
+
+# ==============================================================================
+# DEPLOYMENT & DEVOPS
+# ==============================================================================
+
+### Docker Integration
+alias docker-py='docker run -it --rm python:3' # Run Python in Docker
+alias docker-build='docker build -t'          # Build Docker image
+alias docker-run='docker run -it --rm'        # Run Docker container
+alias docker-compose-up='docker-compose up'   # Start services
+
+### Cloud Deployment
+alias heroku-deploy='git push heroku main'    # Deploy to Heroku
+alias vercel-deploy='vercel --prod'           # Deploy to Vercel
+alias netlify-deploy='netlify deploy --prod'  # Deploy to Netlify
+
+### CI/CD Tools
+alias tox='tox'                               # Run tests across environments
+alias pre-commit='pre-commit run --all-files' # Run pre-commit hooks
+alias bumpversion='bumpversion patch'         # Bump version
+
+# ==============================================================================
+# SPECIALIZED TOOLS & UTILITIES
+# ==============================================================================
+
+### Extended Utilities (PRESERVED + Enhanced)
+alias pip-review='pip-review --local'         # PRESERVED - Review outdated packages
+alias pydeps-tree='pipdeptree'                # PRESERVED - Display dependency tree
+
+### Database Tools
+alias sqlite='python3 -c "import sqlite3; conn = sqlite3.connect(\"\$1\"); c = conn.cursor()"' # SQLite shell
+alias redis-cli-py='python3 -c "import redis; r = redis.Redis(); print(r.ping())"' # Redis check
+
+### API Development
+alias requests-test='python3 -c "import requests; r = requests.get(\"\$1\"); print(r.status_code)"' # Test API endpoint
+alias fastapi-new='fastapi newproject'        # Create new FastAPI project
+
+### GUI Development
+alias tkinter-test='python3 -c "import tkinter; root = tkinter.Tk(); root.mainloop()"' # Test Tkinter
+alias pyqt-test='python3 -c "import PyQt5; print(\"PyQt5 available\")"' # Test PyQt5
+
+### Game Development
+alias pygame-init='python3 -c "import pygame; pygame.init(); print(\"Pygame ready\")"' # Initialize Pygame
+alias arcade-init='python3 -c "import arcade; print(\"Arcade ready\")"' # Test Arcade
+
+### Scientific Computing
+alias numpy-info='python3 -c "import numpy as np; print(f\"NumPy {np.__version__} - {np.show_config()}\")"' # NumPy configuration
+alias scipy-info='python3 -c "import scipy; print(f\"SciPy {scipy.__version__}\")"' # SciPy version
+alias matplotlib-backend='python3 -c "import matplotlib; print(matplotlib.get_backend())"' # Matplotlib backend
+
+# ==============================================================================
+# END OF PYTHON DEVELOPMENT ALIASES
+# ==============================================================================

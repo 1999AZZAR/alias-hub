@@ -1,58 +1,380 @@
-# History & Search Utilities
-# ----------------------------
+# ==============================================================================
+# Search & Discovery Utilities - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive search, discovery, and analysis tools for files, content, and data
+# Includes modern search tools, code analysis, database searching, and productivity helpers
+#
+# Sections:
+# - Command History Management (PRESERVED)
+# - Modern Search Tools (fd, fzf, ag, etc.)
+# - File Discovery & Analysis
+# - Content Search & Analysis (PRESERVED)
+# - Code Search & Analysis
+# - Database & Structured Data Search
+# - Network & Web Search
+# - Binary & Special File Search
+# - Interactive Search & Selection
+# - Search Results Processing
+# - Performance & Optimization
+# - Search History & Bookmarks
+# - Alias Management (PRESERVED)
+#
+# ==============================================================================
 
-### History management
-alias h='history'                            # Show command history
-alias hc='history -c'                        # Clear history
-alias hg='history | grep'                    # Search history
-alias h1='history 10'                        # Last 10 commands
-alias h2='history 20'                        # Last 20 commands
-alias h3='history 30'                        # Last 30 commands
-alias hist-sync='history -a; history -n'     # Sync history across terminals
-alias hist-stats='history | awk "{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}" | column -c3 -s " " -t | sort -nr | nl | head -n20'  # Command frequency stats
+# ==============================================================================
+# COMMAND HISTORY MANAGEMENT (PRESERVED - Your History Aliases)
+# ==============================================================================
 
-### Search utilities
-alias find-file='find . -type f -name'                                          # Find files by name
-alias find-dir='find . -type d -name'                                           # Find directories by name
-alias find-text='grep -r'                                                       # Find text in files
-alias find-recent='find . -type f -mtime -7'                                    # Files modified in last 7 days
-alias find-large='find . -type f -size +100M -exec ls -lh {} \; | sort -k5,5nr' # Find large files
-alias find-empty='find . -type d -empty'                                        # Find empty directories
-alias find-dups='fdupes -r .'                                                   # Find duplicate files
-alias find-broken='find . -type l ! -exec test -e {} \; -print'                 # Find broken symlinks
-alias find-exec='find . -type f -executable'                                    # Find executable files
-alias find-modified='find . -type f -mmin -60'                                  # Files modified in last hour
-alias find-newer='find . -newer'                                                # Find files newer than reference
-alias find-old='find . -type f -mtime +365'                                     # Files not accessed in a year
+### History Management (ALL PRESERVED)
+alias h='history'                            # PRESERVED - Show command history
+alias hc='history -c'                        # PRESERVED - Clear history
+alias hg='history | grep'                    # PRESERVED - Search history
+alias h1='history 10'                        # PRESERVED - Last 10 commands
+alias h2='history 20'                        # PRESERVED - Last 20 commands
+alias h3='history 30'                        # PRESERVED - Last 30 commands
+alias hist-sync='history -a; history -n'     # PRESERVED - Sync history across terminals
 
-### Advanced search
-alias rgf='rg --files | rg'                  # Search filenames with ripgrep
-alias rgc='rg --count'                       # Count matches with ripgrep
-alias rgi='rg -i'                            # Case-insensitive search
-alias rgw='rg -w'                            # Search whole words only
-alias rgz='rg -z'                            # Search in compressed files
-alias locate-update='sudo updatedb'          # Update locate database
+### Advanced History Analysis
+alias hist-stats='history | awk "{CMD[$2]++;count++;}END { for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}" | column -c3 -s " " -t | sort -nr | nl | head -n20'  # PRESERVED - Command frequency stats
+alias hist-most-used='history | awk "{print \$2}" | sort | uniq -c | sort -nr | head -10' # Most used commands
+alias hist-recent-unique='history | awk "!seen[\$2]++" | head -10' # Recent unique commands
+alias hist-failed='history | grep -E "^\s*[0-9]+\s+[0-9-]+\s+[0-9:]+\s+[0-9]+\s+" | tail -10' # Recently failed commands
+alias hist-long-running='history | grep -E "[0-9]+m[0-9]+s|[0-9]+h[0-9]+m" | tail -5' # Long running commands
 
-### File content search
-alias grep='grep --color=auto'               # Colorized grep
-alias egrep='egrep --color=auto'             # Colorized egrep
-alias fgrep='fgrep --color=auto'             # Colorized fgrep
-alias igrep='grep -i'                        # Case-insensitive grep
-alias vgrep='grep -v'                        # Invert match
-alias ngrep='grep -n'                        # Show line numbers
-alias rgrep='grep -r'                        # Recursive grep
-alias wgrep='grep -w'                        # Match whole words only
-alias cgrep='grep --color=always'            # Force color output
+# ==============================================================================
+# MODERN SEARCH TOOLS INTEGRATION
+# ==============================================================================
 
-### Content analysis
-alias wordcount='wc -w'                             # Count words
-alias linecount='wc -l'                             # Count lines
-alias charcount='wc -m'                             # Count characters
-alias sort-uniq='sort | uniq -c | sort -nr'         # Sort and count unique lines
-alias diff-sort='diff <(sort file1) <(sort file2)'  # Compare sorted files
+### fd (Modern find replacement)
+alias fd='fd'                                 # Modern find
+alias fdf='fd --type f'                       # Find files only
+alias fdd='fd --type d'                       # Find directories only
+alias fdh='fd --hidden'                       # Include hidden files
+alias fdg='fd --glob'                         # Use glob patterns
+alias fdi='fd --ignore-case'                  # Case insensitive
+alias fde='fd --extension'                    # Filter by extension
 
-### Aliases list
-# Alias to list all alias files or a specific one with its contents
+### fzf (Fuzzy finder)
+alias fzf='fzf'                               # Basic fzf
+alias fzf-preview='fzf --preview "bat --color=always {}"' # With preview
+alias fzf-multi='fzf -m'                      # Multi-select
+alias fzf-history='history | fzf'             # Search history with fzf
+alias fzf-files='find . -type f | fzf'        # Find files with fzf
+
+### ag (The Silver Searcher) / ripgrep
+alias ag='ag'                                 # The Silver Searcher
+alias agi='ag -i'                             # Case insensitive
+alias agw='ag -w'                             # Word boundaries
+alias agf='ag -g'                             # Search filenames
+alias agl='ag -l'                             # Show only filenames
+
+### ripgrep (Enhanced)
+alias rg='rg'                                 # Basic ripgrep
+alias rgf='rg --files | rg'                   # PRESERVED - Search filenames
+alias rgc='rg --count'                        # PRESERVED - Count matches
+alias rgi='rg -i'                             # PRESERVED - Case-insensitive
+alias rgw='rg -w'                             # PRESERVED - Whole words only
+alias rgz='rg -z'                             # PRESERVED - Compressed files
+alias rgjson='rg --json'                      # JSON output
+alias rgfast='rg --mmap'                      # Memory mapped (faster)
+alias rgline='rg -n'                          # Show line numbers
+alias rginvert='rg -v'                        # Invert matches
+
+### locate & updatedb
+alias locate-update='sudo updatedb'           # PRESERVED - Update locate database
+alias locate='locate'                         # Basic locate
+alias locatei='locate -i'                     # Case insensitive
+alias locatel='locate -l 10'                  # Limit results
+alias locatec='locate -c'                     # Count only
+
+# ==============================================================================
+# FILE DISCOVERY & ANALYSIS (Enhanced)
+# ==============================================================================
+
+### Basic File Discovery (PRESERVED + Enhanced)
+alias find-file='find . -type f -name'                                          # PRESERVED - Find files by name
+alias find-dir='find . -type d -name'                                           # PRESERVED - Find directories
+alias find-text='grep -r'                                                       # PRESERVED - Find text in files
+alias find-recent='find . -type f -mtime -7'                                    # PRESERVED - Recent files
+alias find-large='find . -type f -size +100M -exec ls -lh {} \; | sort -k5,5nr' # PRESERVED - Large files
+alias find-empty='find . -type d -empty'                                        # PRESERVED - Empty directories
+alias find-dups='fdupes -r .'                                                   # PRESERVED - Duplicate files
+alias find-broken='find . -type l ! -exec test -e {} \; -print'                 # PRESERVED - Broken symlinks
+alias find-exec='find . -type f -executable'                                    # PRESERVED - Executable files
+alias find-modified='find . -type f -mmin -60'                                  # PRESERVED - Recently modified
+alias find-newer='find . -newer'                                                # PRESERVED - Newer than reference
+alias find-old='find . -type f -mtime +365'                                     # PRESERVED - Old files
+
+### Advanced File Discovery
+alias find-today='find . -type f -newermt $(date +%Y-%m-%d)'                    # Files from today
+alias find-yesterday='find . -type f -newermt $(date -d yesterday +%Y-%m-%d) ! -newermt $(date +%Y-%m-%d)' # Files from yesterday
+alias find-this-week='find . -type f -mtime -7'                                 # Files this week
+alias find-this-month='find . -type f -mtime -30'                               # Files this month
+alias find-accessed='find . -type f -atime -1'                                  # Recently accessed
+alias find-changed='find . -type f -ctime -1'                                   # Recently changed
+
+### Size-Based Discovery
+alias find-gb='find . -type f -size +1G'                                        # Files over 1GB
+alias find-500mb='find . -type f -size +500M'                                   # Files over 500MB
+alias find-100mb='find . -type f -size +100M'                                   # Files over 100MB
+alias find-10mb='find . -type f -size +10M'                                     # Files over 10MB
+alias find-small='find . -type f -size -1M'                                     # Files under 1MB
+alias find-tiny='find . -type f -size -100k'                                    # Files under 100KB
+
+### Permission-Based Discovery
+alias find-readable='find . -type f -readable'                                  # Readable files
+alias find-writable='find . -type f -writable'                                  # Writable files
+alias find-executable='find . -type f -executable'                              # Executable files
+alias find-owned-by-me='find . -type f -user $(whoami)'                         # Files owned by me
+alias find-world-writable='find . -type f -perm -o+w'                           # World writable files
+
+### Type-Based Discovery
+alias find-images='find . \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.bmp" -o -iname "*.tiff" \)' # Image files
+alias find-videos='find . \( -iname "*.mp4" -o -iname "*.avi" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.wmv" \)'   # Video files
+alias find-audio='find . \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.flac" -o -iname "*.aac" \)'                     # Audio files
+alias find-documents='find . \( -iname "*.pdf" -o -iname "*.doc" -o -iname "*.txt" -o -iname "*.md" \)'                   # Document files
+alias find-archives='find . \( -iname "*.zip" -o -iname "*.tar.gz" -o -iname "*.7z" \)'                                 # Archive files
+alias find-scripts='find . \( -iname "*.sh" -o -iname "*.py" -o -iname "*.js" -o -iname "*.pl" \)'                       # Script files
+
+# ==============================================================================
+# CONTENT SEARCH & ANALYSIS (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Enhanced Grep Operations (PRESERVED + Enhanced)
+alias grep='grep --color=auto'               # PRESERVED - Colorized grep
+alias egrep='egrep --color=auto'             # PRESERVED - Colorized egrep
+alias fgrep='fgrep --color=auto'             # PRESERVED - Colorized fgrep
+alias igrep='grep -i'                        # PRESERVED - Case-insensitive grep
+alias vgrep='grep -v'                        # PRESERVED - Invert match
+alias ngrep='grep -n'                        # PRESERVED - Show line numbers
+alias rgrep='grep -r'                        # PRESERVED - Recursive grep
+alias wgrep='grep -w'                        # PRESERVED - Whole words only
+alias cgrep='grep --color=always'            # PRESERVED - Force color output
+
+### Advanced Grep Operations
+alias agrep='grep -A 3 -B 3'                 # Show context lines
+alias bgrep='grep -B 3'                      # Before context
+alias agrep='grep -A 3'                      # After context
+alias fgrep='grep -F'                        # Fixed string search
+alias pgrep='grep -P'                        # Perl regex
+alias xgrep='grep -E'                        # Extended regex
+alias lgrep='grep -l'                        # List files only
+alias hgrep='grep -h'                        # Suppress filenames
+
+### Content Analysis (PRESERVED + Enhanced)
+alias wordcount='wc -w'                             # PRESERVED - Count words
+alias linecount='wc -l'                             # PRESERVED - Count lines
+alias charcount='wc -m'                             # PRESERVED - Count characters
+alias sort-uniq='sort | uniq -c | sort -nr'         # PRESERVED - Sort and count unique
+alias diff-sort='diff <(sort file1) <(sort file2)'  # PRESERVED - Compare sorted files
+
+### Advanced Content Analysis
+alias file-entropy='ent'                           # Calculate file entropy
+alias file-magic='file -b'                         # File type detection
+alias file-encoding='uchardet'                     # Detect file encoding
+alias file-mime='file --mime-type'                 # MIME type detection
+alias file-language='guesslang'                    # Detect programming language
+
+### Search Result Processing
+alias grep-count='grep -c'                         # Count occurrences per file
+alias grep-unique='grep | sort | uniq'             # Unique matches
+alias grep-sort='grep | sort'                      # Sort matches
+alias grep-head='grep | head -20'                  # First 20 matches
+alias grep-tail='grep | tail -20'                  # Last 20 matches
+
+# ==============================================================================
+# CODE SEARCH & ANALYSIS
+# ==============================================================================
+
+### Programming Language Search
+alias find-py='find . -name "*.py" -type f'        # Python files
+alias find-js='find . -name "*.js" -type f'        # JavaScript files
+alias find-java='find . -name "*.java" -type f'    # Java files
+alias find-cpp='find . -name "*.cpp" -o -name "*.hpp" -type f' # C++ files
+alias find-c='find . -name "*.c" -o -name "*.h" -type f'       # C files
+alias find-go='find . -name "*.go" -type f'        # Go files
+alias find-rust='find . -name "*.rs" -type f'      # Rust files
+alias find-php='find . -name "*.php" -type f'      # PHP files
+alias find-ruby='find . -name "*.rb" -type f'      # Ruby files
+
+### Code Search Patterns
+alias grep-todo='grep -r -i "todo\|fixme\|hack\|xxx" .' # Find TODO comments
+alias grep-comments='grep -r "^\s*#" .'                # Find comments (Python/bash)
+alias grep-functions='grep -r "^\s*function\|^def\|^func\|^sub" .' # Find function definitions
+alias grep-imports='grep -r "^\s*import\|^from\|^use\|^require" .' # Find imports
+alias grep-classes='grep -r "^\s*class" .'             # Find class definitions
+alias grep-constants='grep -r "^[A-Z_][A-Z0-9_]*=" .'  # Find constants
+
+### Code Quality Analysis
+alias grep-debug='grep -r -i "console\.log\|print\|debug\|var_dump" .' # Debug statements
+alias grep-security='grep -r "password\|secret\|key\|token" .' # Potential security issues
+alias grep-deprecated='grep -r "@deprecated\|TODO.*remove" .' # Deprecated code
+alias grep-empty-catch='grep -A 2 -B 2 "catch.*{" .'   # Empty catch blocks
+
+### Git & Version Control Search
+alias git-grep='git grep'                           # Search in git repository
+alias git-log-grep='git log --grep'                 # Search commit messages
+alias git-blame-grep='git blame | grep'             # Search blame output
+alias git-diff-grep='git diff | grep'               # Search diff output
+
+# ==============================================================================
+# DATABASE & STRUCTURED DATA SEARCH
+# ==============================================================================
+
+### SQLite Database Search
+alias sqlite-tables='sqlite3 $1 ".tables"'          # List tables
+alias sqlite-schema='sqlite3 $1 ".schema"'          # Show schema
+alias sqlite-query='sqlite3 $1'                     # Run queries
+alias sqlite-dump='sqlite3 $1 ".dump"'              # Dump database
+
+### JSON Search & Processing
+alias json-search='jq'                              # JSON processor
+alias json-pretty='jq .'                            # Pretty print JSON
+alias json-keys='jq keys'                           # Show JSON keys
+alias json-search-key='jq ".. | objects | select(has(\"$1\"))"' # Search for key
+
+### CSV Search & Processing
+alias csv-head='head -5'                            # Show CSV header
+alias csv-count='wc -l'                             # Count CSV rows
+alias csv-columns='head -1 | tr "," "\n" | nl'      # List columns
+alias csv-search='grep'                             # Search in CSV
+
+### XML Search
+alias xml-search='xmllint --xpath'                  # XPath search
+alias xml-format='xmllint --format'                 # Format XML
+alias xml-validate='xmllint --valid'                # Validate XML
+
+# ==============================================================================
+# NETWORK & WEB SEARCH
+# ==============================================================================
+
+### Network Search & Discovery
+alias nmap-hosts='nmap -sn'                         # Discover hosts
+alias nmap-ports='nmap -p-'                         # Scan all ports
+alias nmap-services='nmap -sV'                      # Service detection
+alias nmap-os='nmap -O'                             # OS detection
+
+### DNS & Domain Search
+alias dig-trace='dig +trace'                        # DNS trace
+alias whois='whois'                                 # Domain information
+alias nslookup='nslookup'                           # DNS lookup
+alias host='host'                                   # DNS host lookup
+
+### Web Search (Command Line)
+alias curl-headers='curl -I'                        # HTTP headers
+alias curl-follow='curl -L'                         # Follow redirects
+alias wget-mirror='wget --mirror --convert-links'   # Mirror website
+alias wget-recursive='wget -r -l 2'                 # Recursive download
+
+### SSH & Remote Search
+alias ssh-keyscan='ssh-keyscan'                     # SSH key scanning
+alias ssh-known-hosts='cat ~/.ssh/known_hosts'      # Known SSH hosts
+alias ssh-config='cat ~/.ssh/config'                # SSH configuration
+
+# ==============================================================================
+# BINARY & SPECIAL FILE SEARCH
+# ==============================================================================
+
+### Binary File Search
+alias strings='strings'                            # Extract strings from binary
+alias hexdump='hexdump -C'                         # Hex dump
+alias objdump='objdump -d'                         # Disassemble binary
+alias readelf='readelf -h'                         # ELF header info
+
+### Image File Analysis
+alias exif='exiftool'                              # EXIF data extraction
+alias img-size='identify -format "%wx%h"'          # Image dimensions
+alias img-colors='convert $1 -colors 8 histogram:txt' # Color analysis
+
+### Archive Content Search
+alias zipgrep='zgrep'                              # Search in zip files
+alias targrep='tar -tf $1 | grep'                  # Search tar contents
+alias 7zgrep='7z l $1 | grep'                      # Search 7z contents
+
+### Log File Search
+alias log-errors='grep -i error'                   # Find errors in logs
+alias log-warnings='grep -i warn'                  # Find warnings in logs
+alias log-today='grep "$(date +%Y-%m-%d)"'         # Today's log entries
+alias log-last-hour='grep "$(date -d "1 hour ago" +%Y-%m-%d\ %H)"' # Last hour logs
+
+# ==============================================================================
+# INTERACTIVE SEARCH & SELECTION
+# ==============================================================================
+
+### Interactive File Selection
+alias fzf-file='find . -type f | fzf --preview "bat --color=always {}"' # Interactive file picker
+alias fzf-dir='find . -type d | fzf'                 # Interactive directory picker
+alias fzf-history='history | fzf'                    # Interactive history search
+alias fzf-kill='ps aux | fzf | awk "{print \$2}" | xargs kill' # Interactive process killer
+
+### Menu-Based Search
+alias search-menu='echo "1. Files 2. Content 3. Code 4. Network" && read choice && case $choice in 1) find-file ;; 2) find-text ;; 3) find-py ;; 4) nmap-hosts ;; esac'
+
+### Search with Preview
+alias grep-preview='grep -r "$1" . | fzf --preview "echo {} | cut -d: -f1 | xargs bat --color=always --line-range $(echo {} | cut -d: -f2):$(($(echo {} | cut -d: -f2)+10))"' # Grep with preview
+
+# ==============================================================================
+# SEARCH RESULTS PROCESSING
+# ==============================================================================
+
+### Result Filtering & Formatting
+alias search-unique='sort | uniq'                   # Remove duplicates
+alias search-count='sort | uniq -c | sort -nr'      # Count occurrences
+alias search-sort='sort'                            # Sort results
+alias search-reverse='sort -r'                      # Reverse sort
+alias search-limit='head -20'                       # Limit results
+
+### Result Export
+alias search-csv='tr "\n" "," | sed "s/,$//"'       # Convert to CSV
+alias search-json='jq -R -s "split(\"\n\") | map(select(. != \"\"))"' # Convert to JSON
+alias search-xml='while read line; do echo "<item>$line</item>"; done' # Convert to XML
+
+### Result Actions
+alias search-edit='fzf --bind "enter:execute(nvim {})"' # Edit selected file
+alias search-open='fzf --bind "enter:execute(xdg-open {})"' # Open selected file
+alias search-copy='fzf --bind "enter:execute(cat {} | xclip -sel clip)"' # Copy content
+
+# ==============================================================================
+# PERFORMANCE & OPTIMIZATION
+# ==============================================================================
+
+### Search Performance Tools
+alias time-search='time grep -r "pattern" .'        # Time search operations
+alias search-benchmark='hyperfine "grep -r pattern ." "rg pattern" "ag pattern"' # Compare search tools
+
+### Index & Cache Management
+alias updatedb='sudo updatedb'                      # Update locate database
+alias mlocate-check='locate -S'                     # Check locate statistics
+alias find-cache='find . -name "*.cache" -o -name "*Cache*" -type d' # Find cache directories
+
+### Search Optimization
+alias find-optimize='find . -type f \( -name "*.tmp" -o -name "*.log" \) -prune -o -print' # Skip temp files
+alias grep-optimize='grep --exclude-dir=.git --exclude-dir=node_modules' # Skip common dirs
+
+# ==============================================================================
+# SEARCH HISTORY & BOOKMARKS
+# ==============================================================================
+
+### Search History Management
+alias search-history='cat ~/.search_history 2>/dev/null || echo "No search history"' # View search history
+alias search-save='echo "$1 $(date)" >> ~/.search_history' # Save search
+alias search-repeat='tail -1 ~/.search_history | cut -d" " -f1' # Repeat last search
+
+### Search Bookmarks
+alias bookmark-add='echo "$1:$PWD" >> ~/.search_bookmarks' # Add search bookmark
+alias bookmark-list='cat ~/.search_bookmarks'          # List bookmarks
+alias bookmark-search='grep "$1" ~/.search_bookmarks'  # Search bookmarks
+
+### Recent Searches
+alias recent-files='find . -type f -printf "%T@ %p\n" | sort -nr | head -10 | cut -d" " -f2-' # Recently modified files
+alias recent-dirs='find . -type d -printf "%T@ %p\n" | sort -nr | head -5 | cut -d" " -f2-'  # Recently modified dirs
+
+# ==============================================================================
+# ALIAS MANAGEMENT (PRESERVED - Your Alias System)
+# ==============================================================================
+
+### Aliases List (PRESERVED)
 alias alias-list='function _alias_list() {
     if [[ -n "$1" ]]; then
         FILE=$(find "$ALIASES_DIR" -iname "$(echo "$1".alias)" 2>/dev/null | head -n 1)
@@ -70,8 +392,17 @@ alias alias-list='function _alias_list() {
     fi
 }; _alias_list'
 
-### Alias to just show the names of alias files
+### Alias to just show the names of alias files (PRESERVED)
 alias alias-files='echo -e "\033[1;32mAvailable alias files:\033[0m" && ls -1 "$ALIASES_DIR"/*.alias | xargs -n1 basename'
 
-### Alias to count total number of aliases
+### Alias to count total number of aliases (PRESERVED)
 alias alias-count='echo "Total aliases: $(grep -h "^alias" "$ALIASES_DIR"/*.alias | wc -l)"'
+
+### Enhanced Alias Management
+alias alias-search='grep -r "alias $1" "$ALIASES_DIR"/*.alias' # Search for specific alias
+alias alias-backup='cp -r "$ALIASES_DIR" "${ALIASES_DIR}_backup_$(date +%Y%m%d_%H%M%S)"' # Backup aliases
+alias alias-sync='cd "$ALIASES_DIR" && git pull && git add . && git commit -m "Sync aliases" && git push' # Sync with git
+
+# ==============================================================================
+# END OF SEARCH & DISCOVERY UTILITIES
+# ==============================================================================

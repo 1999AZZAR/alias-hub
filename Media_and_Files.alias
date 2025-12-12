@@ -1,64 +1,457 @@
-# Media & Files
-# ----------------------------
+# ==============================================================================
+# Media & Files - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive media processing and file management aliases
+# Includes video/audio/image processing, document handling, cloud storage, and more
+#
+# Sections:
+# - Video & YouTube Processing
+# - Audio Processing & Music
+# - Image Processing & Graphics
+# - Document Processing
+# - Archive & Compression (PRESERVED)
+# - File Operations & Metadata (PRESERVED)
+# - Media Playback & Viewing (PRESERVED)
+# - Cloud Storage & Sync
+# - Streaming & Media Servers
+# - Batch Processing
+# - File Conversion
+# - Metadata & Tagging
+# - Backup & Recovery
+# - System Media Tools
+#
+# ==============================================================================
 
-### YouTube and Video Handling
-alias yt-audio='yt-dlp -x --audio-format mp3'              # Download YouTube audio
-alias yt-video='yt-dlp -f bestvideo+bestaudio'             # Download YouTube video
-alias yt-playlist='yt-dlp -f best -ci --yes-playlist'      # Download entire YouTube playlist
-alias vid-convert='ffmpeg'                                 # Video conversion
-alias vid-to-gif='ffmpeg -i $1 -vf "fps=10,scale=320:-1" $2.gif' # Convert video to GIF
+# ==============================================================================
+# VIDEO PROCESSING & YOUTUBE (Enhanced)
+# ==============================================================================
 
-### Audio Manipulation
-alias mp3-info='ffprobe -i $1'                             # Get MP3 file info
-alias mp3-trim='ffmpeg -i $1 -ss $2 -to $3 -c copy $4'     # Trim MP3 file
+### YouTube & Video Downloads (PRESERVED + Enhanced)
+alias yt-audio='yt-dlp -x --audio-format mp3'              # PRESERVED - Download YouTube audio
+alias yt-video='yt-dlp -f bestvideo+bestaudio'             # PRESERVED - Download YouTube video
+alias yt-playlist='yt-dlp -f best -ci --yes-playlist'      # PRESERVED - Download YouTube playlist
 
-### Image Manipulation
-alias img-optimize='jpegoptim'                             # Optimize JPEG images
-alias img-resize='convert $1 -resize $2 $3'                # Resize image (requires ImageMagick)
-alias img-info='identify $1'                               # Get image information
-alias img-to-png='convert $1 $2.png'                       # Convert image to PNG
+### Advanced YouTube Downloads
+alias yt-best='yt-dlp -f best'                             # Download best quality
+alias yt-1080p='yt-dlp -f "best[height<=1080]"'           # Download 1080p or lower
+alias yt-720p='yt-dlp -f "best[height<=720]"'             # Download 720p or lower
+alias yt-audio-best='yt-dlp -x --audio-format best'       # Best audio quality
+alias yt-subs='yt-dlp --write-auto-subs --sub-lang en'    # Download with subtitles
+alias yt-info='yt-dlp --print "%(title)s\\n%(duration)s\\n%(view_count)s views"' # Video info
 
-### PDF Handling
-alias pdf-merge='pdfunite'                                 # Merge multiple PDFs
-alias pdf-split='pdftk $1 burst output page_%02d.pdf'      # Split PDF into individual pages
-alias pdf-compress='gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -q -o $2 $1' # Compress PDF
+### Video Conversion & Processing (Enhanced)
+alias vid-convert='ffmpeg'                                 # PRESERVED - Video conversion
+alias vid-to-gif='ffmpeg -i $1 -vf "fps=10,scale=320:-1" $2.gif' # PRESERVED - Video to GIF
 
-### Archive and Compression
-alias zipf='zip -r $1.zip $2'                              # Compress folder into zip
-alias unzipf='unzip $1'                                    # Extract zip archive
-alias tarf='tar -cvf $1.tar $2'                            # Create tar archive
-alias untar='tar -xvf $1'                                  # Extract tar archive
-alias gz-compress='gzip $1'                                # Compress file with gzip
-alias gz-decompress='gunzip $1'                            # Decompress gzip file
+### Advanced Video Processing
+alias vid-compress='ffmpeg -i $1 -vcodec libx265 -crf 28 $2' # Compress video (HEVC)
+alias vid-resize='ffmpeg -i $1 -vf scale=$2:$3 $4'         # Resize video
+alias vid-crop='ffmpeg -i $1 -filter:v "crop=$2:$3:$4:$5" $6' # Crop video
+alias vid-rotate='ffmpeg -i $1 -vf "transpose=1" $2'       # Rotate video 90°
+alias vid-flip='ffmpeg -i $1 -vf "hflip" $2'               # Horizontal flip
+alias vid-mirror='ffmpeg -i $1 -vf "vflip" $2'             # Vertical flip
+alias vid-speed='ffmpeg -i $1 -filter:v "setpts=$2*PTS" $3' # Change video speed
+alias vid-extract-audio='ffmpeg -i $1 -vn -acodec copy $2' # Extract audio from video
+alias vid-add-audio='ffmpeg -i $1 -i $2 -c:v copy -c:a aac $3' # Add audio to video
 
-### File Searching and Metadata
-alias findf='find . -type f -name'                         # Find files by name
-alias findd='find . -type d -name'                         # Find directories by name
-alias filetype='file $1'                                   # Check file type
-alias filesize='du -h $1'                                  # Check file size
-alias md5sum='md5sum $1'                                   # Get MD5 checksum
-alias sha256sum='sha256sum $1'                             # Get SHA-256 checksum
+### Video Information & Analysis
+alias vid-info='ffprobe -i $1 -v quiet -print_format json -show_format -show_streams' # Detailed video info
+alias vid-duration='ffprobe -i $1 -show_entries format=duration -v quiet -of csv="p=0"' # Video duration
+alias vid-resolution='ffprobe -i $1 -select_streams v:0 -show_entries stream=width,height -v quiet' # Video resolution
+alias vid-bitrate='ffprobe -i $1 -show_entries format=bit_rate -v quiet' # Video bitrate
 
-### File Viewing and Playback
-alias play-audio='mpv $1'                                  # Play audio file
-alias play-video='mpv $1'                                  # Play video file
-alias webcam='mpv av://v4l2:/dev/video0'                   # Quick webcam view
-alias img-view='feh $1'                                    # View image (requires feh)
-alias pdf-view='evince $1'                                 # View PDF (requires Evince)
+### Screen Recording
+alias record-screen='ffmpeg -f x11grab -s 1920x1080 -i :0.0 -f pulse -i default -c:v libx264 -c:a aac output.mp4' # Record screen with audio
+alias record-region='ffmpeg -f x11grab -s $1 -i :0.0+$2,$3 -c:v libx264 output.mp4' # Record screen region
+alias record-webcam='ffmpeg -f v4l2 -i /dev/video0 -c:v libx264 webcam.mp4' # Record webcam
 
-### Clipboard and Text Operations
-alias copy='xclip -sel clip'                               # Copy to clipboard
-alias paste='xclip -o -sel clip'                           # Paste from clipboard
-alias file-head='head -n 10 $1'                            # View first 10 lines of file
-alias file-tail='tail -n 10 $1'                            # View last 10 lines of file
-alias file-cat='cat $1 | less'                             # View file with pagination
+# ==============================================================================
+# AUDIO PROCESSING & MUSIC (Enhanced)
+# ==============================================================================
 
-### File Cleanup
-alias rm-empty='sudo find . -type d -empty -delete'        # Remove empty directories
-alias rm-large='find . -size +100M -exec rm -i {} \;'      # Remove files larger than 100MB
-alias rm-temp='find . -name "*.tmp" -exec rm -i {} \;'     # Remove temporary files
+### Audio Information & Analysis (PRESERVED + Enhanced)
+alias mp3-info='ffprobe -i $1'                             # PRESERVED - Get audio file info
+alias audio-info='ffprobe -i $1 -v quiet -print_format json -show_format -show_streams' # Detailed audio info
+alias audio-duration='ffprobe -i $1 -show_entries format=duration -v quiet' # Audio duration
+alias audio-bitrate='ffprobe -i $1 -show_entries format=bit_rate -v quiet' # Audio bitrate
+alias audio-sample-rate='ffprobe -i $1 -show_entries stream=sample_rate -v quiet' # Sample rate
 
-### File Backup
-alias backup='cp -r $1 $1_backup_$(date +%Y%m%d%H%M%S)'    # Create a timestamped backup
-alias sync-dir='rsync -avz $1 $2'                          # Sync two directories
-alias archive-dir='tar -czvf $1.tar.gz $2'                 # Archive and compress a directory
+### Audio Editing & Processing (Enhanced)
+alias mp3-trim='ffmpeg -i $1 -ss $2 -to $3 -c copy $4'     # PRESERVED - Trim audio
+alias audio-trim='ffmpeg -i $1 -ss $2 -t $3 -c copy $4'   # Trim audio (duration)
+alias audio-normalize='ffmpeg-normalize $1 -o $2'         # Normalize audio levels
+alias audio-compress='ffmpeg -i $1 -filter:a "compand=attacks=0.3:decays=0.8:points=-70/-60|-30/-10" $2' # Audio compression
+alias audio-fade-in='ffmpeg -i $1 -filter:a "afade=t=in:ss=0:d=3" $2' # Fade in effect
+alias audio-fade-out='ffmpeg -i $1 -filter:a "afade=t=out:st=$2:d=3" $3' # Fade out effect
+
+### Audio Conversion
+alias audio-to-mp3='ffmpeg -i $1 -acodec libmp3lame -ab 192k $2.mp3' # Convert to MP3
+alias audio-to-wav='ffmpeg -i $1 -acodec pcm_s16le $2.wav' # Convert to WAV
+alias audio-to-flac='ffmpeg -i $1 -acodec flac $2.flac'   # Convert to FLAC
+alias audio-to-aac='ffmpeg -i $1 -acodec aac -ab 128k $2.m4a' # Convert to AAC
+
+### Audio Effects
+alias audio-reverse='sox $1 $2 reverse'                   # Reverse audio
+alias audio-speed='sox $1 $2 speed $3'                    # Change speed
+alias audio-pitch='sox $1 $2 pitch $3'                    # Change pitch
+alias audio-echo='sox $1 $2 echo 0.8 0.7 100 0.3'        # Echo effect
+alias audio-reverb='sox $1 $2 reverb'                     # Reverb effect
+
+### Music Library Management
+alias music-tag='kid3-cli'                                # Tag editor (if installed)
+alias music-normalize='beets norm'                        # Normalize music library (beets)
+alias music-import='beets import'                         # Import music to library
+alias music-list='beets ls'                               # List music library
+
+### Audio Streaming & Radio
+alias radio-play='mplayer $1'                             # Play internet radio
+alias stream-record='streamripper $1 -d ~/Music'          # Record internet stream
+alias podcast-download='wget -r -l1 -H -nd -Nc -np -A.mp3 $1' # Download podcast
+
+# ==============================================================================
+# IMAGE PROCESSING & GRAPHICS (Enhanced)
+# ==============================================================================
+
+### Image Information & Analysis (PRESERVED + Enhanced)
+alias img-optimize='jpegoptim'                             # PRESERVED - Optimize JPEG
+alias img-resize='convert $1 -resize $2 $3'                # PRESERVED - Resize image
+alias img-info='identify $1'                               # PRESERVED - Get image info
+alias img-to-png='convert $1 $2.png'                       # PRESERVED - Convert to PNG
+
+### Advanced Image Processing
+alias img-compress='convert $1 -quality 80 $2'            # Compress image
+alias img-grayscale='convert $1 -colorspace Gray $2'      # Convert to grayscale
+alias img-blur='convert $1 -blur 0x8 $2'                  # Blur image
+alias img-sharpen='convert $1 -sharpen 0x1 $2'            # Sharpen image
+alias img-brightness='convert $1 -brightness-contrast $2 $3' # Adjust brightness/contrast
+alias img-rotate='convert $1 -rotate $2 $3'               # Rotate image
+alias img-flip='convert $1 -flip $2'                      # Flip image
+alias img-mirror='convert $1 -flop $2'                    # Mirror image
+
+### Image Format Conversion
+alias img-to-jpg='convert $1 $2.jpg'                      # Convert to JPG
+alias img-to-bmp='convert $1 $2.bmp'                      # Convert to BMP
+alias img-to-tiff='convert $1 $2.tiff'                    # Convert to TIFF
+alias img-to-webp='cwebp $1 -o $2.webp'                   # Convert to WebP
+alias img-to-avif='avifenc $1 $2.avif'                    # Convert to AVIF
+
+### Batch Image Processing
+alias img-batch-resize='mogrify -resize $1 *.jpg'        # Batch resize JPGs
+alias img-batch-optimize='jpegoptim --strip-all *.jpg'   # Batch optimize JPGs
+alias img-batch-convert='mogrify -format png *.jpg'      # Convert all JPG to PNG
+
+### Image Analysis & Metadata
+alias img-histogram='convert $1 -define histogram:unique-colors=false histogram:histogram.png' # Color histogram
+alias img-colors='convert $1 -colors 8 -unique-colors txt:' # Extract colors
+alias img-exif='exiftool $1'                              # Show EXIF metadata
+alias img-iptc='exiftool -iptc:all $1'                    # Show IPTC metadata
+
+### Screenshots
+alias screenshot='scrot screenshot.png'                   # Take screenshot
+alias screenshot-select='scrot -s screenshot.png'         # Select area screenshot
+alias screenshot-delay='scrot -d 5 screenshot.png'        # Delayed screenshot
+
+# ==============================================================================
+# DOCUMENT PROCESSING (Enhanced)
+# ==============================================================================
+
+### PDF Processing (PRESERVED + Enhanced)
+alias pdf-merge='pdfunite'                                 # PRESERVED - Merge PDFs
+alias pdf-split='pdftk $1 burst output page_%02d.pdf'      # PRESERVED - Split PDF
+alias pdf-compress='gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -q -o $2 $1' # PRESERVED - Compress PDF
+
+### Advanced PDF Operations
+alias pdf-to-text='pdftotext $1 $2.txt'                    # Extract text from PDF
+alias pdf-to-images='pdftoppm -png $1 $2'                  # Convert PDF to images
+alias pdf-rotate='pdftk $1 cat 1-endR output $2'           # Rotate PDF pages
+alias pdf-watermark='pdftk $1 stamp $2 output $3'          # Add watermark
+alias pdf-password='pdftk $1 output $3 userpw $2'          # Add password protection
+alias pdf-unlock='pdftk $1 inputpw $2 output $3'           # Remove password
+
+### Office Document Processing
+alias doc-to-pdf='libreoffice --headless --convert-to pdf $1' # Convert DOC to PDF
+alias odt-to-doc='libreoffice --headless --convert-to doc $1' # Convert ODT to DOC
+alias xls-to-csv='libreoffice --headless --convert-to csv $1' # Convert XLS to CSV
+alias ppt-to-pdf='libreoffice --headless --convert-to pdf $1' # Convert PPT to PDF
+
+### Text Document Processing
+alias txt-to-pdf='enscript -p - $1 | ps2pdf - $2.pdf'      # Convert text to PDF
+alias md-to-pdf='pandoc $1 -o $2.pdf'                     # Convert Markdown to PDF
+alias md-to-html='pandoc $1 -o $2.html'                   # Convert Markdown to HTML
+alias html-to-pdf='wkhtmltopdf $1 $2.pdf'                 # Convert HTML to PDF
+
+# ==============================================================================
+# ARCHIVE & COMPRESSION (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Archive Operations (PRESERVED)
+alias zipf='zip -r $1.zip $2'                              # PRESERVED - Compress folder to zip
+alias unzipf='unzip $1'                                    # PRESERVED - Extract zip
+alias tarf='tar -cvf $1.tar $2'                            # PRESERVED - Create tar
+alias untar='tar -xvf $1'                                  # PRESERVED - Extract tar
+alias gz-compress='gzip $1'                                # PRESERVED - Compress with gzip
+alias gz-decompress='gunzip $1'                            # PRESERVED - Decompress gzip
+
+### Advanced Archive Operations
+alias tar-gz='tar -czf $1.tar.gz $2'                       # Create tar.gz
+alias tar-bz2='tar -cjf $1.tar.bz2 $2'                     # Create tar.bz2
+alias tar-xz='tar -cJf $1.tar.xz $2'                       # Create tar.xz
+alias tar-extract-gz='tar -xzf $1'                         # Extract tar.gz
+alias tar-extract-bz2='tar -xjf $1'                        # Extract tar.bz2
+alias tar-extract-xz='tar -xJf $1'                         # Extract tar.xz
+
+### Archive Information
+alias zip-list='unzip -l $1'                               # List zip contents
+alias tar-list='tar -tf $1'                                # List tar contents
+alias 7z-list='7z l $1'                                    # List 7z contents
+alias rar-list='unrar l $1'                                # List rar contents
+
+### Password Protected Archives
+alias zip-encrypt='zip -e $1.zip $2'                       # Create encrypted zip
+alias 7z-encrypt='7z a -p $1.7z $2'                        # Create encrypted 7z
+
+# ==============================================================================
+# FILE OPERATIONS & METADATA (PRESERVED + Enhanced)
+# ==============================================================================
+
+### File Search & Information (PRESERVED + Enhanced)
+alias findf='find . -type f -name'                         # PRESERVED - Find files by name
+alias findd='find . -type d -name'                         # PRESERVED - Find directories
+alias filetype='file $1'                                   # PRESERVED - Check file type
+alias filesize='du -h $1'                                  # PRESERVED - Check file size
+alias md5sum='md5sum $1'                                   # PRESERVED - Get MD5 checksum
+alias sha256sum='sha256sum $1'                             # PRESERVED - Get SHA-256 checksum
+
+### Advanced File Analysis
+alias file-mime='file --mime-type $1'                      # MIME type
+alias file-encoding='file -bi $1'                          # File encoding
+alias file-permissions='ls -l $1'                          # File permissions
+alias file-owner='ls -l $1 | awk "{print \$3,\$4}"'         # File owner/group
+alias file-modified='stat -c "%y" $1'                      # Last modified
+alias file-accessed='stat -c "%x" $1'                      # Last accessed
+alias file-changed='stat -c "%z" $1'                       # Last changed
+
+### File Integrity & Verification
+alias sha1sum='sha1sum $1'                                 # SHA-1 checksum
+alias sha512sum='sha512sum $1'                             # SHA-512 checksum
+alias file-verify='sha256sum --check $1'                   # Verify checksum file
+
+### File Comparison
+alias file-diff='diff $1 $2'                               # Text file diff
+alias file-diff-binary='cmp $1 $2'                         # Binary file comparison
+alias file-diff-visual='meld $1 $2'                        # Visual diff (meld)
+
+# ==============================================================================
+# MEDIA PLAYBACK & VIEWING (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Media Playback (PRESERVED + Enhanced)
+alias play-audio='mpv $1'                                  # PRESERVED - Play audio
+alias play-video='mpv $1'                                  # PRESERVED - Play video
+alias webcam='mpv av://v4l2:/dev/video0'                   # PRESERVED - Quick webcam
+alias img-view='feh $1'                                    # PRESERVED - View image
+alias pdf-view='evince $1'                                 # PRESERVED - View PDF
+
+### Advanced Media Playback
+alias play-audio-loop='mpv --loop $1'                      # Loop audio
+alias play-video-loop='mpv --loop $1'                      # Loop video
+alias play-shuffle='mpv --shuffle $1'                      # Shuffle playlist
+alias play-fullscreen='mpv --fullscreen $1'                # Fullscreen playback
+
+### Alternative Media Players
+alias vlc-play='vlc $1'                                    # Play with VLC
+alias mplayer-play='mplayer $1'                            # Play with MPlayer
+alias cvlc-play='cvlc $1'                                  # Headless VLC
+
+### Image Viewers
+alias img-view-gthumb='gthumb $1'                          # GNOME image viewer
+alias img-view-eog='eog $1'                                # Eye of GNOME
+alias img-view-display='display $1'                        # ImageMagick display
+
+### Document Viewers
+alias pdf-view-okular='okular $1'                          # KDE PDF viewer
+alias pdf-view-xpdf='xpdf $1'                              # Lightweight PDF viewer
+alias txt-view='less $1'                                   # Text file viewer
+
+# ==============================================================================
+# CLOUD STORAGE & SYNC
+# ==============================================================================
+
+### Google Drive (rclone)
+alias gdrive-upload='rclone copy $1 gdrive:$2'             # Upload to Google Drive
+alias gdrive-download='rclone copy gdrive:$1 $2'           # Download from Google Drive
+alias gdrive-sync='rclone sync $1 gdrive:$2'               # Sync with Google Drive
+alias gdrive-list='rclone ls gdrive:$1'                    # List Google Drive files
+
+### Dropbox
+alias dropbox-upload='rclone copy $1 dropbox:$2'           # Upload to Dropbox
+alias dropbox-download='rclone copy dropbox:$1 $2'         # Download from Dropbox
+alias dropbox-sync='rclone sync $1 dropbox:$2'             # Sync with Dropbox
+
+### OneDrive
+alias onedrive-upload='rclone copy $1 onedrive:$2'         # Upload to OneDrive
+alias onedrive-download='rclone copy onedrive:$1 $2'       # Download from OneDrive
+
+### Mega.nz
+alias mega-upload='megatools put $1'                       # Upload to Mega
+alias mega-download='megatools get $1'                     # Download from Mega
+
+### AWS S3
+alias s3-upload='aws s3 cp $1 s3://$2'                      # Upload to S3
+alias s3-download='aws s3 cp s3://$1 $2'                    # Download from S3
+alias s3-sync='aws s3 sync $1 s3://$2'                      # Sync with S3
+
+# ==============================================================================
+# STREAMING & MEDIA SERVERS
+# ==============================================================================
+
+### Media Servers
+alias plex-start='sudo systemctl start plexmediaserver'    # Start Plex
+alias plex-stop='sudo systemctl stop plexmediaserver'      # Stop Plex
+alias jellyfin-start='sudo systemctl start jellyfin'       # Start Jellyfin
+alias jellyfin-stop='sudo systemctl stop jellyfin'         # Stop Jellyfin
+
+### Streaming
+alias stream-desktop='ffmpeg -f x11grab -s 1920x1080 -i :0.0 -f flv rtmp://localhost/live/stream' # Stream desktop
+alias stream-webcam='ffmpeg -f v4l2 -i /dev/video0 -f flv rtmp://localhost/live/stream' # Stream webcam
+alias stream-file='ffmpeg -i $1 -f flv rtmp://localhost/live/stream' # Stream video file
+
+### RTMP/HTTP Streaming
+alias rtmp-stream='ffplay rtmp://localhost/live/stream'     # Play RTMP stream
+alias http-stream='ffplay http://localhost:8080/stream'     # Play HTTP stream
+
+# ==============================================================================
+# BATCH PROCESSING
+# ==============================================================================
+
+### Batch Video Processing
+alias batch-vid-compress='for f in *.mp4; do ffmpeg -i "$f" -vcodec libx265 -crf 28 "${f%.*}_compressed.mp4"; done' # Compress all MP4s
+alias batch-vid-resize='for f in *.mp4; do ffmpeg -i "$f" -vf scale=1280:720 "${f%.*}_720p.mp4"; done' # Resize all videos to 720p
+
+### Batch Audio Processing
+alias batch-audio-convert='for f in *.wav; do ffmpeg -i "$f" -acodec libmp3lame -ab 192k "${f%.*}.mp3"; done' # Convert WAV to MP3
+alias batch-audio-normalize='for f in *.mp3; do ffmpeg-normalize "$f" -o "${f%.*}_normalized.mp3"; done' # Normalize all MP3s
+
+### Batch Image Processing
+alias batch-img-resize='for f in *.jpg; do convert "$f" -resize 50% "${f%.*}_small.jpg"; done' # Resize all JPGs to 50%
+alias batch-img-convert='for f in *.png; do convert "$f" "${f%.*}.jpg"; done' # Convert all PNGs to JPGs
+
+### Batch File Operations
+alias batch-rename='mmv'                                   # Mass rename (if mmv installed)
+alias batch-rename-ext='for f in *.$1; do mv "$f" "${f%.$1}.$2"; done' # Change file extensions
+alias batch-add-prefix='for f in *; do mv "$f" "prefix_$f"; done' # Add prefix to all files
+
+# ==============================================================================
+# FILE CONVERSION
+# ==============================================================================
+
+### Universal Converters
+alias convert-any='pandoc $1 -o $2'                        # Convert documents (pandoc)
+alias convert-office='libreoffice --headless --convert-to $2 $1' # Convert office documents
+
+### Specialized Conversions
+alias epub-to-pdf='ebook-convert $1 $2.pdf'                # EPUB to PDF (calibre)
+alias mobi-to-epub='ebook-convert $1 $2.epub'              # MOBI to EPUB (calibre)
+alias azw3-to-pdf='ebook-convert $1 $2.pdf'                # AZW3 to PDF (calibre)
+
+### Audio Format Conversions
+alias flac-to-mp3='for f in *.flac; do ffmpeg -i "$f" -acodec libmp3lame -ab 320k "${f%.*}.mp3"; done' # FLAC to MP3
+alias m4a-to-mp3='for f in *.m4a; do ffmpeg -i "$f" -acodec libmp3lame -ab 192k "${f%.*}.mp3"; done' # M4A to MP3
+
+# ==============================================================================
+# METADATA & TAGGING
+# ==============================================================================
+
+### Audio Tagging
+alias audio-tag='eyeD3 $1'                                 # Audio tag editor
+alias audio-tag-artist='eyeD3 --artist="$2" $1'            # Set artist tag
+alias audio-tag-title='eyeD3 --title="$2" $1'              # Set title tag
+alias audio-tag-album='eyeD3 --album="$2" $1'              # Set album tag
+
+### Video Metadata
+alias video-metadata='ffprobe -i $1 -v quiet -print_format json -show_format' # Video metadata
+alias video-chapters='ffprobe -i $1 -print_format json -show_chapters' # Video chapters
+
+### Image Metadata
+alias img-metadata='exiftool $1'                           # Full image metadata
+alias img-remove-metadata='exiftool -all= -o $2 $1'        # Remove all metadata
+alias img-add-comment='exiftool -comment="$2" $1'          # Add comment
+
+# ==============================================================================
+# BACKUP & RECOVERY (Enhanced)
+# ==============================================================================
+
+### Backup Operations (PRESERVED + Enhanced)
+alias backup='cp -r $1 $1_backup_$(date +%Y%m%d%H%M%S)'    # PRESERVED - Timestamped backup
+alias sync-dir='rsync -avz $1 $2'                          # PRESERVED - Sync directories
+alias archive-dir='tar -czvf $1.tar.gz $2'                 # PRESERVED - Archive directory
+
+### Advanced Backup
+alias backup-incremental='rsync -av --link-dest=../backup-last $1 $2' # Incremental backup
+alias backup-encrypted='tar -cz $1 | openssl enc -aes-256-cbc -salt -out $2.tar.gz.enc' # Encrypted backup
+alias backup-mirror='rsync -av --delete $1 $2'             # Mirror backup (exact copy)
+
+### Recovery Operations
+alias restore-backup='rsync -av $1 $2'                     # Restore from backup
+alias restore-encrypted='openssl enc -d -aes-256-cbc -in $1 | tar xz' # Decrypt and extract backup
+
+# ==============================================================================
+# CLIPBOARD & TEXT OPERATIONS (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Clipboard Operations (PRESERVED)
+alias copy='xclip -sel clip'                               # PRESERVED - Copy to clipboard
+alias paste='xclip -o -sel clip'                           # PRESERVED - Paste from clipboard
+
+### Text File Operations (PRESERVED)
+alias file-head='head -n 10 $1'                            # PRESERVED - First 10 lines
+alias file-tail='tail -n 10 $1'                            # PRESERVED - Last 10 lines
+alias file-cat='cat $1 | less'                             # PRESERVED - View with pagination
+
+### Advanced Text Operations
+alias file-wc='wc -l $1'                                   # Count lines in file
+alias file-grep='grep -n "$2" $1'                          # Search in file
+alias file-sed='sed "s/$2/$3/g" $1'                        # Replace in file
+alias file-sort='sort $1'                                  # Sort file contents
+alias file-unique='sort $1 | uniq'                         # Remove duplicates
+alias file-reverse='tac $1'                                # Reverse file
+
+# ==============================================================================
+# FILE CLEANUP (Enhanced)
+# ==============================================================================
+
+### Cleanup Operations (PRESERVED + Enhanced)
+alias rm-empty='sudo find . -type d -empty -delete'        # PRESERVED - Remove empty directories
+alias rm-large='find . -size +100M -exec rm -i {} \;'      # PRESERVED - Remove large files
+alias rm-temp='find . -name "*.tmp" -exec rm -i {} \;'     # PRESERVED - Remove temp files
+
+### Advanced Cleanup
+alias rm-duplicates='fdupes -rdN .'                        # Remove duplicate files
+alias rm-old='find . -mtime +30 -exec rm -i {} \;'         # Remove files older than 30 days
+alias rm-cache='find . -name "*cache*" -exec rm -rf {} \;' # Remove cache directories
+alias rm-logs='find . -name "*.log" -exec rm {} \;'        # Remove log files
+alias rm-backups='find . -name "*backup*" -exec rm -i {} \;' # Remove backup files
+
+### Safe Cleanup with Confirmation
+alias cleanup-dry='find . -name "*.tmp" -o -name "*.log" -o -name "*~" | head -20' # Preview cleanup
+alias cleanup-safe='find . -name "*.tmp" -exec rm -i {} \; -o -name "*.log" -exec rm -i {} \;' # Interactive cleanup
+
+# ==============================================================================
+# SYSTEM MEDIA TOOLS
+# ==============================================================================
+
+### System Audio/Video
+alias audio-devices='aplay -l'                             # List audio devices
+alias video-devices='v4l2-ctl --list-devices'              # List video devices
+alias audio-test='speaker-test -t wav -c 2'                # Test audio output
+alias video-test='gst-launch-1.0 videotestsrc ! autovideosink' # Video test pattern
+
+### Media Library Management
+alias media-scan='find . -type f \( -iname "*.mp3" -o -iname "*.mp4" -o -iname "*.jpg" \) -exec ls -lh {} \;' # Scan media files
+alias media-organize='exiftool -r -d %Y/%m/%d "-directory<filemodifydate" .' # Organize by date
+alias media-rename='exiftool -r -d "%Y%m%d_%H%M%S_%%f.%%e" "-filename<filemodifydate" .' # Rename by date
+
+# ==============================================================================
+# END OF MEDIA & FILES ALIASES
+# ==============================================================================

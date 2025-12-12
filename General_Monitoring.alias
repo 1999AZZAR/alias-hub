@@ -1,7 +1,35 @@
-# General Monitoring Aliases
-# ----------------------------
+# ==============================================================================
+# General Monitoring - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive system monitoring, performance analysis, and observability tools
+# Includes hardware monitoring, network analysis, container monitoring, and more
+#
+# Sections:
+# - System Information & Hardware
+# - Process & Resource Monitoring (PRESERVED)
+# - CPU Monitoring & Analysis
+# - GPU & Graphics Monitoring
+# - Memory & Swap Monitoring
+# - Disk & Storage Monitoring
+# - Network Monitoring & Analysis
+# - Container & Orchestration
+# - Power & Thermal Management
+# - Logging & Event Monitoring
+# - Security Monitoring
+# - Cloud & Service Monitoring
+# - Application Performance
+# - Database Monitoring
+# - Real-time Dashboards
+# - Custom Monitoring
+#
+# ==============================================================================
 
-### General System Information
+# ==============================================================================
+# SYSTEM INFORMATION & HARDWARE MONITORING
+# ==============================================================================
+
+### Hardware Information (Enhanced)
 cpuinfo()    { lscpu "$@"; }
 meminfo()    { free -h "$@"; }
 diskinfo()   { lsblk -f "$@"; }
@@ -10,20 +38,75 @@ usbinfo()    { lsusb "$@"; }
 pciinfo()    { lspci "$@"; }
 hwinfo()     { hwinfo --short "$@"; }
 
-### System Performance
+### Advanced Hardware Info
+cpu-microcode() { grep microcode /proc/cpuinfo | head -1; }
+cpu-cache()     { lscpu | grep -E "cache|Cache"; }
+mem-slots()     { dmidecode -t memory | grep -E "(Size|Type|Speed)" | head -10; }
+bios-info()     { dmidecode -t bios | grep -E "(Version|Release|Vendor)"; }
+motherboard()   { dmidecode -t baseboard | grep -E "(Manufacturer|Product)"; }
+chassis-info()  { dmidecode -t chassis | grep -E "(Type|Manufacturer)"; }
+dmi-info()      { dmidecode -t system | grep -E "(Manufacturer|Product|Serial)"; }
+
+### System Resources Overview
+system-summary() {
+    echo "=== SYSTEM SUMMARY ==="
+    echo "CPU: $(lscpu | grep "Model name" | cut -d: -f2 | sed 's/^ *//')"
+    echo "RAM: $(free -h | grep Mem | awk '{print $2}')"
+    echo "Disk: $(df -h / | tail -1 | awk '{print $2}')"
+    echo "OS: $(lsb_release -d 2>/dev/null | cut -f2 || cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
+    echo "Kernel: $(uname -r)"
+    echo "Uptime: $(uptime -p)"
+}
+
+# ==============================================================================
+# SYSTEM PERFORMANCE & PROFILING
+# ==============================================================================
+
+### Performance Monitoring (Enhanced)
 latencytop()     { sudo latencytop "$@"; }
 iostatdetailed(){ iostat -dx "${1:-1}"; }
 perfmonitor()    { perf stat -e task-clock,cycles,instructions,cache-references,cache-misses "$@"; }
 processlog()     { ps auxf --sort=-%cpu,-%mem | head -n "${1:-20}"; }
 
-### Process and Resource Monitoring
+### Advanced Performance Tools
+perf-top()       { sudo perf top "$@"; }
+perf-record()    { sudo perf record -a -g "$@"; }
+perf-report()    { sudo perf report "$@"; }
+strace-process() { sudo strace -p "$1" "$@"; }
+ltrace-process() { ltrace -p "$1" "$@"; }
+systemtap()      { sudo stap "$@"; }
+bcc-tools()      { sudo /usr/share/bcc/tools/execsnoop "$@"; }
+
+# ==============================================================================
+# PROCESS & RESOURCE MONITORING (PRESERVED + Enhanced)
+# ==============================================================================
+
+### Core Process Monitors (PRESERVED)
 alias htop='clear && bash --noprofile --norc -c "htop; clear"'
 bashtop(){ bashtop "$@"; }
 glances(){ glances "$@"; }
 gotop()   { gotop "$@"; }
 atop()    { atop "$@"; }
 
-### CPU Monitoring
+### Enhanced Process Monitoring
+procsys() { ps -eo pid,ppid,user,pcpu,pmem,stat,start,time,comm --sort=-pcpu | head -20; }
+procuser() { ps -u "$USER" -o pid,ppid,pcpu,pmem,stat,start,time,comm --sort=-pcpu; }
+proctree() { pstree -a -h -p "$@"; }
+procenv() { cat /proc/"$1"/environ | tr '\0' '\n' | sort; }
+procfiles() { lsof -p "$1" | head -20; }
+procsignals() { kill -l; } # List available signals
+
+### Resource Usage Tracking
+cpu-hogs() { ps aux --sort=-%cpu | head -10; }
+mem-hogs() { ps aux --sort=-%mem | head -10; }
+io-hogs() { iotop -b -n 1 | head -10; }
+net-hogs() { sudo nethogs -t -c 5; }
+
+# ==============================================================================
+# CPU MONITORING & ANALYSIS
+# ==============================================================================
+
+### CPU Monitoring (Enhanced)
 cputop()  { htop --sort PERCENT_CPU "$@"; }
 cpuload() { mpstat "${1:-1}"; }
 cpustats() { iostat -c "$@"; }
@@ -33,7 +116,22 @@ cpuusage() { sar -u 1 "$@"; }
 cpufreq()  { watch -n 1 "cat /proc/cpuinfo | grep -E \"MHz|model name\"" "$@"; }
 thermalzones() { watch -n 1 "cat /sys/class/thermal/thermal_zone*/temp" "$@"; }
 
-### GPU Monitoring
+### Advanced CPU Analysis
+cpu-cores()     { nproc; }
+cpu-threads()   { grep -c processor /proc/cpuinfo; }
+cpu-governor()  { cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | head -1; }
+cpu-freq-info() { cpupower frequency-info -o; }
+cpu-cache-info(){ lscpu | grep -E "cache|Cache"; }
+cpu-flags()     { lscpu | grep -E "Flags|flags"; }
+cpu-bugs()      { grep bugs /proc/cpuinfo | head -1 | cut -d: -f2; }
+cpu-loadavg()   { cat /proc/loadavg; }
+cpu-interrupts(){ watch -n 1 "cat /proc/interrupts | head -10"; }
+
+# ==============================================================================
+# GPU & GRAPHICS MONITORING
+# ==============================================================================
+
+### GPU Monitoring (Enhanced)
 gputop() { nvidia-smi dmon "$@"; }
 gpuinfo() { nvidia-smi "$@"; }
 amdgpuinfo() { radeontop "$@"; }
@@ -44,7 +142,19 @@ gpuutil() { watch -n 1 "nvidia-smi --query-gpu=utilization.gpu --format=csv" "$@
 gpumem() { nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader "$@"; }
 amdtemp() { watch -n 1 "cat /sys/class/drm/card0/device/hwmon/hwmon*/temp1_input" "$@"; }
 
-### RAM and Swap Monitoring
+### Advanced GPU Monitoring
+gpu-processes() { nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv; }
+gpu-power()     { nvidia-smi --query-gpu=power.draw,power.limit --format=csv; }
+gpu-clocks()    { nvidia-smi --query-gpu=clocks.current.graphics,clocks.max.graphics --format=csv; }
+gpu-fans()      { nvidia-smi --query-gpu=fan.speed --format=csv; }
+intel-gpu()     { intel-gpu-top; }
+amd-gpu-freq()  { cat /sys/class/drm/card0/gt_cur_freq_mhz 2>/dev/null || echo "AMD GPU not detected"; }
+
+# ==============================================================================
+# MEMORY & SWAP MONITORING
+# ==============================================================================
+
+### RAM and Swap Monitoring (Enhanced)
 ramtop() { htop --sort PERCENT_MEM "$@"; }
 memtop() { watch -n 1 free -h "$@"; }
 swapinfo() { swapon --show "$@"; }
@@ -52,7 +162,20 @@ swaptop() { watch -n 1 cat /proc/swaps "$@"; }
 memleaks() { sudo slabtop "$@"; }
 pagefaults() { vmstat -s | grep "page" "$@"; }
 
-### Disk and Storage Monitoring
+### Advanced Memory Analysis
+mem-details()   { cat /proc/meminfo | head -20; }
+mem-zones()     { cat /proc/buddyinfo; }
+mem-slab()      { sudo slabtop -o; }
+mem-hugepages() { cat /proc/meminfo | grep -i huge; }
+mem-transparent-hugepages() { cat /sys/kernel/mm/transparent_hugepage/enabled; }
+swap-usage()    { free | grep Swap | awk '{print "Used: " $3 "KB, Free: " $4 "KB, Total: " $2 "KB"}'; }
+mem-pressure()  { cat /proc/pressure/memory; }
+
+# ==============================================================================
+# DISK & STORAGE MONITORING
+# ==============================================================================
+
+### Disk and Storage Monitoring (Enhanced)
 iotop() { iotop "$@"; }
 disktop() { htop --sort IO_RATE "$@"; }
 dfinfo() { df -h "$@"; }
@@ -66,7 +189,25 @@ blkinfo() { blkid "$@"; }
 hdparam() { sudo hdparm -I /dev/sdX "$@"; }
 duheavy() { du -ah / | sort -rh | head -n 20 "$@"; }
 
-### Network Monitoring
+### Advanced Disk Analysis
+disk-usage()    { df -h | grep -E "^/dev" | sort -k5 -hr; }
+disk-partitions(){ lsblk -o NAME,FSTYPE,SIZE,MOUNTPOINT,LABEL; }
+disk-smart-all(){ for disk in /dev/sd?; do echo "=== $disk ==="; sudo smartctl -H $disk; done; }
+disk-speed()     { sudo hdparm -tT /dev/sdX; }
+disk-health()    { sudo smartctl -H /dev/sdX; }
+disk-temp()      { sudo smartctl -A /dev/sdX | grep Temperature; }
+disk-errors()    { sudo smartctl -l error /dev/sdX; }
+nvme-info()      { sudo nvme smart-log /dev/nvme0n1; }
+zfs-pools()      { zpool list; }
+zfs-status()     { zpool status; }
+btrfs-usage()    { sudo btrfs filesystem usage /; }
+lvm-info()       { sudo lvdisplay; }
+
+# ==============================================================================
+# NETWORK MONITORING & ANALYSIS
+# ==============================================================================
+
+### Network Monitoring (Enhanced)
 nethogs() { sudo nethogs "$@"; }
 iftop() { sudo iftop "$@"; }
 netstatinfo() { netstat -tuln "$@"; }
@@ -83,11 +224,55 @@ bwmon() { bmon "$@"; }
 neterror() { dmesg | grep -i network "$@"; }
 wireless() { iwconfig "$@"; }
 
+### Advanced Network Analysis
+net-connections() { ss -tuln; }
+net-routing()     { ip route show; }
+net-arp()         { ip neigh show; }
+net-bridging()    { brctl show; }
+net-firewall()    { sudo iptables -L -n; }
+net-bandwidth()   { vnstat -h; }
+net-ping-flood()  { ping -f -c 100 google.com; }
+net-trace()       { mtr google.com; }
+net-dns-cache()   { systemd-resolve --statistics; }
+wifi-signal()     { iwconfig 2>/dev/null | grep -E "Signal level|Link Quality"; }
+wifi-scan()       { sudo iwlist wlan0 scan | grep -E "ESSID|Signal level"; }
 
+# ==============================================================================
+# CONTAINER & ORCHESTRATION MONITORING
+# ==============================================================================
+
+### Kubernetes Monitoring (Enhanced)
 kubeinfo() { kubectl top nodes "$@"; }
 kubecontinfo() { kubectl top pods "$@"; }
+kube-nodes()      { kubectl get nodes -o wide; }
+kube-pods()       { kubectl get pods --all-namespaces -o wide; }
+kube-services()   { kubectl get services --all-namespaces; }
+kube-deployments(){ kubectl get deployments --all-namespaces; }
+kube-events()     { kubectl get events --sort-by=.metadata.creationTimestamp; }
+kube-logs()       { kubectl logs "$@"; }
+kube-describe()   { kubectl describe "$@"; }
+kube-exec()       { kubectl exec -it "$@"; }
+kube-port-forward(){ kubectl port-forward "$@"; }
 
-### Power Management and Battery Monitoring
+### Docker Monitoring
+docker-ps()       { docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"; }
+docker-stats()    { docker stats --no-stream; }
+docker-logs()     { docker logs "$@"; }
+docker-inspect()  { docker inspect "$@"; }
+docker-top()      { docker top "$@"; }
+docker-events()   { docker events --since 1h; }
+docker-system()   { docker system df; }
+
+### Podman Monitoring
+podman-ps()       { podman ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"; }
+podman-stats()    { podman stats --no-stream; }
+podman-logs()     { podman logs "$@"; }
+
+# ==============================================================================
+# POWER MANAGEMENT & BATTERY MONITORING
+# ==============================================================================
+
+### Power Management and Battery Monitoring (Enhanced)
 powertop() { sudo powertop "$@"; }
 batinfo() { upower -i /org/freedesktop/UPower/devices/battery_BAT0 "$@"; }
 acpiinfo() { acpi -V "$@"; }
@@ -96,13 +281,36 @@ energytop() { powertop --html=powertop_report.html "$@"; }
 powermode() { tlp-stat -s "$@"; }
 bmsinfo() { sudo cat /sys/class/power_supply/BAT0/uevent "$@"; }
 
-### Temperature Monitoring
+### Advanced Power Monitoring
+battery-level()  { cat /sys/class/power_supply/BAT*/capacity 2>/dev/null || echo "No battery detected"; }
+battery-status() { cat /sys/class/power_supply/BAT*/status 2>/dev/null || echo "No battery detected"; }
+battery-health() { upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep -E "energy-full|energy-full-design"; }
+power-profile()  { powerprofilesctl list; }
+power-usage()    { sudo powertop --html=/tmp/power.html && echo "Report saved to /tmp/power.html"; }
+suspend-test()   { sudo rtcwake -m mem -s 60; } # Test suspend for 60 seconds
+
+# ==============================================================================
+# TEMPERATURE MONITORING
+# ==============================================================================
+
+### Temperature Monitoring (Enhanced)
 cputemp() { sensors | grep -i "core" "$@"; }
 gputemp() { nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader "$@"; }
 hddtemp() { sudo hddtemp /dev/sdX "$@"; }
 alltemp() { sensors "$@"; }
 
-### Log Monitoring
+### Advanced Temperature Monitoring
+cpu-temp-zones(){ cat /sys/class/thermal/thermal_zone*/temp | awk '{print $1/1000 "°C"}'; }
+gpu-temp-amd()  { cat /sys/class/drm/card0/device/hwmon/hwmon*/temp1_input 2>/dev/null | awk '{print $1/1000 "°C"}'; }
+nvme-temp()     { sudo nvme smart-log /dev/nvme0n1 | grep temperature; }
+cpu-throttle()  { dmesg | grep -i throttle | tail -5; }
+thermal-trip()  { cat /sys/class/thermal/thermal_zone*/trip_point_*_temp 2>/dev/null | sort -u; }
+
+# ==============================================================================
+# LOG MONITORING & ANALYSIS
+# ==============================================================================
+
+### Log Monitoring (Enhanced)
 syslog() { sudo tail -f /var/log/syslog "$@"; }
 dmesglog() { sudo dmesg -T "$@"; }
 journallog() { journalctl -xe "$@"; }
@@ -111,6 +319,79 @@ kernlog() { sudo tail -f /var/log/kern.log "$@"; }
 bootlog() { journalctl -b "$@"; }
 faillog() { sudo faillog "$@"; }
 xlog() { tail -f ~/.xsession-errors "$@"; }
+
+### Advanced Log Analysis
+log-search()    { sudo journalctl --since "1 hour ago" | grep "$@"; }
+log-errors()    { sudo journalctl -p err --since today; }
+log-warnings()  { sudo journalctl -p warning --since today; }
+log-size()      { sudo du -sh /var/log/* | sort -hr; }
+log-rotate()    { sudo logrotate -f /etc/logrotate.conf; }
+log-vacuum()    { sudo journalctl --vacuum-time=7d; } # Clean logs older than 7 days
+
+# ==============================================================================
+# VIRTUALIZATION MONITORING
+# ==============================================================================
+
+### Virtualization (Enhanced)
+vmusage() { virsh list --all && virsh domstats "$@"; }
+hypervinfo() { sudo virt-top "$@"; }
+vminfo() { VBoxManage list vms && VBoxManage list runningvms "$@"; }
+
+### Advanced Virtualization
+vm-top()        { virt-top "$@"; }
+vm-stats()      { virsh domstats; }
+vm-network()    { virsh net-list; }
+vm-storage()    { virsh pool-list; }
+qemu-monitor()  { virsh qemu-monitor-command --hmp "$@"; }
+
+# ==============================================================================
+# FILE SYSTEM MONITORING
+# ==============================================================================
+
+### File System Monitoring (Enhanced)
+fnotify() { inotifywait -m /path/to/dir "$@"; }
+fscheck() { fsck -N /dev/sdX "$@"; }
+extcheck() { dumpe2fs /dev/sdX | less "$@"; }
+
+### Advanced File System Analysis
+fs-mounts()     { findmnt -t ext4,btrfs,xfs,zfs; }
+fs-usage()      { df -hT | grep -E "(ext|btrfs|xfs|zfs)"; }
+fs-inodes()     { df -i | grep -E "(ext|btrfs|xfs|zfs)"; }
+fs-errors()     { dmesg | grep -i "filesystem\|ext4\|btrfs\|xfs"; }
+fs-fragmentation() { sudo filefrag /dev/sdX 2>/dev/null || echo "Fragmentation check not available"; }
+
+# ==============================================================================
+# KERNEL & SYSTEM MONITORING
+# ==============================================================================
+
+### Kernel and Dmesg (Enhanced)
+dmesgwarn() { dmesg | grep -i warning "$@"; }
+dmesgerr() { dmesg | grep -i error "$@"; }
+kernelver() { uname -r "$@"; }
+kernelconfig() { zcat /proc/config.gz "$@"; }
+
+### Advanced Kernel Monitoring
+kernel-modules(){ lsmod | wc -l && echo "--- Top modules ---" && lsmod | sort -k3 -nr | head -10; }
+kernel-threads(){ ps -eo pid,ppid,user,comm | grep "\[.*\]" | wc -l; }
+kernel-uptime(){ uptime -p; }
+kernel-load()  { cat /proc/loadavg; }
+kernel-limits(){ ulimit -a; }
+
+# ==============================================================================
+# THERMAL MANAGEMENT
+# ==============================================================================
+
+### Thermal Management (Enhanced)
+cpucool() { sudo cpupower frequency-set --governor powersave "$@"; }
+fancontrol() { sudo pwmconfig "$@"; }
+throtinfo() { dmesg | grep -i throttle "$@"; }
+
+### Advanced Thermal Control
+cpu-performance(){ sudo cpupower frequency-set --governor performance; }
+cpu-conservative(){ sudo cpupower frequency-set --governor conservative; }
+cpu-userspace(){ sudo cpupower frequency-set --governor userspace; }
+thermal-zones(){ ls /sys/class/thermal/ | wc -l && cat /sys/class/thermal/thermal_zone*/type; }
+cooling-devices(){ ls /sys/class/thermal/cooling_device*/type 2>/dev/null; }
 
 ### Virtualization
 vmusage() { virsh list --all && virsh domstats "$@"; }
@@ -133,9 +414,166 @@ cpucool() { sudo cpupower frequency-set --governor powersave "$@"; }
 fancontrol() { sudo pwmconfig "$@"; }
 throtinfo() { dmesg | grep -i throttle "$@"; }
 
-### Other Useful Tools
+# ==============================================================================
+# CLOUD & SERVICE MONITORING
+# ==============================================================================
+
+### AWS Monitoring
+aws-ec2-status() { aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId,State.Name,PublicIpAddress]' --output table; }
+aws-s3-usage()   { aws s3 ls s3:// --recursive --summarize; }
+aws-lambda-logs(){ aws logs tail /aws/lambda/$1 --follow; }
+aws-cloudwatch(){ aws cloudwatch list-metrics; }
+
+### GCP Monitoring
+gcp-instances()  { gcloud compute instances list; }
+gcp-logs()       { gcloud logging read "resource.type=gce_instance" --limit 10; }
+gcp-monitoring() { gcloud monitoring dashboards list; }
+
+### Azure Monitoring
+azure-vms()      { az vm list --output table; }
+azure-logs()     { az monitor metrics list --resource /subscriptions/... --metric "Percentage CPU"; }
+
+### Docker Monitoring
+docker-monitor() { watch -n 2 'docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"'; }
+docker-events()  { docker events --since 1h; }
+docker-logs-all(){ for container in $(docker ps -q); do echo "=== $(docker inspect --format='{{.Name}}' $container) ==="; docker logs $container | tail -5; done; }
+
+# ==============================================================================
+# SECURITY MONITORING
+# ==============================================================================
+
+### Security Monitoring
+auth-attempts()  { sudo journalctl -u ssh | grep -i "failed\|failure" | tail -10; }
+firewall-logs()  { sudo journalctl -u ufw | tail -20; }
+selinux-alerts() { sudo ausearch -m avc -ts today; }
+apparmor-status(){ sudo apparmor_status; }
+integrity-check(){ sudo aide --check; }
+clamav-scan()    { sudo clamscan -r /home --bell; }
+rkhunter-check() { sudo rkhunter --check; }
+
+### Network Security
+open-ports()     { sudo netstat -tuln | grep LISTEN; }
+suspicious-conn(){ sudo netstat -tupn | grep -v LISTEN | head -10; }
+arp-scan()       { sudo arp-scan --localnet; }
+nmap-quick()     { sudo nmap -sn 192.168.1.0/24; }
+fail2ban-status(){ sudo fail2ban-client status; }
+
+# ==============================================================================
+# APPLICATION PERFORMANCE MONITORING
+# ==============================================================================
+
+### Web Server Monitoring
+nginx-status()   { curl -s http://localhost/nginx_status; }
+apache-status()  { curl -s http://localhost/server-status; }
+php-fpm-status() { curl -s http://localhost/php-fpm-status; }
+varnish-stats()  { varnishstat -1; }
+
+### Database Monitoring
+mysql-status()   { mysql -e "SHOW PROCESSLIST;"; }
+mysql-slow()     { tail -f /var/log/mysql/mysql-slow.log; }
+postgres-status(){ psql -c "SELECT * FROM pg_stat_activity;"; }
+redis-info()     { redis-cli info | grep -E "(connected_clients|used_memory|total_commands_processed)"; }
+mongodb-status() { mongosh --eval "db.serverStatus()"; }
+
+### Application Monitoring
+app-cpu()        { ps aux --sort=-%cpu | grep -E "(python|node|java|ruby|php)" | head -5; }
+app-mem()        { ps aux --sort=-%mem | grep -E "(python|node|java|ruby|php)" | head -5; }
+app-ports()      { sudo netstat -tuln | grep -E "(python|node|java|ruby|php)"; }
+
+# ==============================================================================
+# REAL-TIME DASHBOARDS
+# ==============================================================================
+
+### System Dashboard
+system-dashboard(){
+    echo "=== SYSTEM DASHBOARD ==="
+    echo "Time: $(date)"
+    echo "Uptime: $(uptime -p)"
+    echo ""
+    echo "CPU Load: $(cat /proc/loadavg | awk '{print $1, $2, $3}')"
+    echo "Memory: $(free -h | grep Mem | awk '{print "Used:", $3, "Free:", $4, "Total:", $2}')"
+    echo "Disk: $(df -h / | tail -1 | awk '{print "Used:", $3, "Free:", $4, "Total:", $2}')"
+    echo ""
+    echo "Top Processes:"
+    ps aux --sort=-%cpu | head -6 | tail -5
+}
+
+### Network Dashboard
+network-dashboard(){
+    echo "=== NETWORK DASHBOARD ==="
+    echo "Interfaces:"
+    ip -br addr
+    echo ""
+    echo "Routes:"
+    ip route | head -3
+    echo ""
+    echo "Connections:"
+    ss -tuln | wc -l | xargs echo "Active connections:"
+}
+
+### Full System Monitor
+monitor-all(){
+    while true; do
+        clear
+        echo "=== COMPREHENSIVE SYSTEM MONITOR ==="
+        echo "Time: $(date)"
+        echo ""
+        echo "CPU & Memory:"
+        top -bn1 | head -5
+        echo ""
+        echo "Disk Usage:"
+        df -h | grep -E "^/dev"
+        echo ""
+        echo "Network:"
+        ss -tuln | wc -l | xargs echo "Active connections:"
+        echo ""
+        echo "Top Processes:"
+        ps aux --sort=-%cpu | head -6 | tail -5
+        sleep 5
+    done
+}
+
+# ==============================================================================
+# CUSTOM MONITORING & ALERTS
+# ==============================================================================
+
+### Custom Monitoring Scripts
+cpu-alert()      { if [ $(echo "$(cat /proc/loadavg | awk '{print $1}') > $(nproc)" | bc) -eq 1 ]; then echo "HIGH CPU LOAD ALERT!"; fi; }
+mem-alert()      { if [ $(free | awk 'NR==2{printf "%.0f", $3*100/$2 }') -gt 90 ]; then echo "HIGH MEMORY USAGE ALERT!"; fi; }
+disk-alert()     { if [ $(df / | tail -1 | awk '{print $5}' | sed 's/%//') -gt 90 ]; then echo "LOW DISK SPACE ALERT!"; fi; }
+
+### Monitoring Automation
+monitor-cpu()    { watch -n 2 'echo "CPU Usage:" && mpstat 1 1 | tail -1'; }
+monitor-mem()    { watch -n 2 'echo "Memory Usage:" && free -h'; }
+monitor-disk()   { watch -n 2 'echo "Disk Usage:" && df -h'; }
+monitor-network(){ watch -n 2 'echo "Network:" && ss -tuln | wc -l && echo "Connections:"'; }
+
+### Log Monitoring with Alerts
+log-monitor()    { sudo tail -f /var/log/syslog | grep --line-buffered -E "(error|warning|critical)" | while read line; do echo "$(date): ALERT - $line"; done; }
+
+### Performance Trending
+perf-trend()     { sar -u 1 5 | tail -5; } # CPU trending over 5 seconds
+mem-trend()      { sar -r 1 5 | tail -5; } # Memory trending
+disk-trend()     { sar -d 1 5 | tail -5; } # Disk I/O trending
+
+# ==============================================================================
+# OTHER USEFUL TOOLS (Enhanced)
+# ==============================================================================
+
+### System Utilities (Enhanced)
 vmstatinfo() { vmstat 1 "$@"; }
 iostatinfo() { iostat -x 1 "$@"; }
 uptimeinfo() { uptime "$@"; }
 whoinfo() { who -a "$@"; }
 proctop() { ps aux --sort=-%mem | head "$@"; }
+
+### Advanced System Tools
+sys-summary()    { uname -a && echo "--- CPU ---" && lscpu | head -5 && echo "--- Memory ---" && free -h && echo "--- Disk ---" && df -h /; }
+sys-health()     { echo "System Health Check:" && echo "- Load: $(cat /proc/loadavg | awk '{print $1}')/$(nproc)" && echo "- Memory: $(free | awk 'NR==2{printf "%.1f%%", $3*100/$2}') used" && echo "- Disk: $(df / | tail -1 | awk '{print $5}') used"; }
+sys-services()   { systemctl list-units --type=service --state=active | head -10; }
+sys-failed()     { systemctl --failed; }
+sys-timers()     { systemctl list-timers --all; }
+
+# ==============================================================================
+# END OF GENERAL MONITORING ALIASES
+# ==============================================================================
