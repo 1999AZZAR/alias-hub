@@ -30,7 +30,6 @@ alias uptime-info='uptime -p'                 # Pretty uptime info
 alias cls='clear'                             # Clear display
 
 # Process Management
-alias top='htop'                                      # Better process viewer
 alias ps-tree='ps auxf'                               # Process tree
 alias ps-cpu='ps auxf | sort -nr -k 3 | head -10'     # Top CPU processes
 alias ps-mem='ps auxf | sort -nr -k 4 | head -10'     # Top memory processes
@@ -118,14 +117,12 @@ alias sys-bottleneck='top -b -n 1'                          # System bottleneck 
 
 # System Security
 alias ports-open='sudo netstat -tulpn'          # Open ports
-alias firewall-status='sudo ufw status'         # Firewall status
 alias firewall-enable='sudo ufw enable'         # Enable firewall
 alias firewall-disable='sudo ufw disable'       # Disable firewall
 alias scan-ports='sudo nmap localhost'          # Port scan
 alias check-rootkit='sudo rkhunter --check'     # Check for rootkits
 alias check-virus='sudo clamscan'               # Virus scan
 alias auth-log='sudo tail -f /var/log/auth.log' # Authentication log
-alias ssl-cert='sudo openssl x509 -text -in'    # Check SSL certificate
 
 # System Backup
 alias backup-system='sudo tar -czf system-backup-$(date +%Y%m%d).tar.gz --exclude=/proc --exclude=/sys --exclude=/tmp --exclude=/media --exclude=/mnt --exclude=/run /'  # System backup

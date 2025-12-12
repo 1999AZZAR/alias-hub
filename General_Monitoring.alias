@@ -18,7 +18,6 @@ processlog()     { ps auxf --sort=-%cpu,-%mem | head -n "${1:-20}"; }
 
 ### Process and Resource Monitoring
 alias htop='clear && bash --noprofile --norc -c "htop; clear"'
-alias top='clear && bash --noprofile --norc -c "htop; clear"'
 bashtop(){ bashtop "$@"; }
 glances(){ glances "$@"; }
 gotop()   { gotop "$@"; }

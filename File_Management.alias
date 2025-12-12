@@ -55,7 +55,6 @@ alias own='sudo chown $USER:$USER'           # Take ownership
 ### File searching and content viewing
 alias ff='find . -type f -name'              # Find files by name
 alias fd='find . -type d -name'              # Find directories by name
-alias grep='grep --color=auto'               # Colorize grep
 alias count='wc -l'                          # Count lines
 alias dus='du -sh * | sort -h'               # Sort by human-readable size
 
