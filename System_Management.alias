@@ -54,8 +54,9 @@ alias net-stats='netstat -tulpn'                    # Network statistics
 alias sys-monitor='glances'                         # System monitoring
 
 # System Information
+alias fastfetch='clear && fastfetch --logo "$(find ~/.local/share/neofetch_ascii/ascii/ -name "*.txt" | shuf -n 1)" --logo-type file --logo-preserve-aspect-ratio'
 alias neofetch='clear && neofetch'            # System info with clear screen
-alias fetch='neofetch'                        # Shorthand for neofetch
+alias fetch='fastfetch'                        # Shorthand for neofetch
 alias sysinfo='inxi -Fxz'                     # Detailed system information
 alias cpu-info='lscpu'                        # CPU information
 alias gpu-info='nvidia-smi'                   # GPU information

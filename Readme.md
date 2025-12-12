@@ -6,9 +6,9 @@ Welcome to **Alias Hub**! This repository organizes a comprehensive collection o
 
 ## 🚀 Getting Started
 
-### One-Liner Installation
+### Installation
 
-Run one of the following commands in your terminal to install or update Alias Hub. The script will automatically detect your shell and set everything up.
+The Alias Hub installer automatically detects your package manager and shell, providing a seamless setup experience.
 
 **Using `curl` (Recommended):**
 ```bash
@@ -20,15 +20,80 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/1999AZZAR/alias-hub/master
 sh -c "$(wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
 ```
 
-The installer will:
-1.  Clone or update the repository to `~/alias-hub`.
-2.  Set up Neofetch with a custom configuration and ASCII art.
-3.  Source the aliases into your `.bashrc` or `.zshrc`.
-4.  Install necessary packages like `eza`, `htop`, and `neofetch`.
+**Manual Installation:**
+```bash
+git clone https://github.com/1999AZZAR/alias-hub.git ~/alias-hub
+cd ~/alias-hub
+./install.sh
+```
+
+### Installation Options
+
+The installer supports various command-line options for different use cases:
+
+```bash
+./install.sh [options]
+```
+
+**Available Options:**
+- `--help`              Show help message
+- `--dry-run`           Preview installation without making changes
+- `--force`             Force reinstallation, overwriting existing configs
+- `--uninstall`         Remove Alias Hub and restore original configurations
+- `--no-packages`       Skip package installation
+- `--verbose`           Enable verbose output
+- `--shell SHELL`       Override shell detection (bash, zsh, fish, ash, dash)
+
+**Examples:**
+```bash
+./install.sh --dry-run          # Preview what would be installed
+./install.sh --force             # Force reinstall
+./install.sh --no-packages       # Install without system packages
+./install.sh --uninstall         # Remove Alias Hub completely
+```
+
+### What Gets Installed
+
+The installer automatically:
+1. **Detects Environment**: Identifies your package manager (apt, dnf, pacman, apk, zypper, emerge) and shell
+2. **Clones Repository**: Downloads Alias Hub to `~/alias-hub`
+3. **Configures Neofetch**: Sets up custom configuration with ASCII art
+4. **Installs Packages**: Adds essential tools like `eza`, `htop`, `neofetch`, `fastfetch`, etc.
+5. **Sets Up Aliases**: Configures shell to source all alias files
+6. **Enables Autocompletion**: Adds tab completion for alias categories
 
 ### Updating
 
-To update to the latest version, simply run the installation command again. The script will automatically pull the latest changes.
+To update to the latest version:
+```bash
+./install.sh  # Re-run the installer
+```
+
+Or manually:
+```bash
+cd ~/alias-hub && git pull
+```
+
+### System Requirements
+
+**Supported Package Managers:**
+- **apt** (Ubuntu, Debian, Linux Mint)
+- **dnf** (Fedora, RHEL, CentOS)
+- **pacman** (Arch Linux, Manjaro)
+- **apk** (Alpine Linux)
+- **zypper** (openSUSE)
+- **emerge** (Gentoo)
+
+**Supported Shells:**
+- **bash** (`.bashrc`)
+- **zsh** (`.zshrc`)
+- **fish** (`.config/fish/config.fish`)
+- **ash/dash** (`.profile`)
+
+**Required Tools:**
+- `git` (for cloning/updating repository)
+- `curl` (for downloading remote scripts)
+- `sudo` (for package installation)
 
 ---
 

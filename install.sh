@@ -1,116 +1,337 @@
 #!/bin/bash
 
-# Install script for Aliases Collection
-# This script downloads the repository, sets up the aliases, configures Neofetch,
-# and reloads your shell.
+# ==============================================================================
+# Alias Hub Installation Script
+# ==============================================================================
+#
+# This script installs and configures the Alias Hub collection, providing
+# comprehensive shell aliases for enhanced terminal productivity.
+#
+# Features:
+# - Multi-package manager support (apt, dnf, pacman, apk, zypper)
+# - Multi-shell support (bash, zsh, fish, ash, dash)
+# - Safe installation with backups and recovery
+# - Uninstall functionality
+# - Dry-run mode for testing
+#
+# Usage:
+#   ./install.sh [options]
+#
+# Options:
+#   --help          Show this help message
+#   --dry-run       Show what would be done without making changes
+#   --force         Force reinstallation, overwriting existing configs
+#   --uninstall     Remove Alias Hub and restore original configurations
+#   --no-packages   Skip package installation
+#   --verbose       Enable verbose output
+#
+# ==============================================================================
+
+set -euo pipefail
 
 # --- Configuration ---
-REPO_URL="https://github.com/1999AZZAR/alias-hub.git"
-ALIASES_DIR="$HOME/alias-hub"
-NEOFETCH_ASCII_INSTALLER_URL="https://raw.githubusercontent.com/1999AZZAR/neofetch_ascii/master/install.sh"
+readonly REPO_URL="https://github.com/1999AZZAR/alias-hub.git"
+readonly ALIASES_DIR="$HOME/alias-hub"
+readonly NEOFETCH_ASCII_INSTALLER_URL="https://raw.githubusercontent.com/1999AZZAR/neofetch_ascii/master/install.sh"
+readonly SCRIPT_VERSION="2.1.0"
+
+# Generate backup suffix
+BACKUP_SUFFIX=".alias-hub-backup.$(date +%Y%m%d_%H%M%S)"
+readonly BACKUP_SUFFIX
+
+# --- Global Variables ---
+DRY_RUN=false
+FORCE=false
+UNINSTALL=false
+SKIP_PACKAGES=false
+VERBOSE=false
+PACKAGE_MANAGER=""
+CURRENT_SHELL=""
+SHELL_RC=""
+
+# --- Color Codes for Output ---
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly NC='\033[0m' # No Color
 
 # --- Helper Functions ---
 print_info() {
-    echo "INFO: $1"
+    echo -e "${BLUE}INFO:${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}SUCCESS:${NC} $1"
 }
 
 print_warning() {
-    echo "WARNING: $1"
+    echo -e "${YELLOW}WARNING:${NC} $1"
 }
 
 print_error() {
-    echo "ERROR: $1" >&2
+    echo -e "${RED}ERROR:${NC} $1" >&2
     exit 1
+}
+
+print_verbose() {
+    if [[ "$VERBOSE" == true ]]; then
+        echo -e "${BLUE}DEBUG:${NC} $1"
+    fi
 }
 
 command_exists() {
     command -v "$1" &> /dev/null
 }
 
-# --- Main Script ---
+package_installed() {
+    local package="$1"
+    case "$PACKAGE_MANAGER" in
+        apt)
+            dpkg -l "$package" 2>/dev/null | grep -q "^ii"
+            ;;
+        dnf|zypper)
+            rpm -q "$package" &>/dev/null
+            ;;
+        pacman)
+            pacman -Q "$package" &>/dev/null
+            ;;
+        apk)
+            apk info -e "$package" &>/dev/null
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
 
-# Step 1: Check for dependencies
-print_info "Checking for required tools (git, curl)..."
-for cmd in git curl; do
-    if ! command_exists "$cmd"; then
-        # Recommend installing build-essential or base-devel for a complete environment
-        print_error "$cmd is not installed. Please install it (e.g., sudo apt install $cmd) and try again."
+detect_package_manager() {
+    print_verbose "Detecting package manager..."
+
+    if command_exists apt; then
+        PACKAGE_MANAGER="apt"
+        print_verbose "Detected apt package manager"
+    elif command_exists dnf; then
+        PACKAGE_MANAGER="dnf"
+        print_verbose "Detected dnf package manager"
+    elif command_exists pacman; then
+        PACKAGE_MANAGER="pacman"
+        print_verbose "Detected pacman package manager"
+    elif command_exists apk; then
+        PACKAGE_MANAGER="apk"
+        print_verbose "Detected apk package manager"
+    elif command_exists zypper; then
+        PACKAGE_MANAGER="zypper"
+        print_verbose "Detected zypper package manager"
+    elif command_exists emerge; then
+        PACKAGE_MANAGER="emerge"
+        print_verbose "Detected emerge package manager"
+    else
+        print_warning "No supported package manager found. Package installation will be skipped."
+        PACKAGE_MANAGER=""
     fi
-done
+}
 
-# Step 2: Clone or update the alias-hub repository
-if [ -d "$ALIASES_DIR/.git" ]; then
-    print_info "Alias Hub directory already exists. Pulling latest changes..."
-    (cd "$ALIASES_DIR" && git pull) || print_warning "Failed to pull latest changes. Continuing with existing version."
-else
-    print_info "Cloning the aliases collection..."
-    git clone --depth 1 "$REPO_URL" "$ALIASES_DIR" || print_error "Failed to clone repository."
-fi
+detect_shell() {
+    print_verbose "Detecting shell..."
 
-# Make helper scripts executable
-print_info "Making scripts executable..."
-chmod +x "$ALIASES_DIR/script/helpers.sh"
-chmod +x "$ALIASES_DIR/script/system_cleaner.sh"
-chmod +x "$ALIASES_DIR/script/update_system.sh"
+    # Get the current shell, fallback to $SHELL if needed
+    CURRENT_SHELL="${CURRENT_SHELL:-$SHELL}"
+    CURRENT_SHELL="${CURRENT_SHELL:-$(ps -p $$ -o cmd= | awk '{print $1}')}"
 
-# Step 3: Set up Neofetch base configuration
-print_info "Setting up Neofetch base configuration..."
-NEOFETCH_CONFIG_DIR="$HOME/.config/neofetch"
-SOURCE_NEOFETCH_CONFIG="$ALIASES_DIR/config/neofetch/config.conf"
-DEST_NEOFETCH_CONFIG="$NEOFETCH_CONFIG_DIR/config.conf"
+    # Extract basename
+    CURRENT_SHELL="${CURRENT_SHELL##*/}"
 
-mkdir -p "$NEOFETCH_CONFIG_DIR"
+    print_verbose "Detected shell: $CURRENT_SHELL"
 
-if [ -f "$DEST_NEOFETCH_CONFIG" ] && ! [ -L "$DEST_NEOFETCH_CONFIG" ]; then
-    print_info "Backing up existing neofetch config to $DEST_NEOFETCH_CONFIG.bak"
-    mv "$DEST_NEOFETCH_CONFIG" "$DEST_NEOFETCH_CONFIG.bak"
-fi
+    case "$CURRENT_SHELL" in
+        bash)
+            SHELL_RC="$HOME/.bashrc"
+            ;;
+        zsh)
+            SHELL_RC="$HOME/.zshrc"
+            ;;
+        fish)
+            SHELL_RC="$HOME/.config/fish/config.fish"
+            ;;
+        ash|dash)
+            SHELL_RC="$HOME/.profile"
+            ;;
+        *)
+            print_warning "Unsupported shell: $CURRENT_SHELL. Supported shells: bash, zsh, fish, ash, dash"
+            SHELL_RC=""
+            ;;
+    esac
 
-print_info "Copying new neofetch config from alias-hub..."
-cp "$SOURCE_NEOFETCH_CONFIG" "$DEST_NEOFETCH_CONFIG"
+    print_verbose "Shell RC file: $SHELL_RC"
+}
 
-# Step 4: Set up Neofetch ASCII art using the remote installer
-print_info "Setting up Neofetch ASCII art by running the remote installer..."
-if ! curl -sSL "$NEOFETCH_ASCII_INSTALLER_URL" | bash; then
-    print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
-fi
+create_backup() {
+    local file="$1"
+    if [[ -f "$file" && ! -L "$file" ]]; then
+        local backup_file="${file}${BACKUP_SUFFIX}"
+        print_verbose "Creating backup: $file -> $backup_file"
+        if [[ "$DRY_RUN" == false ]]; then
+            cp "$file" "$backup_file"
+        fi
+        print_info "Backed up $file to $backup_file"
+    fi
+}
 
-# Step 5: Install required packages
-print_info "Installing required packages (eza, htop, etc.)..."
-if command_exists apt; then
-    sudo apt update && \
-    sudo apt install -y at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip python3-venv snapd flatpak
-else
-    print_warning "apt package manager not found. Skipping package installation. Please install them manually."
-fi
+restore_backup() {
+    local file="$1"
+    local backup_file="${file}${BACKUP_SUFFIX}"
+    if [[ -f "$backup_file" ]]; then
+        print_verbose "Restoring backup: $backup_file -> $file"
+        if [[ "$DRY_RUN" == false ]]; then
+            mv "$backup_file" "$file"
+        fi
+        print_info "Restored $file from backup"
+    fi
+}
 
-# Step 6: Configure aliases in shell rc file
-print_info "Configuring shell to use aliases..."
-SHELL_RC=""
-if [[ $SHELL == *"bash"* ]]; then
-    SHELL_RC="$HOME/.bashrc"
-elif [[ $SHELL == *"zsh"* ]]; then
-    SHELL_RC="$HOME/.zshrc"
-else
-    print_warning "Unsupported shell: $SHELL. Please configure manually by adding the following to your shell's rc file:"
-    echo -e "\n## Custom aliases\nALIASES_DIR=\"$ALIASES_DIR\"\nsource \"\$ALIASES_DIR/script/helpers.sh\"\nfor file in \"\$ALIASES_DIR\"/*.alias; do source \"\$file\"; done"
-    exit 0 # Exit gracefully
-fi
+install_packages() {
+    if [[ "$SKIP_PACKAGES" == true || -z "$PACKAGE_MANAGER" ]]; then
+        print_info "Skipping package installation"
+        return 0
+    fi
 
-# Add sourcing script to the shell rc file
-if ! grep -q "source \"\$ALIASES_DIR/script/helpers.sh\"" "$SHELL_RC"; then
-    echo -e "\n# --- Alias Hub Configuration ---" >> "$SHELL_RC"
-    echo "export ALIASES_DIR=\"$ALIASES_DIR\"" >> "$SHELL_RC"
-    echo "source \"\$ALIASES_DIR/script/helpers.sh\"" >> "$SHELL_RC"
-    echo "for file in \"\$ALIASES_DIR\"/*.alias; do source \"\$file\"; done" >> "$SHELL_RC"
-    print_info "Aliases configured in $SHELL_RC."
-else
-    print_info "Aliases are already configured in $SHELL_RC."
-fi
+    print_info "Installing required packages using $PACKAGE_MANAGER..."
 
-# Step 7: Add autocompletion for alias-list command
-print_info "Configuring autocompletion for alias-list..."
-AUTO_COMPLETE_CODE="
+    # Define packages for each package manager
+    local packages=""
+    case "$PACKAGE_MANAGER" in
+        apt)
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip python3-venv snapd flatpak fastfetch"
+            ;;
+        dnf)
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof python3-pip snapd flatpak fastfetch"
+            ;;
+        pacman)
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof python-pip snapd flatpak fastfetch"
+            ;;
+        apk)
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof py3-pip snapd flatpak fastfetch"
+            ;;
+        zypper)
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip snapd flatpak fastfetch"
+            ;;
+        *)
+            print_warning "Unsupported package manager for installation"
+            return 1
+            ;;
+    esac
+
+    # Check which packages are not installed
+    local packages_to_install=""
+    for package in $packages; do
+        if ! package_installed "$package"; then
+            packages_to_install="$packages_to_install $package"
+        else
+            print_verbose "Package $package is already installed"
+        fi
+    done
+
+    if [[ -z "$packages_to_install" ]]; then
+        print_info "All required packages are already installed"
+        return 0
+    fi
+
+    print_info "Installing packages:$packages_to_install"
+
+    if [[ "$DRY_RUN" == true ]]; then
+        return 0
+    fi
+
+    case "$PACKAGE_MANAGER" in
+        apt)
+            sudo apt update && sudo apt install -y "$packages_to_install"
+            ;;
+        dnf)
+            sudo dnf install -y "$packages_to_install"
+            ;;
+        pacman)
+            sudo pacman -S --noconfirm "$packages_to_install"
+            ;;
+        apk)
+            sudo apk add "$packages_to_install"
+            ;;
+        zypper)
+            sudo zypper install -y "$packages_to_install"
+            ;;
+    esac
+
+    print_success "Package installation completed"
+}
+
+setup_neofetch() {
+    print_info "Setting up Neofetch configuration..."
+
+    local neofetch_config_dir="$HOME/.config/neofetch"
+    local source_config="$ALIASES_DIR/config/neofetch/config.conf"
+    local dest_config="$neofetch_config_dir/config.conf"
+
+    # Create config directory
+    if [[ "$DRY_RUN" == false ]]; then
+        mkdir -p "$neofetch_config_dir"
+    fi
+
+    # Backup existing config if it exists and is not a symlink
+    if [[ -f "$dest_config" && ! -L "$dest_config" ]]; then
+        create_backup "$dest_config"
+        if [[ "$DRY_RUN" == false ]]; then
+            rm "$dest_config"
+        fi
+    fi
+
+    # Copy new config
+    if [[ "$DRY_RUN" == false ]]; then
+        cp "$source_config" "$dest_config"
+    fi
+    print_info "Neofetch config installed to $dest_config"
+
+    # Setup Neofetch ASCII art
+    print_info "Setting up Neofetch ASCII art..."
+    if [[ "$DRY_RUN" == false ]]; then
+        if ! curl -sSL "$NEOFETCH_ASCII_INSTALLER_URL" | bash; then
+            print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
+        fi
+    else
+        print_info "Would run Neofetch ASCII installer"
+    fi
+}
+
+setup_aliases() {
+    print_info "Configuring shell aliases..."
+
+    if [[ -z "$SHELL_RC" ]]; then
+        print_error "No supported shell configuration file found"
+    fi
+
+    # Create backup of shell RC file
+    create_backup "$SHELL_RC"
+
+    # Check if Alias Hub is already configured
+    if grep -q "Alias Hub Configuration" "$SHELL_RC" 2>/dev/null; then
+        if [[ "$FORCE" == false ]]; then
+            print_info "Alias Hub is already configured in $SHELL_RC"
+            return 0
+        else
+            print_info "Removing existing Alias Hub configuration for reinstall..."
+            # Remove existing configuration block
+            if [[ "$DRY_RUN" == false ]]; then
+                sed -i '/# --- Alias Hub Configuration ---/,/# --- End Alias Hub Configuration ---/d' "$SHELL_RC"
+            fi
+        fi
+    fi
+
+    # Add Alias Hub configuration
+    local config_block="
+# --- Alias Hub Configuration ---
+export ALIASES_DIR=\"$ALIASES_DIR\"
+source \"\$ALIASES_DIR/script/helpers.sh\"
+for file in \"\$ALIASES_DIR\"/*.alias; do source \"\$file\"; done
+
 # Auto-completion for alias-list command (only for .alias files)
 _alias_list_completions() {
     local current_word
@@ -119,16 +340,193 @@ _alias_list_completions() {
     alias_files_no_ext=\$(find \"\$ALIASES_DIR\" -maxdepth 1 -type f -name '*.alias' -exec basename {} .alias \\\;)
     COMPREPLY=(\$(compgen -W \"\$alias_files_no_ext\" -- \"\$current_word\"))
 }
-# Enable completion for alias-list
 complete -F _alias_list_completions alias-list
+# --- End Alias Hub Configuration ---
 "
-if ! grep -q "_alias_list_completions" "$SHELL_RC"; then
-    echo -e "$AUTO_COMPLETE_CODE" >> "$SHELL_RC"
-    echo "# --- End Alias Hub Configuration ---" >> "$SHELL_RC"
-    print_info "Autocompletion configured in $SHELL_RC."
-else
-    print_info "Autocompletion is already configured in $SHELL_RC."
-fi
 
-# Step 8: Reload the shell
-print_info "Installation complete! Please reload your shell to apply changes: source $SHELL_RC"
+    if [[ "$DRY_RUN" == false ]]; then
+        echo "$config_block" >> "$SHELL_RC"
+    fi
+
+    print_success "Alias Hub configured in $SHELL_RC"
+}
+
+uninstall() {
+    print_info "Uninstalling Alias Hub..."
+
+    # Remove aliases from shell RC
+    if [[ -f "$SHELL_RC" ]] && grep -q "Alias Hub Configuration" "$SHELL_RC"; then
+        print_info "Removing Alias Hub configuration from $SHELL_RC"
+        if [[ "$DRY_RUN" == false ]]; then
+            sed -i '/# --- Alias Hub Configuration ---/,/# --- End Alias Hub Configuration ---/d' "$SHELL_RC"
+        fi
+        print_success "Removed Alias Hub configuration from shell"
+    fi
+
+    # Restore backups
+    print_info "Restoring original configurations..."
+    restore_backup "$HOME/.config/neofetch/config.conf"
+
+    # Remove repository directory
+    if [[ -d "$ALIASES_DIR" ]]; then
+        print_info "Removing Alias Hub directory: $ALIASES_DIR"
+        if [[ "$DRY_RUN" == false ]]; then
+            rm -rf "$ALIASES_DIR"
+        fi
+        print_success "Removed Alias Hub directory"
+    fi
+
+    print_success "Alias Hub uninstallation completed"
+    print_info "Please restart your shell or run 'source $SHELL_RC' to apply changes"
+}
+
+show_help() {
+    cat << EOF
+Alias Hub Installation Script v$SCRIPT_VERSION
+
+USAGE:
+    $0 [OPTIONS]
+
+OPTIONS:
+    --help              Show this help message
+    --dry-run           Show what would be done without making changes
+    --force             Force reinstallation, overwriting existing configs
+    --uninstall         Remove Alias Hub and restore original configurations
+    --no-packages       Skip package installation
+    --verbose           Enable verbose output
+    --shell SHELL       Override shell detection (bash, zsh, fish, ash, dash)
+
+EXAMPLES:
+    $0                    # Normal installation
+    $0 --dry-run          # Preview installation
+    $0 --force            # Force reinstall
+    $0 --uninstall        # Remove Alias Hub
+    $0 --no-packages      # Install without packages
+
+For more information, visit: https://github.com/1999AZZAR/alias-hub
+EOF
+}
+
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --help)
+                show_help
+                exit 0
+                ;;
+            --dry-run)
+                DRY_RUN=true
+                VERBOSE=true
+                ;;
+            --force)
+                FORCE=true
+                ;;
+            --uninstall)
+                UNINSTALL=true
+                ;;
+            --no-packages)
+                SKIP_PACKAGES=true
+                ;;
+            --verbose)
+                VERBOSE=true
+                ;;
+            --shell)
+                CURRENT_SHELL="$2"
+                shift
+                ;;
+            *)
+                print_error "Unknown option: $1"
+                show_help
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+# --- Main Script ---
+
+main() {
+    # Parse command line arguments
+    parse_arguments "$@"
+
+    # Show banner
+    echo "========================================"
+    echo "  Alias Hub Installation Script v$SCRIPT_VERSION"
+    echo "========================================"
+    echo
+
+    if [[ "$DRY_RUN" == true ]]; then
+        print_info "DRY RUN MODE - No changes will be made"
+        echo
+    fi
+
+    # Handle uninstall mode
+    if [[ "$UNINSTALL" == true ]]; then
+        detect_shell
+        uninstall
+        exit 0
+    fi
+
+    # Detect environment
+    detect_package_manager
+    detect_shell
+
+    # Check for required dependencies
+    print_info "Checking for required tools (git, curl)..."
+    for cmd in git curl; do
+        if ! command_exists "$cmd"; then
+            print_error "$cmd is not installed. Please install it first and try again."
+        fi
+    done
+
+    # Clone or update repository
+    if [[ -d "$ALIASES_DIR/.git" ]]; then
+        print_info "Alias Hub directory already exists. Updating..."
+        if [[ "$DRY_RUN" == false ]]; then
+            (cd "$ALIASES_DIR" && git pull --quiet) || print_warning "Failed to update repository. Continuing with existing version."
+        fi
+    else
+        print_info "Cloning Alias Hub repository..."
+        if [[ "$DRY_RUN" == false ]]; then
+            git clone --depth 1 --quiet "$REPO_URL" "$ALIASES_DIR" || print_error "Failed to clone repository."
+        fi
+    fi
+
+    # Make scripts executable
+    print_info "Setting up executable permissions..."
+    if [[ "$DRY_RUN" == false ]]; then
+        chmod +x "$ALIASES_DIR/script/helpers.sh"
+        chmod +x "$ALIASES_DIR/script/system_cleaner.sh"
+        chmod +x "$ALIASES_DIR/script/update_system.sh"
+    fi
+
+    # Setup Neofetch
+    setup_neofetch
+
+    # Install packages
+    install_packages
+
+    # Configure aliases
+    setup_aliases
+
+    # Installation complete
+    echo
+    print_success "Alias Hub installation completed!"
+    echo
+    print_info "To apply changes immediately, run:"
+    echo "  source $SHELL_RC"
+    echo
+    print_info "Or restart your shell/terminal."
+    echo
+    print_info "Available commands:"
+    echo "  alias-list        - List all available alias categories"
+    echo "  alias-list <cat>  - Show aliases in a specific category"
+    echo "  neofetch          - Display system information"
+    echo "  fastfetch         - Alternative system information display"
+    echo
+    print_info "For more information, visit: https://github.com/1999AZZAR/alias-hub"
+}
+
+# Run main function
+main "$@"

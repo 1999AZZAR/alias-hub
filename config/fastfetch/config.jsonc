@@ -1,0 +1,169 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+      "type": "file",
+      "color": { "1": "white" },
+      "padding": { "top": 0 }
+    },
+    "display": {
+      "separator": " ⠀⢾⡷ ",
+      "color": {
+        "keys": "yellow",
+        "title": "green",
+        "separator": "red"    }
+    },
+    "modules": [
+      // --- Title ---
+      "title",
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      },
+      "break",
+  
+      // --- User/OS/Kernel ---
+      {
+          "type": "users",
+          "key": "User_____"
+      },
+      {
+          "type": "os",
+          "key": "OS_______",
+          "format": "{2}"
+      },
+      {
+          "type": "kernel",
+          "key": "Kernel___",
+          "format": "{2}"
+      },
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      },
+      "break",
+  
+      // --- Uptime/Pkg/IP ---
+      {
+          "type": "uptime",
+          "key": "Uptime___"
+      },
+      {
+          "type": "packages",
+          "key": "Packages_"
+      },
+      {
+          "type": "localip",
+          "key": "Local IP_",
+          "showIpv6": false,
+          "showMac": false
+      },
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      },
+      "break",
+  
+      // --- Shell/DE/Icons ---
+      {
+          "type": "shell",
+          "key": "Shell____"
+      },
+      {
+          "type": "terminal",
+          "key": "Terminal_"
+      },
+      {
+          "type": "de",
+          "key": "DE_______"
+      },
+      {
+          "type": "wm",
+          "key": "WM_______"
+      },
+      {
+          "type": "icons",
+          "key": "Icons____"
+      },
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      },
+      "break",
+  
+      // --- Hardware ---
+      {
+          "type": "cpu",
+          "key": "CPU______",
+          "showPeCoreCount": true,
+          "temp": false
+      },
+      {
+          "type": "gpu",
+          "key": "GPU______",
+          "hideType": "integrated"
+      },
+      {
+          "type": "memory",
+          "key": "Memory___"
+      },
+      {
+          "type": "disk",
+          "key": "Storage__",
+          "folders": "/"
+      },
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      },
+      "break",
+  
+      // --- System & Power ---
+      {
+          "type": "board",
+          "key": "Board____"
+      },
+      {
+          "type": "bios",
+          "key": "Bios_____"
+      },
+      {
+          "type": "battery",
+          "key": "Battery__"
+      },
+      {
+          "type": "poweradapter",
+          "key": "Adapter__"
+      },
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      },
+      "break",
+  
+      // --- Multimedia & Network ---
+      {
+          "type": "display",
+          "key": "Display__"
+      },
+      {
+          "type": "wifi",
+          "key": "Wifi_____"
+      },
+      {
+          "type": "sound",
+          "key": "Sound____"
+      },
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      }
+    ]
+  }
+  
