@@ -1,49 +1,319 @@
-# Fun & Entertainment
-# ----------------------------
+# ==============================================================================
+# Fun & Entertainment - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive entertainment aliases for terminal fun and relaxation
+# Includes games, ASCII art, jokes, music, social media, and more!
+#
+# Sections:
+# - Classic Terminal Games (PRESERVED)
+# - ASCII Art & Animations
+# - Text Effects & Fun Utilities
+# - Jokes & Random Generators
+# - Weather & Information
+# - Social Media & News
+# - Music & Audio
+# - Video & Multimedia
+# - Easter Eggs & Trolls
+# - Productivity Breaks
+# - Creative & Artistic
+# - Games Collection
+# - Internet Fun
+# - Relaxation & Meditation
+#
+# ==============================================================================
 
-### Terminal Games
-alias tetris='bastet'                        # Terminal Tetris game
-alias sl='sl'                                # Steam locomotive (if installed)
-alias nethack='nethack'                      # Play NetHack (if installed)
-alias nyancat='nyancat'                      # Nyan Cat animation (if installed)
-alias pong='pong'                            # Play Pong in terminal (custom script)
-alias pacman='pacman4console'                # Play Pac-Man in terminal (requires pacman4console)
-alias matrix='cmatrix'                       # Matrix rain effect
-alias play-2048='2048-cli'                   # Play 2048 in terminal (requires 2048-cli)
-alias play-snake='nsnake'                    # Play Snake game (requires nsnake)
-alias play-go='go-game'                      # Play Go game (requires go-game)
+# ==============================================================================
+# CLASSIC TERMINAL GAMES (PRESERVED - Your Favorites)
+# ==============================================================================
 
-### Fun Utilities
-alias speedtest='speedtest-cli'                                                               # Test internet speed
-alias cowsay-meme='fortune | cowsay -f $(ls /usr/share/cowsay/cows/ | shuf -n 1) | lolcat'    # Colorful cowsay with fortune
-alias shuftext='echo $1 | fold -w1 | shuf | tr -d "\n"'                                       # Shuffle characters in a string
-alias banner='echo "$1" | figlet | lolcat'                                                    # Display a colorful banner
-alias forcow='fortune | cowsay -f `ls /usr/share/cowsay/cows/ | shuf -n 1`'                   # Random fortune with random cow
-alias clock='tty-clock -c -C 5 -C 6'                                                          # Stylish terminal clock
+### Core Terminal Games (ALL PRESERVED)
+alias tetris='bastet'                        # PRESERVED - Terminal Tetris game
+alias sl='sl'                                # PRESERVED - Steam locomotive
+alias nethack='nethack'                      # PRESERVED - Play NetHack
+alias nyancat='nyancat'                      # PRESERVED - Nyan Cat animation
+alias pong='pong'                            # PRESERVED - Play Pong in terminal
+alias pacman='pacman4console'                # PRESERVED - Play Pac-Man (requires pacman4console)
+alias matrix='cmatrix'                       # PRESERVED - Matrix rain effect
+alias play-2048='2048-cli'                   # PRESERVED - Play 2048 (requires 2048-cli)
+alias play-snake='nsnake'                    # PRESERVED - Play Snake (requires nsnake)
+alias play-go='go-game'                      # PRESERVED - Play Go (requires go-game)
 
-### Easter eggs
-alias troll='echo "Your system will self-destruct in 10 seconds... kidding!"'  # Lighthearted terminal troll
-alias shake='echo "Terminal shake activated!" | pv -qL 20 | lolcat'            # Fun shaking effect
-alias hidden='echo "You found the hidden alias!" | cowsay | lolcat'            # Hidden fun message
+### Additional Classic Games
+alias minesweeper='minesweeper'              # Terminal minesweeper
+alias sudoku='nudoku'                        # Terminal sudoku
+alias chess='gnuchess'                       # Terminal chess
+alias checkers='checkers'                    # Terminal checkers
+alias backgammon='backgammon'                # Terminal backgammon
+alias domino='dominoes'                      # Terminal dominoes
+alias cards='ttycards'                       # Terminal card games
 
-### Weather and Fun Info (via helpers)
-alias weather='weather'    # Show weather forecast (optionally: weather [location])
-alias moon='moon'          # Current moon phase
-alias horo='horo'          # Daily horoscope
+# ==============================================================================
+# ASCII ART & ANIMATIONS
+# ==============================================================================
 
-### Random Generators (via fun helper)
-alias roll-dice='fun dice'      # Roll a six-sided die
-alias flip-coin='fun coin'      # Flip a coin
-alias random-quote='fun quote'  # Get a random quote
-alias joke='fun joke'           # Fetch a random dad joke
-alias random-color='fun color'  # Display a random colored block
+### ASCII Art Generators
+alias ascii-text='figlet'                    # Convert text to ASCII art
+alias ascii-banner='banner'                  # Create banner text
+alias ascii-fonts='figlet -l'                # List available fonts
+alias ascii-random='toilet -f $(ls /usr/share/figlet/fonts/*.flf | shuf -n 1 | xargs basename -s .flf)' # Random font
 
-### Reddit and News (via helpers)
-alias reddit='tuir'            # Terminal Reddit browser
-alias hackernews='hn'          # Hacker News feed
-alias trending='trending_coins' # Trending cryptocurrencies
+### Fun Animations
+alias starwars='telnet towel.blinkenlights.nl' # Star Wars ASCII animation
+alias dance='timeout 8 bash -c "emojis=(😊 😂 🤣 😍 🤔 😎 🤪 😜 🙃 😉); while true; do echo -ne \"\\r\${emojis[RANDOM%\${#emojis[@]}]}\"; sleep 0.15; done; echo"' # Dancing emojis
+alias rainbow='echo "🌈 Rainbow!" | lolcat'    # Rainbow text
+alias fireworks='timeout 6 bash -c "emojis=(🎆 🎇 ✨ 💥 🔥 🌟); while true; do echo -ne \"\\r\${emojis[RANDOM%\${#emojis[@]}]}\"; sleep 0.25; done; echo"' # Fireworks
 
-### Terminal Music and Video
-alias music='ncmpcpp'                               # Terminal music player
-alias ascii-music='mpg123 $1 | pv -qL 20 | lolcat'  # Play music with ASCII effects
-alias youtube-play='yt-dlp -o - $1 | mpv -'         # Play YouTube video directly in terminal
+### Terminal Art
+alias boxes='boxes'                          # Draw boxes around text
+alias cowsay='cowsay'                        # Cow says your text
+alias cowthink='cowthink'                    # Cow thinks your text
+alias toilet='toilet'                        # Colorful text effects
+alias lolcat='lolcat'                        # Rainbow color output
+
+# ==============================================================================
+# TEXT EFFECTS & FUN UTILITIES (Enhanced)
+# ==============================================================================
+
+### Text Effects (Enhanced)
+alias speedtest='speedtest-cli'                                                               # PRESERVED - Test internet speed
+alias cowsay-meme='fortune | cowsay -f $(ls /usr/share/cowsay/cows/ | shuf -n 1) | lolcat'    # PRESERVED - Colorful cowsay
+alias shuftext='echo $1 | fold -w1 | shuf | tr -d "\n"'                                       # PRESERVED - Shuffle characters
+alias banner='echo "$1" | figlet | lolcat'                                                    # PRESERVED - Colorful banner
+alias forcow='fortune | cowsay -f `ls /usr/share/cowsay/cows/ | shuf -n 1`'                   # PRESERVED - Random fortune
+alias clock='tty-clock -c -C 5 -C 6'                                                          # PRESERVED - Stylish terminal clock
+
+### Enhanced Text Effects
+alias rainbow-text='echo "$1" | lolcat'        # Rainbow colored text
+alias glow-text='echo "$1" | toilet --gay'     # Glowing text effect
+alias big-text='figlet -f big "$1"'            # Big ASCII text
+alias small-text='figlet -f small "$1"'        # Small ASCII text
+alias reverse-text='rev <<< "$1"'              # Reverse text
+alias upside-down='echo "$1" | tr "A-Za-z" "N-ZA-Mn-za-m"' # Upside down text (ROT13)
+
+### Fun Text Generators
+alias zalgo='echo "$1" | zalgo'                # Zalgo text (if zalgo installed)
+alias leet='echo "$1" | tr "aeio" "4310"'       # Leet speak
+alias bubble='toilet -f mono12 "$1"'           # Bubble text
+alias metal='toilet -f mono12 -F metal "$1"'   # Metal text effect
+
+# ==============================================================================
+# JOKES & RANDOM GENERATORS (Enhanced)
+# ==============================================================================
+
+### Random Generators (PRESERVED)
+alias roll-dice='fun dice'      # PRESERVED - Roll a six-sided die
+alias flip-coin='fun coin'      # PRESERVED - Flip a coin
+alias random-quote='fun quote'  # PRESERVED - Get a random quote
+alias joke='fun joke'           # PRESERVED - Fetch a random dad joke
+alias random-color='fun color'  # PRESERVED - Display a random colored block
+
+### Enhanced Random Content
+alias chuck-norris='curl -s https://api.chucknorris.io/jokes/random | jq -r .value' # Chuck Norris jokes
+alias random-cat='curl -s https://catfact.ninja/fact | jq -r .fact' # Random cat facts
+alias random-dog='curl -s https://dog-api.kinduff.com/api/facts | jq -r .facts[0]' # Random dog facts
+alias random-advice='curl -s https://api.adviceslip.com/advice | jq -r .slip.advice' # Random advice
+alias random-trivia='curl -s https://opentdb.com/api.php?amount=1&type=multiple | jq -r .results[0].question' # Trivia questions
+
+### Number Generators
+alias random-number='echo $((RANDOM % 100 + 1))' # Random number 1-100
+alias random-uuid='uuidgen'                      # Generate UUID
+alias random-password='openssl rand -base64 12'  # Random password
+alias magic-8ball='echo "The magic 8-ball says: $(shuf -n 1 -e "Yes" "No" "Maybe" "Ask again later" "Definitely" "Absolutely not")"' # Magic 8-ball
+
+### Random Fun
+alias random-emoji='echo $(shuf -n 1 -e 🎉 🎊 🎈 🎆 🎇 ✨ 🎀 🎁 🎂 🎃 🎄 🎅 🎋 🎍 🎎 🎏 🎐 🎑 🎼 🎵 🎶 🎷 🎸 🎹 🎺 🎻 🏀 🏈 ⚽ ⚾ 🥎 🎯 🏆)' # Random emoji
+alias random-art='curl -s https://artii.herokuapp.com/make?text=$(shuf -n 1 -e "HELLO" "FUN" "COOL" "AWESOME" "RAD")' # Random ASCII art
+
+# ==============================================================================
+# EASTER EGGS & TROLLS (Enhanced)
+# ==============================================================================
+
+### Easter Eggs (PRESERVED + Enhanced)
+alias troll='echo "Your system will self-destruct in 10 seconds... kidding!"'  # PRESERVED - Terminal troll
+alias shake='echo "Terminal shake activated!" | pv -qL 20 | lolcat'            # PRESERVED - Shaking effect
+alias hidden='echo "You found the hidden alias!" | cowsay | lolcat'            # PRESERVED - Hidden message
+
+### Fun Trolls & Jokes
+alias fake-update='echo "Updating system..." && sleep 2 && echo "Just kidding! 😄"' # Fake update
+alias fake-hack='echo "Hacking NASA..." && sleep 1 && echo "Access granted! 🚀" && sleep 1 && echo "Just kidding! 😆"' # Fake hacking
+alias surprise='curl -s https://wttr.in/Moon | head -7' # Moon weather surprise
+alias rickroll='echo "Never gonna give you up! 🎵🎶"' # Rickroll text
+alias konami='echo "↑ ↑ ↓ ↓ ← → ← → B A START - Cheat code activated! 🎮"' # Konami code
+
+### Interactive Fun
+alias yes-or-no='echo "Type yes or no:" && read answer && if [[ $answer == "yes" ]]; then echo "Great choice! 👍"; else echo "Maybe next time! 🤔"; fi'
+alias magic-word='echo "Say the magic word:" && read word && if [[ $word == "please" ]]; then echo "✨ Magic activated! ✨"; else echo "Try again! 🔮"; fi'
+
+# ==============================================================================
+# WEATHER & INFORMATION (Enhanced)
+# ==============================================================================
+
+### Weather & Info (PRESERVED)
+alias weather='weather'    # PRESERVED - Show weather forecast
+alias moon='moon'          # PRESERVED - Current moon phase
+alias horo='horo'          # PRESERVED - Daily horoscope
+
+### Enhanced Information
+alias wttr='curl -s wttr.in'               # Weather with ASCII art
+alias wttr-short='curl -s "wttr.in?format=3"' # Short weather format
+alias moon-phase='curl -s "wttr.in/Moon?format=3"' # Moon phase
+alias world-time='curl -s "http://worldtimeapi.org/api/ip" | jq -r ".datetime, .timezone"' # World time
+alias ip-info='curl -s "http://ip-api.com/json" | jq -r ".country, .city, .isp"' # IP information
+
+# ==============================================================================
+# SOCIAL MEDIA & NEWS (Enhanced)
+# ==============================================================================
+
+### Reddit & News (PRESERVED)
+alias reddit='tuir'            # PRESERVED - Terminal Reddit browser
+alias hackernews='hn'          # PRESERVED - Hacker News feed
+alias trending='trending_coins' # PRESERVED - Trending cryptocurrencies
+
+### Enhanced Social & News
+alias hn-top='curl -s "https://hacker-news.firebaseio.com/v0/topstories.json" | jq ".[0:5]" | xargs -I {} curl -s "https://hacker-news.firebaseio.com/v0/item/{}.json" | jq -r ".title"' # Top HN stories
+alias reddit-random='rtv --subreddit random' # Random subreddit
+alias github-trending='curl -s "https://api.github.com/search/repositories?q=stars:>1000&sort=stars&order=desc" | jq -r ".items[0:3][].full_name"' # GitHub trending
+
+### Social Media Fun
+alias tweet-random='curl -s "https://api.twitter.com/2/tweets/search/recent?query=funny&max_results=1" 2>/dev/null || echo "Twitter API needs authentication"' # Random tweets (needs API key)
+alias meme-generator='curl -s "https://meme-api.herokuapp.com/gimme" | jq -r ".url"' # Random memes
+alias joke-api='curl -s "https://v2.jokeapi.dev/joke/Any?format=txt"' # Random jokes from API
+
+# ==============================================================================
+# MUSIC & AUDIO (Enhanced)
+# ==============================================================================
+
+### Music & Audio (PRESERVED)
+alias music='ncmpcpp'                               # PRESERVED - Terminal music player
+alias ascii-music='mpg123 $1 | pv -qL 20 | lolcat'  # PRESERVED - Music with ASCII effects
+alias youtube-play='yt-dlp -o - $1 | mpv -'         # PRESERVED - YouTube video in terminal
+
+### Enhanced Audio
+alias play-mp3='mpg123'                    # Play MP3 files
+alias play-wav='aplay'                     # Play WAV files
+alias radio='mplayer -playlist'            # Play radio streams
+alias spotify-terminal='spotify-tui'       # Terminal Spotify client (if installed)
+
+### Audio Effects
+alias voice-distort='sox -d -p | sox -p -d pitch -500' # Voice distortion (needs sox)
+alias echo-effect='sox input.wav output.wav echo 0.8 0.7 100 0.3' # Echo effect
+alias robot-voice='sox input.wav output.wav phaser' # Robot voice effect
+
+# ==============================================================================
+# VIDEO & MULTIMEDIA
+# ==============================================================================
+
+### Video Players
+alias youtube-audio='yt-dlp -x --audio-format mp3 $1' # Download YouTube audio
+alias youtube-video='yt-dlp $1'                       # Download YouTube video
+alias stream-video='mpv'                              # Stream video
+alias ascii-video='mpv --vo=caca'                     # ASCII video player
+alias mplayer='mplayer'                               # Classic media player
+
+### Image Display
+alias img-cat='icat'                                  # Display images in terminal (if icat installed)
+alias img-info='identify'                             # Image information (ImageMagick)
+alias img-convert='convert'                           # Image conversion (ImageMagick)
+
+### Screen Recording
+alias record-screen='ffmpeg -f x11grab -s 1920x1080 -i :0.0 output.mp4' # Record screen
+alias record-terminal='asciinema rec'                 # Record terminal session
+alias play-recording='asciinema play'                 # Play recorded session
+
+# ==============================================================================
+# PRODUCTIVITY BREAKS & RELAXATION
+# ==============================================================================
+
+### Relaxation Tools
+alias meditate='echo "Close your eyes, take a deep breath..." && sleep 3 && echo "Feel the calm... 🧘"' # Simple meditation
+alias breathe='echo "Breathe in... hold... breathe out..." && for i in {1..4}; do echo -n "🌬️  "; sleep 1; done && echo "Good! 😊"' # Breathing exercise
+alias zen='echo "Finding inner peace..." && timeout 10 cmatrix || echo "Take a moment to relax! ☯️"' # Zen mode
+
+### Productivity Breaks
+alias pomodoro='echo "🍅 25 minutes work, 5 minutes break. Timer started!" && sleep 1500 && echo "🎉 Break time!"' # Pomodoro timer
+alias break-time='echo "👀 Look away from screen for 20 seconds..." && sleep 20 && echo "✅ Eyes rested!"' # Eye break
+alias stretch='echo "🤸 Time to stretch! Reach for the sky! ⬆️"' # Stretch reminder
+
+### Motivational
+alias motivate='messages=("You got this! 💪" "Keep going! 🚀" "You are awesome! 🌟" "One step at a time! 👣" "Believe in yourself! ✨"); echo "${messages[RANDOM%${#messages[@]}]}"' # Random motivation
+alias success='echo "🎊 Achievement unlocked! 🎊"' # Success celebration
+alias level-up='xp=("100" "250" "500" "1000"); echo "⬆️  Level up! ⬆️  Experience gained: ${xp[RANDOM%${#xp[@]}]} XP"' # Gaming-style progress
+
+# ==============================================================================
+# CREATIVE & ARTISTIC
+# ==============================================================================
+
+### ASCII Art Creation
+alias draw-box='echo "+--------------------+" && for i in {1..8}; do echo "|                    |"; done && echo "+--------------------+"' # Draw a simple box
+alias draw-heart='echo "  ♥   ♥  " && echo "♥     ♥ " && echo "♥       ♥" && echo " ♥     ♥ " && echo "  ♥   ♥  "' # ASCII heart
+
+### Color Experiments
+alias color-test='bash -c "for i in {0..255}; do printf \"\\x1b[38;5;\${i}m%3d \" \$i; if [ \$((i % 16)) -eq 15 ]; then echo; fi; done; echo -e \"\\x1b[0m\""' # Color palette
+alias gradient='for i in {0..23}; do printf "\x1b[48;5;$((16 + $i * 6))m   "; done && echo -e "\x1b[0m"' # Color gradient
+
+### Text Art
+alias christmas-tree='echo "   /\\   " && echo "  /  \\  " && echo " /    \\ " && echo "/      \\" && echo "   ||   " && echo "   ||   "' # Christmas tree
+alias rocket='echo "   /\\   " && echo "  /  \\  " && echo " /    \\ " && echo "|      |" && echo "|  🔥  |" && echo "|      |"' # Rocket ship
+
+# ==============================================================================
+# GAMES COLLECTION (Extended)
+# ==============================================================================
+
+### Puzzle Games
+alias lights-out='lightsout'                # Lights out puzzle
+alias fifteen='fifteen'                     # 15 puzzle
+alias klotski='klotski'                    # Klotski puzzle
+alias mahjong='mahjong'                    # Terminal mahjong
+
+### Card Games
+alias solitaire='solitaire'                 # Terminal solitaire
+alias blackjack='blackjack'                # Terminal blackjack
+alias poker='poker'                        # Terminal poker
+
+### Board Games
+alias monopoly='monopoly'                  # Terminal monopoly
+alias risk='risk'                         # Terminal risk
+alias settlers='settlers'                  # Terminal settlers of catan
+
+### Arcade Games
+alias invaders='invaders'                  # Space invaders
+alias asteroids='asteroids'                # Asteroids
+alias centipede='centipede'               # Centipede
+
+# ==============================================================================
+# INTERNET FUN
+# ==============================================================================
+
+### Web Fun
+alias star-wars='telnet towel.blinkenlights.nl' # Star Wars episode IV
+alias tron='ssh sshtron.zachlatta.com'         # TRON lightcycle game
+alias hackertyper='echo "Initializing hackertyper..." && python3 -c "import random,string; [print(random.choice(string.ascii_letters + string.digits)) for _ in range(100)]"' # Fake hacker typer
+
+### Online Games
+alias chess-online='ssh chess@shazow.net'      # Online chess
+alias gomoku='ssh -t play@ascii.town -- gomoku' # Online gomoku
+alias hangman='ssh -t play@ascii.town -- hangman' # Online hangman
+
+### Fun APIs
+alias dad-joke='curl -s "https://icanhazdadjoke.com/" -H "Accept: text/plain"' # Dad jokes
+alias useless-fact='curl -s "https://uselessfacts.jsph.pl/random.txt"' # Useless facts
+alias bored-activity='curl -s "https://www.boredapi.com/api/activity" | jq -r .activity' # Random activities
+
+# ==============================================================================
+# RELAXATION & MEDITATION
+# ==============================================================================
+
+### Meditation Aids
+alias countdown='for i in {10..1}; do echo -ne "\\rRelax... $i "; sleep 1; done && echo "🧘 Peace achieved!"' # Countdown relaxation
+alias mantra='echo "Om Shanti" | lolcat && sleep 2 && echo "Repeat as needed... 🕉️"' # Simple mantra
+alias mindfulness='echo "Focus on your breath... 🌬️" && timeout 30 bash -c "while true; do echo -ne \".\"; sleep 1; done" && echo "Mindful moment complete! ✨"' # Mindfulness timer
+
+### Calming Effects
+alias waves='timeout 10 cmatrix -C blue 2>/dev/null || echo "Visualize ocean waves... 🌊"' # Ocean waves effect
+alias snowfall='timeout 8 bash -c "flakes=(❄️ ❅ ❆ ❄️ ❅ ❆); while true; do echo -ne \"\\r\${flakes[RANDOM%\${#flakes[@]}]}\"; sleep 0.4; done; echo"' # Snowfall effect
+alias bubbles='timeout 8 bash -c "bubs=(○ ◎ ● ◉ ⬤ ○ ◎ ●); while true; do echo -ne \"\\r\${bubs[RANDOM%\${#bubs[@]}]}\"; sleep 0.25; done; echo"' # Floating bubbles
+
+# ==============================================================================
+# END OF FUN & ENTERTAINMENT ALIASES
+# ==============================================================================

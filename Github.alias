@@ -1,55 +1,377 @@
-# Github Aliases
-# ----------------------------
+# ==============================================================================
+# GitHub & Git Aliases - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive collection of Git and GitHub CLI aliases for efficient development
+# Includes safety features, advanced operations, and workflow optimizations
+#
+# DUAL ALIAS SYSTEM:
+# ==================
+# This file provides BOTH short quick aliases AND long descriptive aliases:
+#
+# SHORT ALIASES (Quick Memory-Friendly):
+#   gs, ga, gc, gp, gl, gco, etc. - Fast to type, easy to remember
+#   Located in "QUICK SHORTCUTS" section at the top
+#
+# LONG ALIASES (Descriptive & Safe):
+#   gstatus, gadd, gcommit, gpush, glog, gcheckout, etc. - Clear meaning, safer
+#   Located in detailed sections below
+#
+# Use short aliases for speed, long aliases for clarity/safety!
+#
+# Sections:
+# - Quick Shortcuts (Memory-Friendly)
+# - Basic Git Operations
+# - Staging & Committing
+# - Branching & Merging
+# - Remote Operations
+# - GitHub CLI Integration
+# - Advanced Git Features
+# - Debugging & Maintenance
+# - Configuration & Setup
+# - Workflow Helpers
+# - Legacy Aliases
+#
+# ==============================================================================
 
-### Git Shortcuts
-alias gc='git commit -a -m'                  # Commit all changes
-alias ga='git add'                           # Stage files
-alias gas='git submodule add'                # Adding submodules
-alias gp='git push'                          # Push changes
-alias gu='git pull'                          # Pull changes
-alias gcl='git clone'                        # Clone repository
-alias gs='git status'                        # Check status
-alias gl='git log --oneline'                 # Compact git log
-alias gd='git diff'                          # Show changes
-alias gb='git branch'                        # List branches
-alias gco='git checkout'                     # Switch branches
-alias greset='git reset --hard'              # Hard reset changes
-alias gclean='git clean -fd'                 # Remove untracked files
+# ==============================================================================
+# BASIC GIT OPERATIONS
+# ==============================================================================
 
-### Advanced Git
-alias gstash='git stash'                     # Stash changes
-alias gstash-pop='git stash pop'             # Pop the last stash
-alias gmerge='git merge'                     # Merge branches
-alias grebase='git rebase'                   # Rebase changes
-alias gamend='git commit --amend --no-edit'  # Amend last commit
-alias gundo='git reset HEAD~1'               # Undo last commit (keep changes)
+### Repository Management
+alias gstatus='git status --short --branch'          # Compact status with branch info
+alias glog='git log --oneline --graph --decorate'    # Visual log with branches/tags
+alias gdiff='git diff --word-diff=color'             # Highlight word-level changes
+alias gshow='git show --stat --pretty=fuller'        # Detailed commit information
+alias gblame='git blame'                             # Show who changed each line
+alias greflog='git reflog'                           # Show reference log
 
-### GitHub Shortcuts
-alias ghclone='gh repo clone'                # Clone a GitHub repository
-alias ghcreate='gh repo create'              # Create a new GitHub repository
-alias ghview='gh repo view'                  # View repository details
-alias ghpr='gh pr create'                    # Create a pull request
-alias ghpr-list='gh pr list'                 # List open pull requests
-alias ghpr-view='gh pr view'                 # View pull request details
-alias ghissue='gh issue create'              # Create a GitHub issue
-alias ghissue-list='gh issue list'           # List issues in repository
-alias ghissue-view='gh issue view'           # View issue details
+### Navigation & Information
+alias gbranch='git branch --all --verbose'           # List all branches with details
+alias gremote='git remote --verbose'                 # Show remote repositories
+alias gtags='git tag --list --sort=-version:refname' # List all tags chronologically
+alias gstats='git shortlog --summary --numbered'     # Contribution statistics
 
-### Git Log and Diff Enhancements
-alias glog='git log --graph --decorate --oneline --all'  # Detailed log with graph
-alias gdiff='git diff --word-diff=color'                 # Highlight word-level diffs
-alias gshow='git show --pretty=fuller'                   # Show commit details
+# ==============================================================================
+# STAGING & COMMITTING
+# ==============================================================================
 
-### Git Collaboration
-alias gfetch='git fetch --all --prune'       # Fetch updates and prune stale branches
-alias gsync='git pull --rebase && git push'  # Sync local branch with remote
-alias grename='git branch -m'                # Rename current branch
-alias gdeletes='git branch -d'               # Delete local branch
-alias grmremote='git push origin --delete'   # Remove remote branch
+### Staging Operations
+alias gadd='git add'                                 # Stage files
+alias gadd-all='git add --all'                       # Stage all changes
+alias gadd-patch='git add --patch'                   # Interactive staging
+alias gadd-interactive='git add --interactive'       # Interactive staging menu
 
-### Git Aliases for Specific Workflows
-alias gfix='git commit --fixup'              # Mark commit for autosquash
-alias gsquash='git rebase -i --autosquash'   # Interactive rebase with autosquash
-alias gtag='git tag -a'                      # Create annotated tag
-alias gtags='git tag'                        # List all tags
-alias gtagpush='git push origin --tags'      # Push all tags to remote
+### Committing
+alias gcommit='git commit --verbose'                 # Commit with diff preview
+alias gcommit-all='git commit --all --verbose'       # Commit all changes
+alias gamend='git commit --amend --no-edit'          # Amend last commit (keep message)
+alias gamend-edit='git commit --amend'               # Amend last commit (edit message)
+alias gfixup='git commit --fixup'                    # Create fixup commit for autosquash
+
+### Undo Operations (Safe)
+alias guncommit='git reset --soft HEAD~1'            # Undo last commit, keep changes
+alias gunstage='git reset HEAD'                      # Unstage files, keep changes
+alias gunstage-all='git reset HEAD -- .'             # Unstage all files
+
+# ==============================================================================
+# BRANCHING & MERGING
+# ==============================================================================
+
+### Branch Operations
+alias gcheckout='git checkout'                       # Switch branches
+alias gbranch-new='git checkout -b'                  # Create and switch to new branch
+alias gbranch-delete='git branch --delete'           # Delete local branch (safe)
+alias gbranch-force-delete='git branch --delete --force'  # Force delete local branch
+alias gbranch-rename='git branch --move'             # Rename current branch
+
+### Merging & Rebasing
+alias gmerge='git merge'                             # Merge branches
+alias gmerge-no-ff='git merge --no-ff'               # Merge with merge commit
+alias grebase='git rebase'                           # Rebase current branch
+alias grebase-interactive='git rebase --interactive' # Interactive rebase
+alias grebase-continue='git rebase --continue'       # Continue rebase after conflict
+alias grebase-abort='git rebase --abort'             # Abort rebase
+
+### Advanced Rebasing
+alias gsquash='git rebase --interactive --autosquash'  # Autosquash fixup commits
+alias grebase-continue='git rebase --continue'       # Continue rebase
+alias grebase-skip='git rebase --skip'               # Skip current patch
+alias grebase-abort='git rebase --abort'             # Abort rebase
+
+# ==============================================================================
+# REMOTE OPERATIONS
+# ==============================================================================
+
+### Remote Repository Management
+alias gclone='git clone'                             # Clone repository
+alias gfetch='git fetch --all --prune'               # Fetch all, prune stale branches
+alias gpull='git pull --rebase'                      # Pull with rebase (safer)
+alias gpush='git push'                               # Push current branch
+alias gpush-set='git push --set-upstream origin'     # Push and set upstream
+alias gpush-force='git push --force-with-lease'      # Force push with safety
+alias gpush-tags='git push --tags'                   # Push all tags
+
+### Remote Branch Management
+alias gremote-add='git remote add'                   # Add remote repository
+alias gremote-remove='git remote remove'             # Remove remote repository
+alias gremote-rename='git remote rename'             # Rename remote
+alias gtrack='git branch --set-upstream-to'          # Track remote branch
+
+### Synchronization
+alias gsync='git pull --rebase && git push'          # Sync with remote (rebase strategy)
+alias gsync-merge='git pull && git push'             # Sync with remote (merge strategy)
+
+# ==============================================================================
+# GITHUB CLI INTEGRATION
+# ==============================================================================
+
+### Repository Operations
+alias ghclone='gh repo clone'                        # Clone GitHub repository
+alias ghcreate='gh repo create'                      # Create new GitHub repository
+alias ghfork='gh repo fork'                          # Fork a repository
+alias ghview='gh repo view'                          # View repository in browser
+alias ghview-web='gh repo view --web'                # Open repository in browser
+alias ghlist='gh repo list'                          # List your repositories
+
+### Repository Management
+alias gharchive='gh repo archive'                    # Archive repository
+alias ghdelete='gh repo delete'                      # Delete repository (CAUTION!)
+alias ghrename='gh repo edit --name'                 # Rename repository
+alias ghprivate='gh repo edit --visibility private'  # Make repository private
+alias ghpublic='gh repo edit --visibility public'    # Make repository public
+
+### Pull Request Operations
+alias ghpr-create='gh pr create'                     # Create pull request
+alias ghpr-list='gh pr list'                         # List pull requests
+alias ghpr-view='gh pr view'                         # View pull request details
+alias ghpr-checkout='gh pr checkout'                 # Checkout pull request
+alias ghpr-merge='gh pr merge'                       # Merge pull request
+alias ghpr-close='gh pr close'                       # Close pull request
+alias ghpr-reopen='gh pr reopen'                     # Reopen pull request
+
+### Issue Operations
+alias ghissue-create='gh issue create'               # Create new issue
+alias ghissue-list='gh issue list'                   # List issues
+alias ghissue-view='gh issue view'                   # View issue details
+alias ghissue-close='gh issue close'                 # Close issue
+alias ghissue-reopen='gh issue reopen'               # Reopen issue
+alias ghissue-edit='gh issue edit'                   # Edit issue
+
+### Authentication & Configuration
+alias ghauth-login='gh auth login'                   # Login to GitHub
+alias ghauth-logout='gh auth logout'                 # Logout from GitHub
+alias ghauth-status='gh auth status'                 # Check authentication status
+alias ghconfig='gh config'                           # GitHub CLI configuration
+
+### Gist Operations
+alias ghgist-create='gh gist create'                 # Create gist
+alias ghgist-list='gh gist list'                     # List gists
+alias ghgist-view='gh gist view'                     # View gist
+alias ghgist-edit='gh gist edit'                     # Edit gist
+
+# ==============================================================================
+# ADVANCED GIT FEATURES
+# ==============================================================================
+
+### Stashing
+alias gstash='git stash push -m'                     # Stash with message
+alias gstash-list='git stash list'                   # List all stashes
+alias gstash-pop='git stash pop'                     # Pop latest stash
+alias gstash-apply='git stash apply'                 # Apply latest stash (keep in list)
+alias gstash-drop='git stash drop'                   # Drop latest stash
+alias gstash-clear='git stash clear'                 # Clear all stashes
+
+### Bisect (Bug Hunting)
+alias gbisect-start='git bisect start'               # Start bisect session
+alias gbisect-good='git bisect good'                 # Mark commit as good
+alias gbisect-bad='git bisect bad'                   # Mark commit as bad
+alias gbisect-reset='git bisect reset'               # End bisect session
+
+### Worktrees
+alias gworktree-list='git worktree list'             # List worktrees
+alias gworktree-add='git worktree add'               # Add new worktree
+alias gworktree-remove='git worktree remove'         # Remove worktree
+alias gworktree-prune='git worktree prune'           # Clean up worktrees
+
+### Submodules
+alias gsub-add='git submodule add'                   # Add submodule
+alias gsub-init='git submodule init'                 # Initialize submodules
+alias gsub-update='git submodule update'             # Update submodules
+alias gsub-status='git submodule status'             # Check submodule status
+
+### Tagging
+alias gtag-create='git tag -a'                       # Create annotated tag
+alias gtag-lightweight='git tag'                     # Create lightweight tag
+alias gtag-delete='git tag --delete'                 # Delete local tag
+alias gtag-push='git push origin --tags'             # Push all tags
+alias gtag-push-single='git push origin'             # Push single tag
+
+# ==============================================================================
+# DEBUGGING & MAINTENANCE
+# ==============================================================================
+
+### Repository Health
+alias gfsck='git fsck'                               # Check repository integrity
+alias ggc='git gc --aggressive'                      # Aggressive garbage collection
+alias gprune='git prune'                             # Remove unreachable objects
+
+### Cleanup Operations (Use with caution!)
+alias gclean-dry='git clean --dry-run'               # Preview files to be cleaned
+alias gclean-untracked='git clean -fd'                # Remove untracked files
+alias gclean-ignored='git clean -fdX'                 # Remove ignored files
+alias gclean-all='git clean -fdx'                     # Remove all untracked/ignored files
+
+### Reset Operations (Use with extreme caution!)
+alias greset-soft='git reset --soft HEAD~1'           # Soft reset (keep changes staged)
+alias greset-mixed='git reset HEAD~1'                 # Mixed reset (keep changes unstaged)
+alias greset-hard='git reset --hard HEAD~1'           # Hard reset (lose changes!)
+alias greset-hard-origin='git reset --hard origin/$(git branch --show-current)'  # Reset to remote
+
+### File Operations
+alias grm='git rm'                                   # Remove files from git
+alias grm-cached='git rm --cached'                    # Remove from index only
+alias gmv='git mv'                                   # Move/rename files
+
+# ==============================================================================
+# CONFIGURATION & SETUP
+# ==============================================================================
+
+### Git Configuration Helpers
+alias gconfig-list='git config --list --show-origin'  # Show all git config
+alias gconfig-global='git config --global --list'     # Show global config
+alias gconfig-local='git config --local --list'       # Show local config
+
+alias gconfig-user='git config user.name && git config user.email'  # Show user info
+alias gconfig-set-user='git config user.name'          # Set username
+alias gconfig-set-email='git config user.email'        # Set email
+
+alias gconfig-editor='git config core.editor'          # Show/set default editor
+alias gconfig-merge-tool='git config merge.tool'       # Show/set merge tool
+alias gconfig-diff-tool='git config diff.tool'         # Show/set diff tool
+
+### Git Hooks
+alias ghooks-path='git config core.hooksPath'         # Show hooks path
+alias ghooks-install='chmod +x .git/hooks/*'           # Make hooks executable
+
+### Aliases Management
+alias galiases='git config --get-regexp alias'        # List all git aliases
+alias galias-add='git config --global alias.'         # Add global alias
+
+# ==============================================================================
+# WORKFLOW HELPERS
+# ==============================================================================
+
+### Daily Workflow
+alias gmorning='git status && git fetch --all'        # Start work routine
+alias gevening='git add . && git status'              # End work routine
+alias gready='git add . && git commit -m "Ready for review"'  # Mark work ready
+
+### Feature Branch Workflow
+alias gfeature-start='git checkout -b feature/'       # Start feature branch
+alias gfeature-finish='git checkout main && git merge --no-ff feature/'  # Finish feature
+
+### Hotfix Workflow
+alias ghotfix-start='git checkout -b hotfix/'         # Start hotfix branch
+alias ghotfix-finish='git checkout main && git merge --no-ff hotfix/'  # Finish hotfix
+
+### Release Workflow
+alias grelease-start='git checkout -b release/'       # Start release branch
+alias grelease-finish='git checkout main && git merge --no-ff release/ && git tag -a'  # Finish release
+
+### Code Review Helpers
+alias greview-diff='git diff main..HEAD'              # Show changes for review
+alias greview-log='git log --oneline main..HEAD'      # Show commits for review
+
+# ==============================================================================
+# SAFETY & UTILITY FUNCTIONS
+# ==============================================================================
+
+### Safe Operations with Confirmation
+alias greset-hard-safe='echo "WARNING: This will permanently delete uncommitted changes!" && read -p "Continue? (y/N): " confirm && [[ $confirm == [yY] ]] && git reset --hard HEAD~1'
+
+alias gclean-safe='echo "WARNING: This will delete untracked files!" && read -p "Continue? (y/N): " confirm && [[ $confirm == [yY] ]] && git clean -fd'
+
+### Quick Info Functions
+alias gcurrent-branch='git branch --show-current'     # Show current branch name
+alias glast-commit='git log -1 --oneline'             # Show last commit
+alias guncommitted='git status --porcelain'           # Show uncommitted changes
+alias gstaged='git diff --cached --name-only'         # Show staged files
+
+### Repository Information
+alias grepo-info='echo "Repository: $(basename $(git rev-parse --show-toplevel))" && echo "Branch: $(git branch --show-current)" && echo "Remote: $(git remote get-url origin 2>/dev/null || echo "No remote")"'
+alias gcontributors='git shortlog -sn --no-merges'    # List contributors by commits
+
+# ==============================================================================
+# QUICK SHORTCUTS (Memory-Friendly Aliases)
+# ==============================================================================
+# Short, easy-to-remember aliases for daily use
+# These are quick to type but may be less descriptive
+
+### Essential Git Operations (Short)
+alias gs='git status --short'                        # Quick status
+alias ga='git add'                                   # Quick add
+alias gaa='git add --all'                            # Add all files
+alias gc='git commit -m'                             # Quick commit with message
+alias gca='git commit --amend --no-edit'             # Quick amend
+alias gp='git push'                                  # Quick push
+alias gpf='git push --force-with-lease'              # Force push (safe)
+alias gl='git log --oneline -10'                     # Quick log (last 10)
+alias gd='git diff'                                  # Quick diff
+alias gds='git diff --staged'                        # Staged diff
+alias gb='git branch'                                # Quick branch list
+alias gco='git checkout'                             # Quick checkout
+alias gcb='git checkout -b'                          # Create and checkout branch
+alias gm='git merge'                                 # Quick merge
+alias gr='git rebase'                                # Quick rebase
+alias gf='git fetch --all'                           # Quick fetch all
+alias gpl='git pull'                                 # Quick pull
+alias gcl='git clone'                                # Quick clone
+
+### GitHub CLI (Short)
+alias ghc='gh repo clone'                            # Clone repo
+alias ghv='gh repo view --web'                       # View repo in browser
+alias ghp='gh pr create'                             # Create PR
+alias ghl='gh pr list'                               # List PRs
+alias ghi='gh issue create'                          # Create issue
+alias ghis='gh issue list'                           # List issues
+
+### Stashing (Short)
+alias gss='git stash'                                # Stash changes
+alias gsp='git stash pop'                            # Pop stash
+alias gsa='git stash apply'                          # Apply stash
+
+### Branch Operations (Short)
+alias gbd='git branch --delete'                      # Delete branch
+alias gbm='git branch --move'                        # Move/rename branch
+
+### Remote Operations (Short)
+alias gra='git remote add'                           # Add remote
+alias grr='git remote remove'                         # Remove remote
+alias grv='git remote --verbose'                      # View remotes
+
+### Utility Shortcuts
+alias gclean='git clean -fd'                         # Clean untracked (use carefully!)
+alias greset='git reset --hard HEAD~1'               # Hard reset (use carefully!)
+alias groot='cd $(git rev-parse --show-toplevel)'    # Go to repo root
+alias gurl='git remote get-url origin'               # Get repo URL
+alias gsi='git status --ignored'                     # Status with ignored files
+alias gbr='git branch -r'                            # Remote branches only
+alias gtrack='git branch --set-upstream-to=origin/$(git branch --show-current)'  # Track current branch
+alias guntrack='git branch --unset-upstream'         # Untrack current branch
+alias gsize='git count-objects -vH'                  # Repository size info
+
+# ==============================================================================
+# LEGACY ALIASES (for backward compatibility)
+# ==============================================================================
+
+# Keep old aliases for users who expect them (may conflict with new short aliases)
+alias gs_old='git status'                            # Traditional status (conflicts with gs)
+alias ga_old='git add'                               # Traditional add (conflicts with ga)
+alias gc_old='git commit'                            # Traditional commit (conflicts with gc)
+alias gp_old='git push'                              # Traditional push (conflicts with gp)
+alias gl_old='git log --oneline'                     # Traditional log (conflicts with gl)
+
+# ==============================================================================
+# END OF GITHUB ALIASES
+# ==============================================================================

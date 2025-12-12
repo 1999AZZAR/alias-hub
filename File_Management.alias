@@ -1,78 +1,393 @@
-# File Management & Operations
-# ----------------------------
+# ==============================================================================
+# File Management & Operations - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive file management aliases with modern tools and safety features
+# Preserves existing short aliases for muscle memory while adding extensive new features
+#
+# Sections:
+# - Archive & Compression
+# - Directory Listing (PRESERVED - Your muscle memory aliases)
+# - File Operations (Basic)
+# - Advanced File Operations
+# - File Permissions & Ownership
+# - File Search & Discovery
+# - Directory Management
+# - File Content Operations
+# - Backup & Recovery
+# - Batch Operations
+# - System File Operations
+# - Development File Operations
+#
+# ==============================================================================
 
-### Archive & compression
-alias x='extract'                             # extract any archive
-alias arc='archive'                           # create any archive
+# ==============================================================================
+# ARCHIVE & COMPRESSION (Enhanced)
+# ==============================================================================
 
-### Modern ls replacement with icons
-alias ls='exa --icons --group-directories-first'
-alias ll='exa -l --icons --group-directories-first'     # Long list
-alias la='exa -la --icons --group-directories-first'    # Show hidden files
-alias lt='exa -T --icons --group-directories-first'     # Tree view
-alias lm='exa -l --sort=modified'                       # Sort by modification time
-alias lz='exa -l --sort=size'                           # Sort by size
-alias lr='exa -R'                                       # Recursive list
-alias lx='exa -l --sort=extension'                      # Sort by extension
-alias ld='exa -D'                                       # List directories only
-alias lf='exa -f'                                       # List files only
-alias l.='exa -d .*'                                    # List hidden files only
+### Archive Operations (Preserved + Enhanced)
+alias x='extract'                             # Extract any archive (PRESERVED)
+alias arc='archive'                           # Create any archive (PRESERVED)
 
-### File operations with safety and information
-alias rm='rm -iv'                            # Interactive and verbose removal
-alias cp='cp -iv'                            # Interactive and verbose copy
-alias mv='mv -iv'                            # Interactive and verbose move
-alias ln='ln -iv'                            # Interactive and verbose link
-alias mkdir='mkdir -pv'                      # Make parent dirs, verbose
-alias chown='sudo chown --preserve-root'     # Prevent root ownership change
-alias chmod='sudo chmod --preserve-root'     # Prevent root permission change
-alias rmdir='rmdir -v'                       # Verbose directory removal
+### Advanced Archive Operations
+alias tar-gz='tar -czf'                       # Create gzip tar archive
+alias tar-bz2='tar -cjf'                      # Create bzip2 tar archive
+alias tar-xz='tar -cJf'                       # Create xz tar archive
+alias tar-extract='tar -xf'                   # Extract tar archive
+alias zip-create='zip -r'                     # Create zip archive
+alias zip-extract='unzip'                     # Extract zip archive
+alias 7z-create='7z a'                        # Create 7zip archive
+alias 7z-extract='7z x'                       # Extract 7zip archive
+alias rar-create='rar a'                      # Create rar archive
+alias rar-extract='unrar x'                   # Extract rar archive
 
-### Advanced file operations
-alias trash='gio trash'                      # Move to trash instead of delete
-alias restore='gio trash --restore'          # Restore from trash
-alias empty-trash='gio trash --empty'        # Empty trash
-alias symlink='ln -s'                        # Create symbolic link
-alias hardlink='ln'                          # Create hard link
-alias newest='find . -type f -printf "%T@ %p\n" | sort -n | tail -10 | cut -f2- -d" "'  # 10 newest files
-alias oldest='find . -type f -printf "%T@ %p\n" | sort -n | head -10 | cut -f2- -d" "'  # 10 oldest files
-alias dups='find . -type f -exec md5sum {} \; | sort | uniq -d -w32'                    # Find duplicate files
-alias big='find . -type f -size +100M'       # Find files over 100MB
-alias small='find . -type f -size -100k'     # Find files under 100KB
-alias empty='find . -type f -empty'          # Find empty files
-alias dirsize='du -sh * | sort -hr'          # Directory sizes, sorted
+### Archive Information
+alias tar-list='tar -tf'                      # List tar contents
+alias zip-list='unzip -l'                     # List zip contents
+alias 7z-list='7z l'                          # List 7zip contents
 
-### File permissions and ownership
-alias mx='chmod a+x'                         # Make executable
-alias 000='chmod 000'                        # None
-alias 644='chmod 644'                        # User read/write
-alias 666='chmod 666'                        # All read/write
-alias 755='chmod 755'                        # User all, group/other read/execute
-alias 777='chmod 777'                        # All all
-alias www='sudo chown www-data:www-data'     # Web server ownership
-alias own='sudo chown $USER:$USER'           # Take ownership
+# ==============================================================================
+# DIRECTORY LISTING (PRESERVED - Your Muscle Memory Aliases)
+# ==============================================================================
 
-### File searching and content viewing
-alias ff='find . -type f -name'              # Find files by name
-alias fd='find . -type d -name'              # Find directories by name
-alias count='wc -l'                          # Count lines
-alias dus='du -sh * | sort -h'               # Sort by human-readable size
+### Modern ls replacement with icons (ALL PRESERVED)
+alias ls='exa --icons --group-directories-first'                    # PRESERVED
+alias ll='exa -l --icons --group-directories-first'                 # PRESERVED - Long list
+alias la='exa -la --icons --group-directories-first'                # PRESERVED - Show hidden files
+alias lt='exa -T --icons --group-directories-first'                 # PRESERVED - Tree view
+alias lm='exa -l --sort=modified'                                   # PRESERVED - Sort by modification time
+alias lz='exa -l --sort=size'                                       # PRESERVED - Sort by size
+alias lr='exa -R'                                                   # PRESERVED - Recursive list
+alias lx='exa -l --sort=extension'                                  # PRESERVED - Sort by extension
+alias ld='exa -D'                                                   # PRESERVED - List directories only
+alias lf='exa -f'                                                   # PRESERVED - List files only
+alias l.='exa -d .*'                                                # PRESERVED - List hidden files only
 
-### Quick file operations
-alias touchx='touch && chmod +x'             # Create and make executable
-alias append='cat >> '                       # Append to file
-alias view='less'                            # View file content
+### Additional Listing Shortcuts (Safe to add - different from your muscle memory)
+alias l1='exa -1'                           # Single column
+alias lg='exa --git'                        # Show git status
+alias lh='exa -lh'                          # Human readable sizes
+alias lS='exa -l --sort=size --reverse'     # Largest files first
+alias lt5='exa -T --level=5'                # Tree with depth limit
+alias ltree='exa -T --git-ignore'           # Tree ignoring git files
 
-### Directory helpers
-alias mkcd='mkcd'                              # make directory & cd
-alias back='back'                              # go back in directory
-alias findc='findc'                            # find content in files
-alias rename-ext='rename_ext'                  # rename file extensions
+# ==============================================================================
+# FILE OPERATIONS (Basic - Enhanced Safety)
+# ==============================================================================
 
-### Archive handling functions
-# Extract various archive formats
-# Create archives based on extension
-# Show files after changing directory
-# Go back x directories
+### Core File Operations (Enhanced with safety)
+alias rm='rm -iv'                            # PRESERVED - Interactive and verbose removal
+alias cp='cp -iv'                            # PRESERVED - Interactive and verbose copy
+alias mv='mv -iv'                            # PRESERVED - Interactive and verbose move
+alias ln='ln -iv'                            # PRESERVED - Interactive and verbose link
+alias mkdir='mkdir -pv'                      # PRESERVED - Make parent dirs, verbose
+alias rmdir='rmdir -v'                       # PRESERVED - Verbose directory removal
 
-### File operations with safety and information
+### Safe File Operations (New)
+alias rm-safe='rm -I'                        # Safer removal (prompts for 3+ files)
+alias cp-backup='cp --backup=numbered'       # Copy with numbered backups
+alias mv-backup='mv --backup=numbered'       # Move with numbered backups
+alias cp-preserve='cp -a'                    # Archive copy (preserve all attributes)
+alias rsync-copy='rsync -avh --progress'     # Rsync with progress
+alias rsync-sync='rsync -avh --delete'       # Sync directories
+
+### Batch File Operations
+alias rename='rename'                        # Bulk rename files
+alias rename-upper='rename "y/a-z/A-Z/"'     # Convert to uppercase
+alias rename-lower='rename "y/A-Z/a-z/"'     # Convert to lowercase
+alias rename-space='rename "s/ /_/g"'        # Replace spaces with underscores
+alias batch-chmod='find . -type f -exec chmod' # Batch chmod
+
+# ==============================================================================
+# ADVANCED FILE OPERATIONS
+# ==============================================================================
+
+### File Linking & Special Operations
+alias symlink='ln -s'                        # PRESERVED - Create symbolic link
+alias hardlink='ln'                          # PRESERVED - Create hard link
+alias symlink-relative='ln -sr'              # Create relative symbolic link
+alias link-info='ls -la'                     # Show link information
+
+### Trash Operations (Enhanced)
+alias trash='gio trash'                      # PRESERVED - Move to trash instead of delete
+alias restore='gio trash --restore'          # PRESERVED - Restore from trash
+alias empty-trash='gio trash --empty'        # PRESERVED - Empty trash
+alias trash-list='gio trash --list'          # List trash contents
+alias trash-size='du -sh ~/.local/share/Trash' # Show trash size
+
+### File Content Operations
+alias head10='head -10'                      # First 10 lines
+alias tail10='tail -10'                      # Last 10 lines
+alias tailf='tail -f'                        # Follow file changes
+alias catn='cat -n'                          # Cat with line numbers
+alias tac='tac'                              # Reverse cat (last line first)
+
+### File Comparison
+alias diff-side='diff --side-by-side'        # Side-by-side diff
+alias diff-color='diff --color'              # Colored diff
+alias diff-unified='diff -u'                 # Unified diff format
+alias meld='meld'                            # Visual diff tool (if installed)
+
+# ==============================================================================
+# FILE PERMISSIONS & OWNERSHIP (Enhanced)
+# ==============================================================================
+
+### Quick Permissions (Preserved + Enhanced)
+alias mx='chmod a+x'                         # PRESERVED - Make executable
+alias 000='chmod 000'                        # PRESERVED - None
+alias 644='chmod 644'                        # PRESERVED - User read/write
+alias 666='chmod 666'                        # PRESERVED - All read/write
+alias 755='chmod 755'                        # PRESERVED - User all, group/other read/execute
+alias 777='chmod 777'                        # PRESERVED - All all
+
+### Advanced Permissions
+alias perm-exec='chmod +x'                   # Add execute permission
+alias perm-read='chmod +r'                   # Add read permission
+alias perm-write='chmod +w'                  # Add write permission
+alias perm-none='chmod -rwx'                 # Remove all permissions
+alias perm-sticky='chmod +t'                 # Set sticky bit
+alias perm-suid='chmod +s'                   # Set SUID bit
+alias perm-sgid='chmod +s'                   # Set SGID bit
+
+### Ownership Operations (Enhanced)
+alias chown='sudo chown --preserve-root'     # PRESERVED - Prevent root ownership change
+alias chmod='sudo chmod --preserve-root'     # PRESERVED - Prevent root permission change
+alias www='sudo chown www-data:www-data'     # PRESERVED - Web server ownership
+alias own='sudo chown $USER:$USER'           # PRESERVED - Take ownership
+
+### Advanced Ownership
+alias chown-recursive='sudo chown -R'        # Recursive ownership change
+alias chgrp='sudo chgrp'                     # Change group ownership
+alias chgrp-recursive='sudo chgrp -R'        # Recursive group change
+alias take-own='sudo chown -R $USER:$USER'   # Take ownership of directory tree
+
+### Permission Queries
+alias perm-show='ls -l'                      # Show permissions
+alias perm-octal='stat -c "%a %n"'           # Show octal permissions
+alias perm-who='ls -l | awk "{print \$1, \$3, \$4, \$9}"' # Show owner/group for files
+
+# ==============================================================================
+# FILE SEARCH & DISCOVERY
+# ==============================================================================
+
+### File Search (Enhanced)
+alias ff='find . -type f -name'              # PRESERVED - Find files by name
+alias fd='find . -type d -name'              # PRESERVED - Find directories by name
+alias find-exec='find . -type f -executable' # Find executable files
+alias find-empty='find . -empty'             # Find empty files/directories
+alias find-today='find . -type f -newermt $(date +%Y-%m-%d)' # Files modified today
+alias find-week='find . -type f -mtime -7'   # Files modified in last week
+alias find-month='find . -type f -mtime -30' # Files modified in last month
+
+### Content Search
+alias grep-case='grep -i'                    # Case-insensitive grep
+alias grep-line='grep -n'                    # Show line numbers
+alias grep-word='grep -w'                    # Whole word match
+alias grep-invert='grep -v'                  # Invert match
+alias grep-files='grep -l'                   # Show only filenames
+alias grep-count='grep -c'                   # Count matches
+
+### File Type Search
+alias find-pictures='find . \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.bmp" \)' # Find images
+alias find-videos='find . \( -iname "*.mp4" -o -iname "*.avi" -o -iname "*.mkv" -o -iname "*.mov" \)'   # Find videos
+alias find-audio='find . \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.flac" \)'                     # Find audio
+alias find-documents='find . \( -iname "*.pdf" -o -iname "*.doc" -o -iname "*.txt" \)'                  # Find documents
+alias find-scripts='find . \( -iname "*.sh" -o -iname "*.py" -o -iname "*.js" \)'                       # Find scripts
+
+# ==============================================================================
+# FILE SIZE & ORGANIZATION ANALYSIS
+# ==============================================================================
+
+### Size Analysis (Enhanced)
+alias count='wc -l'                          # PRESERVED - Count lines
+alias dus='du -sh * | sort -h'               # PRESERVED - Sort by human-readable size
+alias dirsize='du -sh * | sort -hr'          # PRESERVED - Directory sizes, sorted
+
+### Advanced Size Operations
+alias du-sort='du -sh * | sort -h'           # Sort directories by size
+alias du-human='du -h'                       # Human readable sizes
+alias du-total='du -shc *'                   # Total size with summary
+alias df-human='df -h'                       # Disk free in human readable
+alias df-inodes='df -i'                      # Show inode usage
+
+### File Analysis
+alias newest='find . -type f -printf "%T@ %p\n" | sort -n | tail -10 | cut -f2- -d" "'  # PRESERVED - 10 newest files
+alias oldest='find . -type f -printf "%T@ %p\n" | sort -n | head -10 | cut -f2- -d" "'  # PRESERVED - 10 oldest files
+alias largest='find . -type f -exec ls -lh {} \; | sort -k5 -hr | head -10'              # 10 largest files
+alias smallest='find . -type f -exec ls -lh {} \; | sort -k5 -h | head -10'             # 10 smallest files
+
+### Duplicate Detection
+alias dups='find . -type f -exec md5sum {} \; | sort | uniq -d -w32'                    # PRESERVED - Find duplicate files
+alias dups-names='find . -type f -exec basename {} \; | sort | uniq -d'                # Find files with duplicate names
+alias dups-size='find . -type f -size $(stat -c%s "$1") ! -path "$1" -exec ls -lh {} \;' # Find same size files
+
+# ==============================================================================
+# FILE SIZE FILTERING (Enhanced)
+# ==============================================================================
+
+alias big='find . -type f -size +100M'       # PRESERVED - Find files over 100MB
+alias small='find . -type f -size -100k'     # PRESERVED - Find files under 100KB
+alias empty='find . -type f -empty'          # PRESERVED - Find empty files
+
+### Size Ranges
+alias big-1g='find . -type f -size +1G'      # Files over 1GB
+alias big-500m='find . -type f -size +500M'  # Files over 500MB
+alias big-50m='find . -type f -size +50M'    # Files over 50MB
+alias small-1m='find . -type f -size -1M'    # Files under 1MB
+alias small-500k='find . -type f -size -500k' # Files under 500KB
+alias small-10k='find . -type f -size -10k'  # Files under 10KB
+
+# ==============================================================================
+# DIRECTORY MANAGEMENT
+# ==============================================================================
+
+### Directory Operations
+alias mkcd='mkcd'                              # PRESERVED - make directory & cd
+alias back='back'                              # PRESERVED - go back in directory
+alias cd..='cd ..'                            # Go up one directory
+alias cd...='cd ../..'                        # Go up two directories
+alias cd....='cd ../../..'                    # Go up three directories
+alias cdh='cd ~'                              # Go to home directory
+alias cdr='cd /'                              # Go to root directory
+alias cdt='cd /tmp'                           # Go to temp directory
+
+### Directory Information
+alias pwd-long='pwd -P'                       # Show physical path (resolve symlinks)
+alias dirs='dirs -v'                          # Show directory stack
+alias pushd='pushd'                           # Push directory to stack
+alias popd='popd'                             # Pop directory from stack
+
+### Directory Creation
+alias mkdir-parents='mkdir -p'                # Create parent directories
+alias mkdir-parents-verbose='mkdir -pv'       # Create with verbose output
+alias mkdir-temp='mktemp -d'                  # Create temporary directory
+
+# ==============================================================================
+# FILE CONTENT OPERATIONS
+# ==============================================================================
+
+### Content Viewing (Enhanced)
+alias view='less'                            # PRESERVED - View file content
+alias view-bat='bat'                         # Use bat for syntax highlighting (if available)
+alias head='head'                            # First lines
+alias tail='tail'                            # Last lines
+alias tail-follow='tail -f'                  # Follow file changes
+alias cat-less='cat | less'                  # Cat through less
+alias cat-numbered='cat -n'                  # Cat with line numbers
+
+### File Creation & Editing
+alias touchx='touch && chmod +x'             # PRESERVED - Create and make executable
+alias touch-date='touch -t $(date +%Y%m%d%H%M.%S)' # Touch with current timestamp
+alias append='cat >> '                       # PRESERVED - Append to file
+
+### Content Manipulation
+alias dos2unix='dos2unix'                    # Convert DOS to Unix line endings
+alias unix2dos='unix2dos'                    # Convert Unix to DOS line endings
+alias strip-spaces='sed "s/[[:space:]]*$//"' # Strip trailing spaces
+alias remove-empty-lines='sed "/^$/d"'       # Remove empty lines
+
+# ==============================================================================
+# BACKUP & RECOVERY
+# ==============================================================================
+
+### Backup Operations
+alias backup-file='cp --backup=numbered'     # Create numbered backup
+alias backup-dir='rsync -av --backup --backup-dir=.backup' # Backup directory
+alias backup-incremental='rsync -av --link-dest=../backup-last .' # Incremental backup
+
+### Recovery Operations
+alias restore-file='cp --backup=numbered --reverse' # Restore from backup
+alias diff-backup='diff --recursive --brief' # Compare with backup
+
+### Version Control Integration
+alias git-backup='git add . && git commit -m "Backup $(date)"' # Git-based backup
+alias git-restore='git checkout'             # Restore from git
+
+# ==============================================================================
+# BATCH OPERATIONS
+# ==============================================================================
+
+### Batch Processing
+alias batch-rename='mmv'                     # Mass move/rename (if mmv installed)
+alias batch-convert='find . -type f -exec'   # Execute command on all files
+alias batch-copy='find . -type f -exec cp {}' # Copy all files to location
+
+### Bulk Operations
+alias chmod-recursive='chmod -R'            # Recursive permission change
+alias chown-recursive='chown -R'            # Recursive ownership change
+alias find-exec='find . -type f -exec'       # Execute command on found files
+
+# ==============================================================================
+# SYSTEM FILE OPERATIONS
+# ==============================================================================
+
+### System Directories
+alias lshome='ls -la ~'                      # List home directory
+alias lsroot='ls -la /'                      # List root directory
+alias lsetc='ls -la /etc'                    # List etc directory
+alias lsvar='ls -la /var'                    # List var directory
+alias lsusr='ls -la /usr'                    # List usr directory
+
+### Log Files
+alias taillog='tail -f /var/log/syslog'      # Follow system log
+alias lesslog='less /var/log/syslog'         # View system log
+alias logsize='du -sh /var/log/* | sort -h'  # Log file sizes
+
+### Configuration Files
+alias hosts='sudo $EDITOR /etc/hosts'        # Edit hosts file
+alias fstab='sudo $EDITOR /etc/fstab'        # Edit fstab
+alias resolv='sudo $EDITOR /etc/resolv.conf' # Edit DNS config
+
+# ==============================================================================
+# DEVELOPMENT FILE OPERATIONS
+# ==============================================================================
+
+### Code File Operations
+alias find-py='find . -name "*.py" -type f'  # Find Python files
+alias find-js='find . -name "*.js" -type f'  # Find JavaScript files
+alias find-java='find . -name "*.java" -type f' # Find Java files
+alias find-cpp='find . -name "*.cpp" -name "*.hpp" -type f' # Find C++ files
+
+### Git Integration
+alias git-clean='git clean -fd'             # Clean git repository
+alias git-ignore='echo "*" >> .gitignore'   # Quick add to gitignore
+alias git-untracked='git ls-files --others --exclude-standard' # Show untracked files
+
+### Project Operations
+alias count-lines='find . -name "*.py" -o -name "*.js" -o -name "*.java" | xargs wc -l' # Count lines of code
+alias count-files='find . -type f | wc -l'   # Count total files
+alias project-size='du -sh .'               # Show project size
+
+# ==============================================================================
+# UTILITY FUNCTIONS & HELPERS
+# ==============================================================================
+
+### File Information
+alias file-info='file'                       # Show file type information
+alias file-mime='file --mime-type'           # Show MIME type
+alias file-encoding='file -bi'               # Show encoding information
+
+### Directory Navigation Helpers
+alias findc='findc'                            # PRESERVED - find content in files
+alias rename-ext='rename_ext'                  # PRESERVED - rename file extensions
+alias tree='tree -C'                          # Colorized tree view
+alias tree-dirs='tree -d'                     # Show only directories
+alias tree-level='tree -L'                    # Limit tree depth
+
+### Quick Utilities
+alias clip='xclip -selection clipboard'       # Copy to clipboard (Linux)
+alias pclip='xclip -selection clipboard -o'   # Paste from clipboard (Linux)
+alias timestamp='date +%Y%m%d_%H%M%S'         # Current timestamp
+alias random-name='echo $(date +%s)_$RANDOM'  # Generate random filename
+
+# ==============================================================================
+# ARCHIVE HANDLING FUNCTIONS (Enhanced Documentation)
+# ==============================================================================
+# The x() function extracts various archive formats automatically
+# The arc() function creates archives based on file extension
+# Supported formats: tar.gz, tar.bz2, tar.xz, zip, 7z, rar, etc.
+# Use: x archive.tar.gz or arc files/ archive.tar.gz
+
+# ==============================================================================
+# END OF FILE MANAGEMENT ALIASES
+# ==============================================================================
