@@ -1,12 +1,37 @@
 # ==============================================================================
-# Shell Helper Functions
-# centralized functions for alias-hub (sourced, no shebang)
+# ALIAS HUB - SHELL HELPER FUNCTIONS
+# ==============================================================================
 #
-# This file contains wrapper functions for common package managers
-# and a master 'update' alias to run a comprehensive system update script.
+# Comprehensive shell helper functions for the Alias Hub collection
+# This file contains wrapper functions, utility functions, and system helpers
 #
-# To use, source this file in your .bashrc or .zshrc:
-#   source /path/to/your/helper.sh
+# FILE INFORMATION:
+# - Location: script/helpers.sh
+# - Type: Shell script (sourced, no shebang required)
+# - Compatibility: Bash, Zsh, and other POSIX-compliant shells
+# - Dependencies: Standard Unix tools (grep, sed, awk, etc.)
+#
+# CONTENTS:
+# - Package Manager Wrappers (apt, snap, flatpak)
+# - System Update Functions
+# - Network Utilities
+# - Archive Management
+# - Development Tools
+# - Power Management (TLP)
+# - System Information Helpers
+#
+# USAGE:
+# Source this file in your shell configuration:
+#   Bash:  source /path/to/alias-hub/script/helpers.sh
+#   Zsh:   source /path/to/alias-hub/script/helpers.sh
+#   Fish:  source /path/to/alias-hub/script/helpers.sh
+#
+# Or let the installer handle it automatically.
+#
+# AUTHOR: Alias Hub Community
+# VERSION: 2.0.0
+# LICENSE: MIT
+#
 # ==============================================================================
 
 # Remove alias eval to avoid overriding built-in eval
@@ -436,7 +461,7 @@ fun() {
   case "$1" in
   dice) echo $((RANDOM % 6 + 1)) ;;
   coin) echo $((RANDOM % 2 == 0 ? "Heads" : "Tails")) ;;
-  color) echo "[38;5;$((RANDOM % 256))m█[0m" ;;
+  color) echo "[38;5;$((RANDOM % 256))mâ–ˆ[0m" ;;
   quote)
     if ! command -v jq &>/dev/null; then
       echo "Error: jq command not found. Please install jq." >&2
@@ -559,3 +584,27 @@ tlp() {
             ;;
     esac
 }
+
+# ==============================================================================
+# END OF ALIAS HUB SHELL HELPER FUNCTIONS
+# ==============================================================================
+#
+# This file provides essential helper functions for the Alias Hub ecosystem.
+# All functions are designed to be safe, efficient, and cross-platform compatible.
+#
+# SUPPORTED FUNCTIONS:
+# - Package Management: apt, snap, flatpak wrappers with sudo handling
+# - System Updates: Comprehensive update functions for different package managers
+# - Network Tools: IP detection, connectivity testing, DNS utilities
+# - Archive Operations: Extract and create archives with auto-detection
+# - Development Aids: Compiler detection, development environment setup
+# - Power Management: TLP control functions for laptop power optimization
+#
+# TROUBLESHOOTING:
+# - If functions don't work, ensure the file is properly sourced
+# - Check that required tools are installed (sudo, package managers, etc.)
+# - Verify shell compatibility (Bash 4+, Zsh 5+, etc.)
+#
+# For more information, visit: https://github.com/1999AZZAR/alias-hub
+#
+# ==============================================================================

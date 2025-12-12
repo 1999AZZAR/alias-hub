@@ -1,29 +1,69 @@
 #!/bin/bash
 
 # ==============================================================================
-# Alias Hub Installation Script
+# ALIAS HUB INSTALLATION SCRIPT
 # ==============================================================================
 #
-# This script installs and configures the Alias Hub collection, providing
-# comprehensive shell aliases for enhanced terminal productivity.
+# Comprehensive installation and configuration script for the Alias Hub collection
+# This script provides a seamless setup experience for enhanced terminal productivity
 #
-# Features:
-# - Multi-package manager support (apt, dnf, pacman, apk, zypper)
+# FILE INFORMATION:
+# - Location: install.sh (root directory)
+# - Type: Bash installation script
+# - Compatibility: Linux systems with standard package managers
+# - Dependencies: bash 4+, git, curl, sudo access for package installation
+#
+# FEATURES:
+# - Multi-package manager support (apt, dnf, pacman, apk, zypper, emerge)
 # - Multi-shell support (bash, zsh, fish, ash, dash)
-# - Safe installation with backups and recovery
-# - Uninstall functionality
-# - Dry-run mode for testing
+# - Intelligent environment detection
+# - Safe installation with automatic backups
+# - Comprehensive configuration file management
+# - Uninstall functionality with clean restoration
+# - Dry-run mode for testing and validation
+# - Verbose logging and error handling
 #
-# Usage:
+# INSTALLATION PROCESS:
+# 1. Environment detection (OS, shell, package manager)
+# 2. Dependency checking and installation
+# 3. Repository cloning/updating
+# 4. Configuration file installation (neofetch, fastfetch)
+# 5. Package installation (eza, htop, etc.)
+# 6. Shell configuration and alias sourcing
+# 7. Autocompletion setup
+#
+# USAGE:
 #   ./install.sh [options]
 #
-# Options:
-#   --help          Show this help message
-#   --dry-run       Show what would be done without making changes
-#   --force         Force reinstallation, overwriting existing configs
-#   --uninstall     Remove Alias Hub and restore original configurations
-#   --no-packages   Skip package installation
-#   --verbose       Enable verbose output
+# COMMAND LINE OPTIONS:
+#   --help              Show comprehensive help message
+#   --dry-run           Preview installation without making changes
+#   --force             Force reinstallation, overwriting existing configurations
+#   --uninstall         Complete removal with backup restoration
+#   --no-packages       Skip system package installation
+#   --verbose           Enable detailed logging and debug information
+#   --shell SHELL       Override automatic shell detection
+#
+# CONFIGURATION FILES INSTALLED:
+#   - ~/.config/neofetch/config.conf      (Neofetch display configuration)
+#   - ~/.config/fastfetch/config.jsonc    (Fastfetch display configuration)
+#   - ~/.bashrc/.zshrc/etc.               (Shell configuration with aliases)
+#
+# SUPPORTED SYSTEMS:
+#   - Ubuntu, Debian, Linux Mint          (apt)
+#   - Fedora, RHEL, CentOS                (dnf)
+#   - Arch Linux, Manjaro                 (pacman)
+#   - Alpine Linux                        (apk)
+#   - openSUSE                            (zypper)
+#   - Gentoo                              (emerge)
+#
+# TROUBLESHOOTING:
+# - If installation fails, check that git and curl are installed
+# - Ensure you have sudo privileges for package installation
+# - Use --verbose flag for detailed error information
+# - Check ~/.alias-hub-backup-* files for configuration restoration
+#
+# For more information, visit: https://github.com/1999AZZAR/alias-hub
 #
 # ==============================================================================
 
@@ -82,6 +122,61 @@ print_verbose() {
 
 command_exists() {
     command -v "$1" &> /dev/null
+}
+
+validate_environment() {
+    print_verbose "Validating installation environment..."
+
+    # Check if running on Linux
+    if [[ "$OSTYPE" != "linux-gnu"* ]]; then
+        print_warning "This script is designed for Linux systems. Your OS: $OSTYPE"
+        print_warning "Some features may not work correctly on non-Linux systems."
+    fi
+
+    # Check for internet connectivity
+    if ! curl -s --connect-timeout 5 google.com >/dev/null 2>&1; then
+        print_warning "No internet connection detected. Package installation may fail."
+        print_warning "You can still install with --no-packages flag."
+    fi
+
+    # Check available disk space (minimum 50MB)
+    local available_space
+    available_space=$(df "$HOME" | tail -1 | awk '{print int($4/1024)}') # MB
+    if [[ $available_space -lt 50 ]]; then
+        print_warning "Low disk space detected: ${available_space}MB available"
+        print_warning "At least 50MB free space recommended for installation."
+    fi
+
+    print_verbose "Environment validation completed"
+}
+
+validate_config_files() {
+    print_verbose "Validating configuration files..."
+
+    local missing_configs=0
+
+    # Check if config files exist in repository
+    declare -A required_configs=(
+        ["$ALIASES_DIR/config/neofetch/config.conf"]="Neofetch configuration"
+        ["$ALIASES_DIR/config/fastfetch/config.jsonc"]="Fastfetch configuration"
+    )
+
+    for config_file in "${!required_configs[@]}"; do
+        if [[ ! -f "$config_file" ]]; then
+            print_warning "Required config file missing: ${required_configs[$config_file]}"
+            print_warning "File: $config_file"
+            ((missing_configs++))
+        else
+            print_verbose "Found: ${required_configs[$config_file]}"
+        fi
+    done
+
+    if [[ $missing_configs -gt 0 ]]; then
+        print_warning "Found $missing_configs missing configuration files"
+        print_warning "Installation may not work correctly without all config files."
+    else
+        print_verbose "All required configuration files are present"
+    fi
 }
 
 package_installed() {
@@ -243,61 +338,128 @@ install_packages() {
         return 0
     fi
 
+    local install_success=true
+
     case "$PACKAGE_MANAGER" in
         apt)
-            sudo apt update && sudo apt install -y "$packages_to_install"
+            if ! sudo apt update && sudo apt install -y "$packages_to_install"; then
+                install_success=false
+            fi
             ;;
         dnf)
-            sudo dnf install -y "$packages_to_install"
+            if ! sudo dnf install -y "$packages_to_install"; then
+                install_success=false
+            fi
             ;;
         pacman)
-            sudo pacman -S --noconfirm "$packages_to_install"
+            if ! sudo pacman -S --noconfirm "$packages_to_install"; then
+                install_success=false
+            fi
             ;;
         apk)
-            sudo apk add "$packages_to_install"
+            if ! sudo apk add "$packages_to_install"; then
+                install_success=false
+            fi
             ;;
         zypper)
-            sudo zypper install -y "$packages_to_install"
+            if ! sudo zypper install -y "$packages_to_install"; then
+                install_success=false
+            fi
             ;;
     esac
 
-    print_success "Package installation completed"
+    if [[ "$install_success" == true ]]; then
+        print_success "Package installation completed successfully"
+    else
+        print_warning "Some packages may not have installed correctly"
+        print_warning "You can try installing them manually or run the installer again"
+    fi
 }
 
-setup_neofetch() {
-    print_info "Setting up Neofetch configuration..."
+setup_configs() {
+    print_info "Setting up configuration files..."
 
-    local neofetch_config_dir="$HOME/.config/neofetch"
-    local source_config="$ALIASES_DIR/config/neofetch/config.conf"
-    local dest_config="$neofetch_config_dir/config.conf"
+    # Define all config files to install
+    declare -A config_files=(
+        ["$ALIASES_DIR/config/neofetch/config.conf"]="$HOME/.config/neofetch/config.conf"
+        ["$ALIASES_DIR/config/fastfetch/config.jsonc"]="$HOME/.config/fastfetch/config.jsonc"
+    )
 
-    # Create config directory
-    if [[ "$DRY_RUN" == false ]]; then
-        mkdir -p "$neofetch_config_dir"
-    fi
+    local installed_configs=0
+    local failed_configs=0
 
-    # Backup existing config if it exists and is not a symlink
-    if [[ -f "$dest_config" && ! -L "$dest_config" ]]; then
-        create_backup "$dest_config"
+    for source_config in "${!config_files[@]}"; do
+        local dest_config="${config_files[$source_config]}"
+        local config_name=$(basename "$source_config" .conf .jsonc)
+        local config_tool=$(basename "$(dirname "$dest_config")")
+
+        print_verbose "Processing $config_tool $config_name config..."
+
+        # Create config directory
+        local config_dir=$(dirname "$dest_config")
         if [[ "$DRY_RUN" == false ]]; then
-            rm "$dest_config"
+            if ! mkdir -p "$config_dir"; then
+                print_warning "Failed to create directory: $config_dir"
+                ((failed_configs++))
+                continue
+            fi
+        else
+            print_info "Would create directory: $config_dir"
         fi
+
+        # Check if source config exists
+        if [[ ! -f "$source_config" ]]; then
+            print_warning "Source config not found: $source_config"
+            ((failed_configs++))
+            continue
+        fi
+
+        # Backup existing config if it exists and is not a symlink
+        if [[ -f "$dest_config" && ! -L "$dest_config" ]]; then
+            create_backup "$dest_config"
+            if [[ "$DRY_RUN" == false ]]; then
+                rm "$dest_config" || {
+                    print_warning "Failed to remove existing config: $dest_config"
+                    ((failed_configs++))
+                    continue
+                }
+            fi
+        fi
+
+        # Copy new config
+        if [[ "$DRY_RUN" == false ]]; then
+            if cp "$source_config" "$dest_config"; then
+                print_verbose "$config_tool config installed to $dest_config"
+                ((installed_configs++))
+            else
+                print_warning "Failed to install $config_tool config to $dest_config"
+                ((failed_configs++))
+                continue
+            fi
+        else
+            print_info "Would install $config_tool config to $dest_config"
+            ((installed_configs++))
+        fi
+
+        # Special handling for neofetch ASCII art
+        if [[ "$config_tool" == "neofetch" && "$config_name" == "config" ]]; then
+            print_info "Setting up Neofetch ASCII art..."
+            if [[ "$DRY_RUN" == false ]]; then
+                if ! curl -sSL "$NEOFETCH_ASCII_INSTALLER_URL" | bash; then
+                    print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
+                fi
+            else
+                print_info "Would run Neofetch ASCII installer"
+            fi
+        fi
+    done
+
+    if [[ $installed_configs -gt 0 ]]; then
+        print_success "Installed $installed_configs configuration files"
     fi
 
-    # Copy new config
-    if [[ "$DRY_RUN" == false ]]; then
-        cp "$source_config" "$dest_config"
-    fi
-    print_info "Neofetch config installed to $dest_config"
-
-    # Setup Neofetch ASCII art
-    print_info "Setting up Neofetch ASCII art..."
-    if [[ "$DRY_RUN" == false ]]; then
-        if ! curl -sSL "$NEOFETCH_ASCII_INSTALLER_URL" | bash; then
-            print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
-        fi
-    else
-        print_info "Would run Neofetch ASCII installer"
+    if [[ $failed_configs -gt 0 ]]; then
+        print_warning "Failed to install $failed_configs configuration files"
     fi
 }
 
@@ -363,9 +525,10 @@ uninstall() {
         print_success "Removed Alias Hub configuration from shell"
     fi
 
-    # Restore backups
+    # Restore config file backups
     print_info "Restoring original configurations..."
     restore_backup "$HOME/.config/neofetch/config.conf"
+    restore_backup "$HOME/.config/fastfetch/config.jsonc"
 
     # Remove repository directory
     if [[ -d "$ALIASES_DIR" ]]; then
@@ -468,9 +631,15 @@ main() {
         exit 0
     fi
 
+    # Validate environment and requirements
+    validate_environment
+
     # Detect environment
     detect_package_manager
     detect_shell
+
+    # Validate configuration files
+    validate_config_files
 
     # Check for required dependencies
     print_info "Checking for required tools (git, curl)..."
@@ -501,8 +670,8 @@ main() {
         chmod +x "$ALIASES_DIR/script/update_system.sh"
     fi
 
-    # Setup Neofetch
-    setup_neofetch
+    # Setup configuration files
+    setup_configs
 
     # Install packages
     install_packages
@@ -512,20 +681,54 @@ main() {
 
     # Installation complete
     echo
-    print_success "Alias Hub installation completed!"
+    print_success "🎉 Alias Hub installation completed successfully!"
+    echo
+    echo "═══════════════════════════════════════════════════════════════════════"
+    echo "                           INSTALLATION SUMMARY"
+    echo "═══════════════════════════════════════════════════════════════════════"
+    echo
+    print_info "📁 Repository Location: $ALIASES_DIR"
+    print_info "⚙️  Shell Configuration: $SHELL_RC"
+    print_info "📋 Available Alias Files: $(ls -1 "$ALIASES_DIR"/*.alias | wc -l) categories"
+    echo
+    echo "───────────────────────────────────────────────────────────────────────"
+    echo "                      🚀 GETTING STARTED"
+    echo "───────────────────────────────────────────────────────────────────────"
     echo
     print_info "To apply changes immediately, run:"
     echo "  source $SHELL_RC"
     echo
     print_info "Or restart your shell/terminal."
     echo
-    print_info "Available commands:"
-    echo "  alias-list        - List all available alias categories"
-    echo "  alias-list <cat>  - Show aliases in a specific category"
-    echo "  neofetch          - Display system information"
-    echo "  fastfetch         - Alternative system information display"
+    echo "───────────────────────────────────────────────────────────────────────"
+    echo "                      🛠️  ESSENTIAL COMMANDS"
+    echo "───────────────────────────────────────────────────────────────────────"
     echo
-    print_info "For more information, visit: https://github.com/1999AZZAR/alias-hub"
+    print_info "📋 List all alias categories:"
+    echo "  alias-list"
+    echo
+    print_info "🔍 Show aliases in a specific category:"
+    echo "  alias-list system    # System management aliases"
+    echo "  alias-list dev       # Development aliases"
+    echo "  alias-list network   # Network aliases"
+    echo
+    print_info "💻 System information:"
+    echo "  neofetch            # Beautiful system info"
+    echo "  fastfetch           # Fast alternative system info"
+    echo "  htop               # Interactive process viewer"
+    echo "  glances            # System monitoring dashboard"
+    echo
+    echo "───────────────────────────────────────────────────────────────────────"
+    echo "                      📚 LEARN MORE"
+    echo "───────────────────────────────────────────────────────────────────────"
+    echo
+    print_info "📖 Full documentation: https://github.com/1999AZZAR/alias-hub"
+    print_info "🆘 Troubleshooting: Check the README.md file"
+    print_info "🔧 Advanced usage: Explore the script/ directory"
+    echo
+    echo "═══════════════════════════════════════════════════════════════════════"
+    echo "                     ✨ HAPPY TERMINALING! ✨"
+    echo "═══════════════════════════════════════════════════════════════════════"
 }
 
 # Run main function
