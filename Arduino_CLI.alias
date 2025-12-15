@@ -1,0 +1,228 @@
+# ==============================================================================
+# Arduino CLI - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive Arduino CLI aliases for embedded systems programming with Arduino
+# Includes board management, core installation, library management, compilation, and utilities
+#
+# Sections:
+# - Environment Setup & Configuration
+# - Board Management
+# - Core Management
+# - Library Management
+# - Sketch Operations
+# - Compilation & Upload
+# - Monitoring & Debugging
+# - Project Management
+# - Board Discovery & Information
+# - Examples & Templates
+# - Platform & Package Management
+# - Utilities & Helpers
+#
+# ==============================================================================
+
+# ==============================================================================
+# ENVIRONMENT SETUP & CONFIGURATION
+# ==============================================================================
+
+### Arduino CLI Configuration
+alias arduino-cli-config='arduino-cli config'                         # Show current configuration
+alias arduino-config-init='arduino-cli config init'                   # Initialize Arduino CLI config
+alias arduino-config-dump='arduino-cli config dump'                   # Dump configuration to stdout
+alias arduino-config-set='arduino-cli config set'                     # Set configuration value
+alias arduino-data-dir='arduino-cli config dump | grep "data_dir"'    # Show data directory path
+alias arduino-sketchbook='arduino-cli config dump | grep "sketchbook"' # Show sketchbook path
+alias arduino-user-dir='arduino-cli config dump | grep "user_dir"'    # Show user directory path
+
+### Version & Information
+alias arduino-version='arduino-cli version'                           # Show Arduino CLI version
+alias arduino-info='arduino-cli version --check'                      # Check for updates
+
+# ==============================================================================
+# BOARD MANAGEMENT
+# ==============================================================================
+
+### Board List & Discovery
+alias arduino-boards='arduino-cli board list'                         # List all connected boards
+alias arduino-boards-all='arduino-cli board listall'                  # List all available boards
+alias arduino-boards-search='arduino-cli board listall'               # Search for boards
+alias arduino-board-details='arduino-cli board details'               # Show board details
+
+### Board Attach & Selection
+alias arduino-attach='arduino-cli board attach'                       # Attach to a board
+alias arduino-detach='arduino-cli board detach'                       # Detach from board
+
+# ==============================================================================
+# CORE MANAGEMENT
+# ==============================================================================
+
+### Core Installation & Updates
+alias arduino-core-install='arduino-cli core install'                 # Install Arduino core
+alias arduino-core-update-index='arduino-cli core update-index'       # Update core index
+alias arduino-core-update='arduino-cli core upgrade'                  # Upgrade installed cores
+alias arduino-core-list='arduino-cli core list'                       # List installed cores
+alias arduino-core-search='arduino-cli core search'                   # Search available cores
+alias arduino-core-uninstall='arduino-cli core uninstall'             # Uninstall Arduino core
+
+### Common Core Installations
+alias arduino-uno-core='arduino-cli core install arduino:avr'         # Install Arduino AVR core (Uno, Nano, etc.)
+alias arduino-mega-core='arduino-cli core install arduino:avr'        # Install AVR core for Mega
+alias arduino-nano-core='arduino-cli core install arduino:avr'        # Install AVR core for Nano
+alias arduino-esp32-core='arduino-cli core install esp32:esp32'       # Install ESP32 core
+alias arduino-esp8266-core='arduino-cli core install esp8266:esp8266' # Install ESP8266 core
+alias arduino-samd-core='arduino-cli core install arduino:samd'       # Install SAMD core (MKR, Zero, etc.)
+alias arduino-nrf52-core='arduino-cli core install adafruit:nrf52'    # Install Adafruit nRF52 core
+alias arduino-rp2040-core='arduino-cli core install rp2040:rp2040'    # Install Raspberry Pi Pico core
+alias arduino-pico-core='arduino-cli core install rp2040:rp2040'      # Install Pico core
+
+# ==============================================================================
+# LIBRARY MANAGEMENT
+# ==============================================================================
+
+### Library Installation & Updates
+alias arduino-lib-install='arduino-cli lib install'                   # Install library
+alias arduino-lib-update-index='arduino-cli lib update-index'         # Update library index
+alias arduino-lib-upgrade='arduino-cli lib upgrade'                   # Upgrade libraries
+alias arduino-lib-list='arduino-cli lib list'                         # List installed libraries
+alias arduino-lib-search='arduino-cli lib search'                     # Search for libraries
+alias arduino-lib-uninstall='arduino-cli lib uninstall'               # Uninstall library
+alias arduino-lib-deps='arduino-cli lib deps'                         # Show library dependencies
+
+### Popular Library Installations
+alias arduino-servo-lib='arduino-cli lib install "Servo"'             # Install Servo library
+alias arduino-wifi-lib='arduino-cli lib install "WiFi"'               # Install WiFi library
+alias arduino-http-lib='arduino-cli lib install "ArduinoHttpClient"'  # Install HTTP client library
+alias arduino-json-lib='arduino-cli lib install "ArduinoJson"'        # Install JSON library
+alias arduino-blynk-lib='arduino-cli lib install "Blynk"'             # Install Blynk library
+alias arduino-dht-lib='arduino-cli lib install "DHT sensor library"'  # Install DHT sensor library
+
+# ==============================================================================
+# SKETCH OPERATIONS
+# ==============================================================================
+
+### Sketch Creation & Management
+alias arduino-new='arduino-cli sketch new'                            # Create new sketch
+alias arduino-sketch-check='arduino-cli sketch archive'               # Archive sketch
+alias arduino-sketch-list='ls ~/Arduino'                              # List sketches (assuming default location)
+
+# ==============================================================================
+# COMPILATION & UPLOAD
+# ==============================================================================
+
+### Compilation
+alias arduino-compile='arduino-cli compile'                           # Compile sketch
+alias arduino-verify='arduino-cli compile --verify'                   # Verify sketch (compile only)
+alias arduino-compile-verbose='arduino-cli compile --verbose'         # Verbose compilation
+alias arduino-compile-upload='arduino-cli compile --upload'           # Compile and prepare for upload
+
+### Upload to Board
+alias arduino-upload='arduino-cli upload'                             # Upload sketch to board
+alias arduino-upload-port='arduino-cli upload -p'                     # Upload to specific port
+alias arduino-upload-verify='arduino-cli upload --verify'             # Upload and verify
+alias arduino-upload-verbose='arduino-cli upload --verbose'           # Verbose upload
+
+### Combined Operations
+alias arduino-build='arduino-cli compile --upload'                    # Build and upload sketch
+alias arduino-build-upload='arduino-cli compile --upload'             # Compile and upload
+alias arduino-full-build='arduino-cli compile --upload --verbose'     # Full build with verbose output
+
+# ==============================================================================
+# MONITORING & DEBUGGING
+# ==============================================================================
+
+### Serial Monitor
+alias arduino-monitor='arduino-cli monitor'                           # Start serial monitor
+alias arduino-monitor-port='arduino-cli monitor -p'                   # Monitor specific port
+alias arduino-monitor-baud='arduino-cli monitor -c baudrate='         # Monitor with baud rate
+alias arduino-monitor-115200='arduino-cli monitor -c baudrate=115200' # Monitor at 115200 baud
+alias arduino-monitor-9600='arduino-cli monitor -c baudrate=9600'     # Monitor at 9600 baud
+alias arduino-monitor-57600='arduino-cli monitor -c baudrate=57600'   # Monitor at 57600 baud
+
+### Debugging
+alias arduino-debug='arduino-cli debug'                               # Start debugging session
+alias arduino-debug-list='arduino-cli debug list'                     # List available debuggers
+
+# ==============================================================================
+# PROJECT MANAGEMENT
+# ==============================================================================
+
+### Project Structure
+alias arduino-init='arduino-cli sketch new .'                         # Initialize Arduino project in current directory
+alias arduino-project-new='arduino-cli sketch new'                    # Create new project
+alias arduino-project-name='arduino-cli sketch archive'               # Archive project with name
+
+# ==============================================================================
+# BOARD DISCOVERY & INFORMATION
+# ==============================================================================
+
+### Board Information
+alias arduino-board-fqbn='arduino-cli board list --format json'       # Get board FQBN (JSON format)
+alias arduino-board-info='arduino-cli board details -b'               # Get detailed board information
+alias arduino-ports='arduino-cli board list'                          # List available ports
+
+### FQBN (Fully Qualified Board Name) Helpers
+alias arduino-fqbn-uno='arduino:avr:uno'                              # Arduino Uno FQBN
+alias arduino-fqbn-nano='arduino:avr:nano'                            # Arduino Nano FQBN
+alias arduino-fqbn-mega='arduino:avr:mega'                            # Arduino Mega FQBN
+alias arduino-fqbn-esp32='esp32:esp32:esp32'                          # ESP32 FQBN
+alias arduino-fqbn-esp8266='esp8266:esp8266:nodemcuv2'                # ESP8266 NodeMCU FQBN
+
+# ==============================================================================
+# EXAMPLES & TEMPLATES
+# ==============================================================================
+
+### Examples
+alias arduino-examples-list='arduino-cli lib examples'                # List library examples
+alias arduino-examples-core='arduino-cli sketch new'                  # Create example sketch
+
+# ==============================================================================
+# PLATFORM & PACKAGE MANAGEMENT
+# ==============================================================================
+
+### Platform Management
+alias arduino-platform-list='arduino-cli core list'                   # List installed platforms
+alias arduino-platform-search='arduino-cli core search'               # Search platforms
+alias arduino-platform-update='arduino-cli core upgrade'              # Update platforms
+
+### Package Management
+alias arduino-package-list='arduino-cli core list'                    # List packages
+alias arduino-package-update='arduino-cli core update-index'          # Update package index
+
+# ==============================================================================
+# UTILITIES & HELPERS
+# ==============================================================================
+
+### Quick Development Workflow
+alias arduino-quick='arduino-cli compile --upload && arduino-cli monitor' # Quick compile, upload, and monitor
+alias arduino-dev='arduino-cli compile --upload -p'                   # Development build and upload
+
+### Common Workflows
+alias arduino-setup-uno='arduino-cli core install arduino:avr && arduino-cli board attach arduino:avr:uno' # Setup for Uno
+alias arduino-setup-esp32='arduino-cli core install esp32:esp32 && arduino-cli board attach esp32:esp32:esp32' # Setup for ESP32
+alias arduino-setup-esp8266='arduino-cli core install esp8266:esp8266 && arduino-cli board attach esp8266:esp8266:nodemcuv2' # Setup for ESP8266
+
+### Cleanup & Maintenance
+alias arduino-clean='rm -rf build/'                                   # Clean build directory
+alias arduino-cache-clean='arduino-cli cache clean'                   # Clean Arduino CLI cache
+alias arduino-rebuild='arduino-clean && arduino-cli compile'          # Clean and rebuild
+
+### Help & Documentation
+alias arduino-help='arduino-cli help'                                 # Show Arduino CLI help
+alias arduino-help-board='arduino-cli board --help'                   # Board command help
+alias arduino-help-compile='arduino-cli compile --help'               # Compile command help
+alias arduino-help-upload='arduino-cli upload --help'                 # Upload command help
+alias arduino-help-lib='arduino-cli lib --help'                       # Library command help
+alias arduino-help-core='arduino-cli core --help'                     # Core command help
+
+### Board-Specific Quick Commands
+alias arduino-uno-compile='arduino-cli compile -b arduino:avr:uno'    # Compile for Uno
+alias arduino-uno-upload='arduino-cli upload -b arduino:avr:uno -p'   # Upload to Uno
+alias arduino-nano-compile='arduino-cli compile -b arduino:avr:nano'  # Compile for Nano
+alias arduino-nano-upload='arduino-cli upload -b arduino:avr:nano -p' # Upload to Nano
+alias arduino-esp32-compile='arduino-cli compile -b esp32:esp32:esp32' # Compile for ESP32
+alias arduino-esp32-upload='arduino-cli upload -b esp32:esp32:esp32 -p' # Upload to ESP32
+
+# ==============================================================================
+# END OF ARDUINO CLI ALIASES
+# ==============================================================================
+
