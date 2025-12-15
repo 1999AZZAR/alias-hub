@@ -1,5 +1,23 @@
-# PostgreSQL Aliases
-# Add these to your ~/.bashrc or ~/.bash_aliases file
+# ==============================================================================
+# PostgreSQL Management - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive PostgreSQL database management aliases for efficient operations
+# Includes database operations, backups, monitoring, service management, and utilities
+#
+# Sections:
+# - Basic Database Connection
+# - Database Operations
+# - Backup & Restore
+# - Monitoring & Analysis
+# - Service Management
+# - Logging & Troubleshooting
+#
+# ==============================================================================
+
+# ==============================================================================
+# BASIC DATABASE CONNECTION
+# ==============================================================================
 
 # Basic psql connection with default database
 alias psql='psql -U postgres'
@@ -11,6 +29,22 @@ alias psl='psql -l'
 # Usage: psdb database_name
 alias psdb='psql -U postgres -d'
 
+# ==============================================================================
+# DATABASE OPERATIONS
+# ==============================================================================
+
+# Create a new database
+# Usage: pgcreate database_name
+alias pgcreate='createdb -U postgres'
+
+# Drop a database
+# Usage: pgdrop database_name
+alias pgdrop='dropdb -U postgres'
+
+# ==============================================================================
+# BACKUP & RESTORE
+# ==============================================================================
+
 # Backup database
 # Usage: pgbackup database_name
 alias pgbackup='pg_dump -U postgres -F c -b -v -f'
@@ -18,6 +52,10 @@ alias pgbackup='pg_dump -U postgres -F c -b -v -f'
 # Restore database from backup
 # Usage: pgrestore backup_file database_name
 alias pgrestore='pg_restore -U postgres -d'
+
+# ==============================================================================
+# MONITORING & ANALYSIS
+# ==============================================================================
 
 # Monitor PostgreSQL processes
 alias pgps='psql -U postgres -c "SELECT pid, usename, client_addr, state, query_start, query FROM pg_stat_activity;"'
@@ -32,13 +70,9 @@ alias pgtsize='psql -U postgres -c "SELECT schemaname, relname, pg_size_pretty(p
 # Usage: pgkill database_name
 alias pgkill='psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='\''$1'\'' AND pid <> pg_backend_pid();"'
 
-# Create a new database
-# Usage: pgcreate database_name
-alias pgcreate='createdb -U postgres'
-
-# Drop a database
-# Usage: pgdrop database_name
-alias pgdrop='dropdb -U postgres'
+# ==============================================================================
+# SERVICE MANAGEMENT
+# ==============================================================================
 
 # Start PostgreSQL server (adjust path as needed)
 alias pgstart='sudo service postgresql start'
@@ -52,5 +86,13 @@ alias pgrestart='sudo service postgresql restart'
 # Show PostgreSQL server status
 alias pgstatus='sudo service postgresql status'
 
+# ==============================================================================
+# LOGGING & TROUBLESHOOTING
+# ==============================================================================
+
 # Tail PostgreSQL logs (adjust path as needed)
 alias pglog='sudo tail -f /var/log/postgresql/postgresql-*.log'
+
+# ==============================================================================
+# END OF POSTGRESQL ALIASES
+# ==============================================================================

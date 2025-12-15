@@ -1,5 +1,26 @@
-# ─── Odoo Management Aliases ──────────────────────────────────────────────
-# Place in ~/.aliases/Odoo.alias and source from your shell init script
+# ==============================================================================
+# Odoo Management - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive Odoo ERP system management function with service control and utilities
+# Provides easy-to-use commands for starting, stopping, monitoring, and managing Odoo instances
+#
+# FUNCTIONS:
+# - odoo() - Main Odoo management function with multiple subcommands
+#
+# USAGE:
+#   odoo              - Start Odoo and open UI
+#   odoo start        - Start Odoo service
+#   odoo stop         - Stop Odoo service
+#   odoo restart      - Restart Odoo service
+#   odoo enable       - Enable Odoo on boot
+#   odoo disable      - Disable Odoo on boot
+#   odoo logs         - Show Odoo logs
+#   odoo status       - Check Odoo status
+#   odoo venv         - Activate Python virtual environment
+#   odoo help         - Show help message
+#
+# ==============================================================================
 
 odoo() {
     local SERVICE="odoo16"
@@ -69,3 +90,7 @@ odoo() {
             ;;
     esac
 }
+
+# ==============================================================================
+# END OF ODOO MANAGEMENT ALIASES
+# ==============================================================================

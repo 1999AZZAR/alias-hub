@@ -1,5 +1,31 @@
-# System Management & Monitoring
-# ----------------------------
+# ==============================================================================
+# System Management & Monitoring - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive system management aliases for administration, monitoring, and maintenance
+# Includes package management, power management, process control, resource monitoring, and utilities
+#
+# Sections:
+# - System Updates & Package Management
+# - System Power Management
+# - Process Management
+# - System Resource Monitoring
+# - System Information
+# - Extended Monitoring
+# - Storage Monitoring
+# - Service Management
+# - System Maintenance
+# - System Performance
+# - System Security
+# - System Backup
+# - User Management
+# - Battery Management
+#
+# ==============================================================================
+
+# ==============================================================================
+# SYSTEM UPDATES & PACKAGE MANAGEMENT
+# ==============================================================================
 
 # System Updates & Package Management
 
@@ -18,7 +44,9 @@ alias snap-find='snap find'                                                   # 
 alias flatpak-list='flatpak list'                                             # List flatpak packages
 alias flatpak-update='flatpak update'                                         # Update flatpak packages
 
-# System Power Management
+# ==============================================================================
+# SYSTEM POWER MANAGEMENT
+# ==============================================================================
 alias rbt='sudo reboot now'                   # Quick reboot
 alias sdn='sudo shutdown now'                 # Quick shutdown
 alias suspend='systemctl suspend'             # Suspend system
@@ -29,7 +57,9 @@ alias poweroff='sudo poweroff'                # Power off system
 alias uptime-info='uptime -p'                 # Pretty uptime info
 alias cls='clear'                             # Clear display
 
-# Process Management
+# ==============================================================================
+# PROCESS MANAGEMENT
+# ==============================================================================
 alias ps-tree='ps auxf'                               # Process tree
 alias ps-cpu='ps auxf | sort -nr -k 3 | head -10'     # Top CPU processes
 alias ps-mem='ps auxf | sort -nr -k 4 | head -10'     # Top memory processes
@@ -38,7 +68,9 @@ alias kill9='sudo kill -9'                            # Force kill process
 alias killall9='sudo killall -9'                      # Force kill all processes
 alias kill-zombie='kill -9 $(ps -A -ostat,ppid | grep -e "[zZ]"| awk "{ print $2 }")'  # Kill zombie processes
 
-# System Resource Monitoring
+# ==============================================================================
+# SYSTEM RESOURCE MONITORING
+# ==============================================================================
 alias df='df -h'                                    # Disk usage in human readable
 alias du='du -h'                                    # Directory size in human readable
 alias free='free -h'                                # RAM usage in human readable
@@ -52,7 +84,9 @@ alias io-stats='iostat -x 1'                        # IO statistics
 alias net-stats='netstat -tulpn'                    # Network statistics
 alias sys-monitor='glances'                         # System monitoring
 
-# System Information
+# ==============================================================================
+# SYSTEM INFORMATION
+# ==============================================================================
 alias fastfetch='clear && fastfetch --logo "$(find ~/.local/share/neofetch_ascii/ascii/ -name "*.txt" | shuf -n 1)" --logo-type file --logo-preserve-aspect-ratio'
 alias neofetch='clear && neofetch'            # System info with clear screen
 alias fetch='fastfetch'                        # Shorthand for neofetch
@@ -69,7 +103,9 @@ alias boot-logs='journalctl -b'               # Boot logs
 alias kernel-info='uname -a'                  # Kernel information
 alias os-info='cat /etc/os-release'           # OS information
 
-# Extended Monitoring
+# ==============================================================================
+# EXTENDED MONITORING
+# ==============================================================================
 alias io='iostat -xz 1'                         # I/O statistics with details per second
 alias netuse='vnstat -l'                        # Monitor network bandwidth usage live
 alias logwatch='sudo tail -f /var/log/syslog'   # View system log in real-time
@@ -78,12 +114,16 @@ alias uptime='uptime -p && who'                 # System uptime and active sessi
 alias dmesg='dmesg --follow'                    # Monitor kernel messages
 alias servstat='systemctl list-units --type=service --state=running' # Active services
 
-# Storage Monitoring
+# ==============================================================================
+# STORAGE MONITORING
+# ==============================================================================
 alias inodes='df -i'                      # Check inode usage
 alias dhealth='sudo smartctl -H /dev/sda' # Check disk health (requires smartmontools)
 alias openfiles='lsof | wc -l'            # Count open files
 
-# Service Management
+# ==============================================================================
+# SERVICE MANAGEMENT
+# ==============================================================================
 alias services='systemctl list-units --type=service'  # List all services
 alias service-status='systemctl status'        # Check service status
 alias service-start='sudo systemctl start'     # Start service
@@ -95,7 +135,9 @@ alias service-reload='sudo systemctl reload'   # Reload service
 alias service-failed='systemctl --failed'      # Show failed services
 alias journal-errors='journalctl -p 3 -xb'     # Show error messages
 
-# System Maintenance
+# ==============================================================================
+# SYSTEM MAINTENANCE
+# ==============================================================================
 alias cache-clear='sudo sync; sudo echo 3 > /proc/sys/vm/drop_caches'  # Clear system cache
 alias swap-clear='sudo swapoff -a && sudo swapon -a'                   # Clear swap
 alias tmp-clear='sudo rm -rf /tmp/*'                                   # Clear temporary files
@@ -106,7 +148,9 @@ alias check-disk='sudo fsck'                                           # Check d
 alias smart-status='sudo smartctl -a'                                  # Disk SMART status
 alias repair-system='sudo dpkg --configure -a'                         # Repair package system
 
-# System Performance
+# ==============================================================================
+# SYSTEM PERFORMANCE
+# ==============================================================================
 alias cpu-freq='watch -n 1 "cat /proc/cpuinfo | grep \"^[c]pu MHz\""'   # CPU frequency
 alias mem-hogs='ps auxf | sort -nr -k 4 | head -10'                     # Top memory consumers
 alias cpu-hogs='ps auxf | sort -nr -k 3 | head -10'                     # Top CPU consumers
@@ -115,7 +159,9 @@ alias load='uptime'                                         # System load
 alias io-hogs='iotop -o'                                    # IO-intensive processes
 alias sys-bottleneck='top -b -n 1'                          # System bottleneck analysis
 
-# System Security
+# ==============================================================================
+# SYSTEM SECURITY
+# ==============================================================================
 alias ports-open='sudo netstat -tulpn'          # Open ports
 alias firewall-enable='sudo ufw enable'         # Enable firewall
 alias firewall-disable='sudo ufw disable'       # Disable firewall
@@ -124,18 +170,28 @@ alias check-rootkit='sudo rkhunter --check'     # Check for rootkits
 alias check-virus='sudo clamscan'               # Virus scan
 alias auth-log='sudo tail -f /var/log/auth.log' # Authentication log
 
-# System Backup
+# ==============================================================================
+# SYSTEM BACKUP
+# ==============================================================================
 alias backup-system='sudo tar -czf system-backup-$(date +%Y%m%d).tar.gz --exclude=/proc --exclude=/sys --exclude=/tmp --exclude=/media --exclude=/mnt --exclude=/run /'  # System backup
 alias backup-home='tar -czf home-backup-$(date +%Y%m%d).tar.gz ~/'  # Backup home
 alias backup-list='ls -lh *backup*.tar.gz'                          # List backups
 alias backup-extract='tar -xzf'                                     # Extract backup
 
-# User Management
+# ==============================================================================
+# USER MANAGEMENT
+# ==============================================================================
 alias adduser='sudo useradd -m'           # Add a new user
 alias deluser='sudo userdel -r'           # Delete a user and their home directory
 alias passwd='sudo passwd'                # Change a user's password
 alias listusers='cut -d: -f1 /etc/passwd' # List all users
 
-# Battery Management
+# ==============================================================================
+# BATTERY MANAGEMENT
+# ==============================================================================
 alias fullcharge='sudo tlp fullcharge'    # charge Battery to 100 percen
 alias chargeone='sudo tlp chargeonce'     # charge now
+
+# ==============================================================================
+# END OF SYSTEM MANAGEMENT ALIASES
+# ==============================================================================
