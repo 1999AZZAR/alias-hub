@@ -1,0 +1,474 @@
+# ==============================================================================
+# Redis Management - Enhanced Collection
+# ==============================================================================
+#
+# Comprehensive Redis database management aliases and functions for efficient operations
+# Includes server management, CLI operations, data operations, monitoring, and utilities
+#
+# Sections:
+# - Server Management (Function Wrapper)
+# - Connection & CLI
+# - Key Operations
+# - String Operations
+# - Hash Operations
+# - List Operations
+# - Set Operations
+# - Sorted Set Operations
+# - Database Operations
+# - Configuration & Information
+# - Monitoring & Statistics
+# - Persistence & Backup
+# - Security & Authentication
+# - Cluster & Replication
+# - Pub/Sub Operations
+# - Scripting & Lua
+# - Utilities & Helpers
+#
+# ==============================================================================
+
+# ==============================================================================
+# SERVER MANAGEMENT (Function Wrapper)
+# ==============================================================================
+
+# Main Redis management function with service control
+redis() {
+    local SERVICE="redis"
+    local COLOR_GREEN="\033[1;32m"
+    local COLOR_YELLOW="\033[1;33m"
+    local COLOR_RED="\033[1;31m"
+    local COLOR_BLUE="\033[1;34m"
+    local COLOR_RESET="\033[0m"
+
+    is_active() {
+        systemctl is-active --quiet "$SERVICE" 2>/dev/null || service "$SERVICE" status >/dev/null 2>&1
+    }
+
+    case "$1" in
+        start|-s|--start)
+            if is_active; then
+                echo -e "${COLOR_YELLOW}Redis is already running.${COLOR_RESET}"
+            else
+                echo -e "${COLOR_GREEN}Starting Redis server...${COLOR_RESET}"
+                if systemctl start "$SERVICE" 2>/dev/null; then
+                    echo -e "${COLOR_GREEN}Redis started successfully.${COLOR_RESET}"
+                elif sudo service redis start 2>/dev/null; then
+                    echo -e "${COLOR_GREEN}Redis started successfully.${COLOR_RESET}"
+                else
+                    echo -e "${COLOR_RED}Failed to start Redis. Please check your installation.${COLOR_RESET}"
+                    return 1
+                fi
+            fi
+            ;;
+        stop|-st|--stop)
+            echo -e "${COLOR_RED}Stopping Redis server...${COLOR_RESET}"
+            if systemctl stop "$SERVICE" 2>/dev/null; then
+                echo -e "${COLOR_GREEN}Redis stopped successfully.${COLOR_RESET}"
+            elif sudo service redis stop 2>/dev/null; then
+                echo -e "${COLOR_GREEN}Redis stopped successfully.${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}Failed to stop Redis.${COLOR_RESET}"
+                return 1
+            fi
+            ;;
+        restart|-r|--restart)
+            echo -e "${COLOR_YELLOW}Restarting Redis server...${COLOR_RESET}"
+            if systemctl restart "$SERVICE" 2>/dev/null; then
+                echo -e "${COLOR_GREEN}Redis restarted successfully.${COLOR_RESET}"
+            elif sudo service redis restart 2>/dev/null; then
+                echo -e "${COLOR_GREEN}Redis restarted successfully.${COLOR_RESET}"
+            else
+                echo -e "${COLOR_RED}Failed to restart Redis.${COLOR_RESET}"
+                return 1
+            fi
+            ;;
+        status|--status)
+            echo -e "${COLOR_BLUE}Redis Server Status:${COLOR_RESET}"
+            if command -v systemctl &>/dev/null; then
+                systemctl status "$SERVICE" 2>/dev/null || service redis status 2>/dev/null
+            else
+                service redis status 2>/dev/null
+            fi
+            ;;
+        logs|-l|--logs)
+            echo -e "${COLOR_GREEN}Tailing Redis logs (Ctrl+C to exit)...${COLOR_RESET}"
+            if [ -f /var/log/redis/redis-server.log ]; then
+                sudo tail -f /var/log/redis/redis-server.log
+            elif [ -f /var/log/redis.log ]; then
+                sudo tail -f /var/log/redis.log
+            elif command -v journalctl &>/dev/null; then
+                journalctl -u "$SERVICE" -f 2>/dev/null || journalctl -u redis-server -f
+            else
+                echo -e "${COLOR_RED}Log file not found.${COLOR_RESET}"
+            fi
+            ;;
+        info|-i|--info)
+            echo -e "${COLOR_BLUE}Redis Server Information:${COLOR_RESET}"
+            redis-cli info
+            ;;
+        ping|-p|--ping)
+            redis-cli ping
+            ;;
+        cli|-c|--cli)
+            echo -e "${COLOR_GREEN}Opening Redis CLI...${COLOR_RESET}"
+            redis-cli
+            ;;
+        help|-h|--help)
+            echo -e "${COLOR_GREEN}Redis Management Helper${COLOR_RESET}"
+            echo -e "  ${COLOR_YELLOW}redis start${COLOR_RESET}      → Start Redis server"
+            echo -e "  ${COLOR_YELLOW}redis stop${COLOR_RESET}       → Stop Redis server"
+            echo -e "  ${COLOR_YELLOW}redis restart${COLOR_RESET}    → Restart Redis server"
+            echo -e "  ${COLOR_YELLOW}redis status${COLOR_RESET}     → Show Redis status"
+            echo -e "  ${COLOR_YELLOW}redis logs${COLOR_RESET}       → Tail Redis logs"
+            echo -e "  ${COLOR_YELLOW}redis info${COLOR_RESET}       → Show Redis information"
+            echo -e "  ${COLOR_YELLOW}redis ping${COLOR_RESET}       → Ping Redis server"
+            echo -e "  ${COLOR_YELLOW}redis cli${COLOR_RESET}        → Open Redis CLI"
+            echo -e "  ${COLOR_YELLOW}redis help${COLOR_RESET}       → Show this help"
+            ;;
+        *)
+            echo -e "${COLOR_RED}Unknown command: $1${COLOR_RESET}"
+            redis help
+            return 1
+            ;;
+    esac
+}
+
+# ==============================================================================
+# CONNECTION & CLI
+# ==============================================================================
+
+### Basic Connection
+alias redis-cli-connect='redis-cli'                                    # Connect to Redis CLI
+alias redis-cli-local='redis-cli -h localhost -p 6379'                # Connect to local Redis
+alias redis-cli-host='redis-cli -h'                                    # Connect to specific host
+alias redis-cli-port='redis-cli -p'                                    # Connect to specific port
+alias redis-cli-auth='redis-cli -a'                                    # Connect with password
+alias redis-cli-db='redis-cli -n'                                      # Select database number
+
+### Advanced Connection Options
+alias redis-cli-raw='redis-cli --raw'                                  # Raw mode output
+alias redis-cli-nopipe='redis-cli --no-raw'                            # No raw mode
+alias redis-cli-csv='redis-cli --csv'                                  # CSV output format
+alias redis-cli-scan='redis-cli --scan'                                # Scan mode
+alias redis-cli-pattern='redis-cli --pattern'                          # Pattern mode
+alias redis-cli-intset-limit='redis-cli --intset-limit'                # Intset limit
+alias redis-cli-pipe='redis-cli --pipe'                                # Pipe mode
+alias redis-cli-eval='redis-cli --eval'                                # Lua script evaluation
+
+### Connection Helpers
+alias redis-ping='redis-cli ping'                                      # Ping Redis server
+alias redis-echo='redis-cli echo'                                      # Echo test
+alias redis-quit='redis-cli quit'                                      # Close connection
+
+# ==============================================================================
+# KEY OPERATIONS
+# ==============================================================================
+
+### Key Existence & Type
+alias redis-exists='redis-cli exists'                                  # Check if key exists
+alias redis-type='redis-cli type'                                      # Get key type
+alias redis-keys='redis-cli keys'                                      # Get all keys (use with caution)
+alias redis-keys-pattern='redis-cli keys'                              # Get keys matching pattern
+
+### Key Deletion & Management
+alias redis-del='redis-cli del'                                        # Delete key(s)
+alias redis-unlink='redis-cli unlink'                                  # Unlink key(s) (async delete)
+alias redis-rename='redis-cli rename'                                  # Rename key
+alias redis-renamenx='redis-cli renamenx'                              # Rename if new key doesn't exist
+alias redis-expire='redis-cli expire'                                  # Set key expiration (seconds)
+alias redis-expireat='redis-cli expireat'                              # Set key expiration (timestamp)
+alias redis-pexpire='redis-cli pexpire'                                # Set key expiration (milliseconds)
+alias redis-persist='redis-cli persist'                                # Remove expiration
+alias redis-ttl='redis-cli ttl'                                        # Get time to live (seconds)
+alias redis-pttl='redis-cli pttl'                                      # Get time to live (milliseconds)
+
+### Key Scanning (Safe alternative to KEYS)
+alias redis-scan='redis-cli --scan'                                    # Scan keys
+alias redis-scan-pattern='redis-cli --scan --pattern'                  # Scan with pattern
+
+### Key Random & Move
+alias redis-randomkey='redis-cli randomkey'                            # Get random key
+alias redis-move='redis-cli move'                                      # Move key to another database
+alias redis-dump='redis-cli dump'                                      # Serialize key value
+alias redis-restore='redis-cli restore'                                # Restore key from serialized value
+
+# ==============================================================================
+# STRING OPERATIONS
+# ==============================================================================
+
+### Basic String Operations
+alias redis-get='redis-cli get'                                        # Get string value
+alias redis-set='redis-cli set'                                        # Set string value
+alias redis-setnx='redis-cli setnx'                                    # Set if not exists
+alias redis-setex='redis-cli setex'                                    # Set with expiration
+alias redis-psetex='redis-cli psetex'                                  # Set with expiration (ms)
+alias redis-append='redis-cli append'                                  # Append to string
+alias redis-strlen='redis-cli strlen'                                  # Get string length
+
+### String Bitwise Operations
+alias redis-setbit='redis-cli setbit'                                  # Set bit at offset
+alias redis-getbit='redis-cli getbit'                                  # Get bit at offset
+alias redis-bitcount='redis-cli bitcount'                              # Count set bits
+alias redis-bitop='redis-cli bitop'                                    # Bitwise operations
+alias redis-bitpos='redis-cli bitpos'                                  # Find first bit set/clear
+
+### String Range & Increment
+alias redis-getrange='redis-cli getrange'                              # Get substring
+alias redis-setrange='redis-cli setrange'                              # Overwrite substring
+alias redis-incr='redis-cli incr'                                      # Increment integer
+alias redis-decr='redis-cli decr'                                      # Decrement integer
+alias redis-incrby='redis-cli incrby'                                  # Increment by amount
+alias redis-decrby='redis-cli decrby'                                  # Decrement by amount
+alias redis-incrbyfloat='redis-cli incrbyfloat'                        # Increment by float
+
+### Multiple String Operations
+alias redis-mget='redis-cli mget'                                      # Get multiple values
+alias redis-mset='redis-cli mset'                                      # Set multiple values
+alias redis-msetnx='redis-cli msetnx'                                  # Set multiple if none exist
+
+# ==============================================================================
+# HASH OPERATIONS
+# ==============================================================================
+
+### Hash Field Operations
+alias redis-hget='redis-cli hget'                                      # Get hash field value
+alias redis-hset='redis-cli hset'                                      # Set hash field value
+alias redis-hsetnx='redis-cli hsetnx'                                  # Set hash field if not exists
+alias redis-hdel='redis-cli hdel'                                      # Delete hash field(s)
+alias redis-hexists='redis-cli hexists'                                # Check if hash field exists
+alias redis-hgetall='redis-cli hgetall'                                # Get all hash fields and values
+alias redis-hkeys='redis-cli hkeys'                                    # Get all hash field names
+alias redis-hvals='redis-cli hvals'                                    # Get all hash values
+alias redis-hlen='redis-cli hlen'                                      # Get number of hash fields
+
+### Hash Multiple Operations
+alias redis-hmget='redis-cli hmget'                                    # Get multiple hash fields
+alias redis-hmset='redis-cli hmset'                                    # Set multiple hash fields
+alias redis-hscan='redis-cli hscan'                                    # Scan hash fields
+
+### Hash Increment Operations
+alias redis-hincrby='redis-cli hincrby'                                # Increment hash field by integer
+alias redis-hincrbyfloat='redis-cli hincrbyfloat'                      # Increment hash field by float
+
+# ==============================================================================
+# LIST OPERATIONS
+# ==============================================================================
+
+### List Push/Pop Operations
+alias redis-lpush='redis-cli lpush'                                    # Push to left
+alias redis-rpush='redis-cli rpush'                                    # Push to right
+alias redis-lpop='redis-cli lpop'                                      # Pop from left
+alias redis-rpop='redis-cli rpop'                                      # Pop from right
+alias redis-rpoplpush='redis-cli rpoplpush'                            # Pop from right, push to left
+alias redis-brpop='redis-cli brpop'                                    # Blocking pop from right
+alias redis-blpop='redis-cli blpop'                                    # Blocking pop from left
+alias redis-brpoplpush='redis-cli brpoplpush'                          # Blocking rpoplpush
+
+### List Access Operations
+alias redis-llen='redis-cli llen'                                      # Get list length
+alias redis-lindex='redis-cli lindex'                                  # Get element by index
+alias redis-lrange='redis-cli lrange'                                  # Get range of elements
+alias redis-lset='redis-cli lset'                                      # Set element by index
+
+### List Modification Operations
+alias redis-ltrim='redis-cli ltrim'                                    # Trim list to range
+alias redis-lrem='redis-cli lrem'                                      # Remove elements from list
+alias redis-linsert='redis-cli linsert'                                # Insert element in list
+
+# ==============================================================================
+# SET OPERATIONS
+# ==============================================================================
+
+### Set Basic Operations
+alias redis-sadd='redis-cli sadd'                                      # Add member(s) to set
+alias redis-srem='redis-cli srem'                                      # Remove member(s) from set
+alias redis-smembers='redis-cli smembers'                              # Get all set members
+alias redis-sismember='redis-cli sismember'                            # Check if member exists
+alias redis-scard='redis-cli scard'                                    # Get set cardinality
+alias redis-spop='redis-cli spop'                                      # Remove and return random member
+alias redis-srandmember='redis-cli srandmember'                        # Get random member(s)
+
+### Set Operations
+alias redis-sinter='redis-cli sinter'                                  # Intersection of sets
+alias redis-sunion='redis-cli sunion'                                  # Union of sets
+alias redis-sdiff='redis-cli sdiff'                                    # Difference of sets
+alias redis-sinterstore='redis-cli sinterstore'                        # Store intersection
+alias redis-sunionstore='redis-cli sunionstore'                        # Store union
+alias redis-sdiffstore='redis-cli sdiffstore'                          # Store difference
+alias redis-smove='redis-cli smove'                                    # Move member between sets
+alias redis-sscan='redis-cli sscan'                                    # Scan set members
+
+# ==============================================================================
+# SORTED SET OPERATIONS
+# ==============================================================================
+
+### Sorted Set Basic Operations
+alias redis-zadd='redis-cli zadd'                                      # Add member(s) with score
+alias redis-zrem='redis-cli zrem'                                      # Remove member(s)
+alias redis-zcard='redis-cli zcard'                                    # Get sorted set cardinality
+alias redis-zcount='redis-cli zcount'                                  # Count members in score range
+alias redis-zscore='redis-cli zscore'                                  # Get member score
+alias redis-zrank='redis-cli zrank'                                    # Get member rank (ascending)
+alias redis-zrevrank='redis-cli zrevrank'                              # Get member rank (descending)
+
+### Sorted Set Range Operations
+alias redis-zrange='redis-cli zrange'                                  # Get range by rank
+alias redis-zrevrange='redis-cli zrevrange'                            # Get range by rank (reversed)
+alias redis-zrangebyscore='redis-cli zrangebyscore'                    # Get range by score
+alias redis-zrevrangebyscore='redis-cli zrevrangebyscore'              # Get range by score (reversed)
+
+### Sorted Set Increment & Operations
+alias redis-zincrby='redis-cli zincrby'                                # Increment member score
+alias redis-zinterstore='redis-cli zinterstore'                        # Store intersection
+alias redis-zunionstore='redis-cli zunionstore'                        # Store union
+alias redis-zremrangebyscore='redis-cli zremrangebyscore'              # Remove by score range
+alias redis-zremrangebyrank='redis-cli zremrangebyrank'                # Remove by rank range
+alias redis-zscan='redis-cli zscan'                                    # Scan sorted set
+
+# ==============================================================================
+# DATABASE OPERATIONS
+# ==============================================================================
+
+### Database Selection & Management
+alias redis-select='redis-cli select'                                  # Select database
+alias redis-flushdb='redis-cli flushdb'                                # Flush current database
+alias redis-flushall='redis-cli flushall'                              # Flush all databases
+alias redis-dbsize='redis-cli dbsize'                                  # Get number of keys in current DB
+
+### Database Swap & Copy
+alias redis-swapdb='redis-cli swapdb'                                  # Swap two databases
+alias redis-copy='redis-cli copy'                                      # Copy key to another database
+
+# ==============================================================================
+# CONFIGURATION & INFORMATION
+# ==============================================================================
+
+### Server Information
+alias redis-info='redis-cli info'                                      # Get server information
+alias redis-info-server='redis-cli info server'                        # Server section
+alias redis-info-clients='redis-cli info clients'                      # Clients section
+alias redis-info-memory='redis-cli info memory'                        # Memory section
+alias redis-info-stats='redis-cli info stats'                          # Statistics section
+alias redis-info-replication='redis-cli info replication'              # Replication section
+alias redis-info-cpu='redis-cli info cpu'                              # CPU section
+alias redis-info-commandstats='redis-cli info commandstats'            # Command statistics
+
+### Configuration Management
+alias redis-config-get='redis-cli config get'                          # Get configuration parameter
+alias redis-config-set='redis-cli config set'                          # Set configuration parameter
+alias redis-config-rewrite='redis-cli config rewrite'                  # Rewrite configuration file
+alias redis-config-resetstat='redis-cli config resetstat'              # Reset statistics
+
+### Server Commands
+alias redis-time='redis-cli time'                                      # Get server time
+alias redis-lastsave='redis-cli lastsave'                              # Get last save timestamp
+alias redis-role='redis-cli role'                                      # Get server role
+alias redis-client-list='redis-cli client list'                        # List connected clients
+alias redis-client-kill='redis-cli client kill'                        # Kill client connection
+alias redis-client-setname='redis-cli client setname'                  # Set client name
+alias redis-client-getname='redis-cli client getname'                  # Get client name
+
+# ==============================================================================
+# MONITORING & STATISTICS
+# ==============================================================================
+
+### Monitoring
+alias redis-monitor='redis-cli monitor'                                # Monitor commands in real-time
+alias redis-slowlog='redis-cli slowlog'                                # Show slow log
+alias redis-slowlog-len='redis-cli slowlog len'                        # Get slow log length
+alias redis-slowlog-reset='redis-cli slowlog reset'                    # Reset slow log
+
+### Statistics
+alias redis-memory-usage='redis-cli memory usage'                      # Get memory usage of key
+alias redis-memory-stats='redis-cli memory stats'                      # Get memory statistics
+alias redis-memory-doctor='redis-cli memory doctor'                    # Memory diagnostics
+
+# ==============================================================================
+# PERSISTENCE & BACKUP
+# ==============================================================================
+
+### Persistence Operations
+alias redis-save='redis-cli save'                                      # Save database to disk (sync)
+alias redis-bgsave='redis-cli bgsave'                                  # Save database to disk (async)
+alias redis-bgrewriteaof='redis-cli bgrewriteaof'                      # Rewrite AOF file
+
+### Backup & Restore
+alias redis-backup='redis-cli --rdb /tmp/redis-backup.rdb'             # Create RDB backup
+alias redis-backup-copy='cp /var/lib/redis/dump.rdb /tmp/redis-backup-$(date +%Y%m%d).rdb' # Copy RDB file
+
+# ==============================================================================
+# SECURITY & AUTHENTICATION
+# ==============================================================================
+
+### Authentication
+alias redis-auth='redis-cli auth'                                      # Authenticate with password
+alias redis-acl-list='redis-cli acl list'                              # List ACL users
+alias redis-acl-getuser='redis-cli acl getuser'                        # Get ACL user details
+alias redis-acl-setuser='redis-cli acl setuser'                        # Set ACL user
+alias redis-acl-deluser='redis-cli acl deluser'                        # Delete ACL user
+
+# ==============================================================================
+# CLUSTER & REPLICATION
+# ==============================================================================
+
+### Cluster Operations
+alias redis-cluster-nodes='redis-cli cluster nodes'                    # List cluster nodes
+alias redis-cluster-info='redis-cli cluster info'                      # Get cluster information
+alias redis-cluster-slots='redis-cli cluster slots'                    # Get cluster slots
+alias redis-cluster-keyslot='redis-cli cluster keyslot'                # Get key slot
+
+### Replication
+alias redis-slaveof='redis-cli slaveof'                                # Make server replica
+alias redis-slaveof-noone='redis-cli slaveof no one'                   # Stop replication
+alias redis-replicaof='redis-cli replicaof'                            # Make server replica (new syntax)
+alias redis-sync='redis-cli sync'                                      # Sync with master
+
+# ==============================================================================
+# PUB/SUB OPERATIONS
+# ==============================================================================
+
+### Pub/Sub
+alias redis-publish='redis-cli publish'                                # Publish message to channel
+alias redis-subscribe='redis-cli subscribe'                            # Subscribe to channel(s)
+alias redis-psubscribe='redis-cli psubscribe'                          # Pattern subscribe
+alias redis-unsubscribe='redis-cli unsubscribe'                        # Unsubscribe from channel(s)
+alias redis-punsubscribe='redis-cli punsubscribe'                      # Pattern unsubscribe
+alias redis-pubsub='redis-cli pubsub'                                  # Pub/Sub commands
+alias redis-pubsub-channels='redis-cli pubsub channels'                # List active channels
+alias redis-pubsub-numsub='redis-cli pubsub numsub'                    # Number of subscribers
+
+# ==============================================================================
+# SCRIPTING & LUA
+# ==============================================================================
+
+### Lua Scripting
+alias redis-eval='redis-cli eval'                                      # Evaluate Lua script
+alias redis-evalsha='redis-cli evalsha'                                # Evaluate Lua script by SHA
+alias redis-script-load='redis-cli script load'                        # Load Lua script
+alias redis-script-exists='redis-cli script exists'                    # Check if script exists
+alias redis-script-flush='redis-cli script flush'                      # Flush all scripts
+alias redis-script-kill='redis-cli script kill'                        # Kill running script
+
+# ==============================================================================
+# UTILITIES & HELPERS
+# ==============================================================================
+
+### Quick Operations
+alias redis-stats='redis-cli info stats'                               # Quick statistics
+alias redis-memory='redis-cli info memory'                             # Memory information
+alias redis-keys-count='redis-cli dbsize'                              # Count keys
+alias redis-connected-clients='redis-cli info clients | grep connected_clients' # Connected clients count
+
+### Common Workflows
+alias redis-check='redis-cli ping && echo "Redis is running"'          # Check if Redis is running
+alias redis-clear-all='redis-cli flushall'                             # Clear all databases (use with caution)
+alias redis-clear-db='redis-cli flushdb'                               # Clear current database (use with caution)
+
+### Development Helpers
+alias redis-test='redis-cli ping && redis-cli set test "OK" && redis-cli get test && redis-cli del test' # Quick test
+alias redis-size='redis-cli dbsize'                                    # Get database size
+alias redis-slow-commands='redis-cli slowlog get 10'                   # Show 10 slowest commands
+
+# ==============================================================================
+# END OF REDIS ALIASES
+# ==============================================================================
+

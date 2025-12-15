@@ -42,16 +42,19 @@ The Alias Hub installer provides a seamless setup experience with automatic dete
 #### Quick Installation Methods
 
 **Using `curl` (Recommended):**
+
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
 ```
 
 **Using `wget`:**
+
 ```bash
 sh -c "$(wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
 ```
 
 **Manual Installation:**
+
 ```bash
 # Clone the repository
 git clone https://github.com/1999AZZAR/alias-hub.git ~/alias-hub
@@ -73,15 +76,15 @@ The installer supports various command-line options for different use cases and 
 
 #### Available Options
 
-| Option | Description |
-|--------|-------------|
-| `--help` | Show help message and exit |
-| `--dry-run` | Preview installation without making changes |
-| `--force` | Force reinstallation, overwriting existing configurations |
-| `--uninstall` | Remove Alias Hub and restore original configurations |
-| `--no-packages` | Skip system package installation |
-| `--verbose` | Enable verbose output for debugging |
-| `--shell SHELL` | Override automatic shell detection |
+| Option            | Description                                               |
+| ----------------- | --------------------------------------------------------- |
+| `--help`        | Show help message and exit                                |
+| `--dry-run`     | Preview installation without making changes               |
+| `--force`       | Force reinstallation, overwriting existing configurations |
+| `--uninstall`   | Remove Alias Hub and restore original configurations      |
+| `--no-packages` | Skip system package installation                          |
+| `--verbose`     | Enable verbose output for debugging                       |
+| `--shell SHELL` | Override automatic shell detection                        |
 
 #### Installation Examples
 
@@ -110,21 +113,22 @@ The installer supports various command-line options for different use cases and 
 The installer performs the following operations automatically:
 
 1. **Environment Detection**
+
    - Identifies your package manager (apt, dnf, pacman, apk, zypper, emerge)
    - Detects your shell environment (bash, zsh, fish, ash, dash)
    - Checks for required dependencies
-
 2. **Repository Setup**
+
    - Downloads Alias Hub to `~/alias-hub`
    - Creates necessary directory structure
    - Sets proper file permissions
-
 3. **Neofetch Configuration**
+
    - Installs custom Neofetch configuration
    - Downloads ASCII art collection
    - Configures display settings
-
 4. **Package Installation**
+
    - Installs essential command-line tools:
      - `eza` - Modern replacement for `ls`
      - `htop` - Interactive process viewer
@@ -134,13 +138,13 @@ The installer performs the following operations automatically:
      - `tree` - Directory tree viewer
      - `glances` - System monitoring
      - And many more...
-
 5. **Shell Configuration**
+
    - Adds Alias Hub sourcing to your shell RC file
    - Enables tab completion for alias categories
    - Creates backups of existing configurations
-
 6. **Autocompletion Setup**
+
    - Configures tab completion for `alias-list` command
    - Supports completion for all alias categories
 
@@ -149,11 +153,13 @@ The installer performs the following operations automatically:
 #### Automatic Updates
 
 To update to the latest version, simply re-run the installer:
+
 ```bash
 ./install.sh
 ```
 
 The installer will:
+
 - Pull the latest changes from the repository
 - Update configurations if needed
 - Install any new required packages
@@ -162,6 +168,7 @@ The installer will:
 #### Manual Updates
 
 For manual updates:
+
 ```bash
 cd ~/alias-hub
 git pull origin master
@@ -182,12 +189,12 @@ Alias Hub supports the following package managers:
 
 #### Supported Shells
 
-| Shell | Configuration File | Status |
-|-------|-------------------|--------|
-| **bash** | `~/.bashrc` | Fully Supported |
-| **zsh** | `~/.zshrc` | Fully Supported |
-| **fish** | `~/.config/fish/config.fish` | Fully Supported |
-| **ash/dash** | `~/.profile` | Supported (limited) |
+| Shell              | Configuration File             | Status              |
+| ------------------ | ------------------------------ | ------------------- |
+| **bash**     | `~/.bashrc`                  | Fully Supported     |
+| **zsh**      | `~/.zshrc`                   | Fully Supported     |
+| **fish**     | `~/.config/fish/config.fish` | Fully Supported     |
+| **ash/dash** | `~/.profile`                 | Supported (limited) |
 
 #### Required Tools
 
@@ -208,6 +215,7 @@ Once installed, Alias Hub provides immediate access to hundreds of useful aliase
 ### Basic Commands
 
 After installation, restart your shell or run:
+
 ```bash
 source ~/.bashrc  # For bash users
 source ~/.zshrc   # For zsh users
@@ -233,6 +241,7 @@ alias-help [alias-name]
 Alias Hub organizes aliases into logical categories for easy discovery:
 
 #### System Management
+
 ```bash
 # System information and monitoring
 neofetch              # Display system information
@@ -249,6 +258,7 @@ disk-usage            # Analyze disk usage
 ```
 
 #### Development Tools
+
 ```bash
 # Git operations
 gs                    # git status
@@ -259,17 +269,30 @@ gl                    # git log
 
 # Python development
 py                    # python3
-pip                   # pip3
-venv-create           # Create virtual environment
-venv-activate         # Activate virtual environment
+pip                   # pip with system packages flag
+venv-c                # Create virtual environment
+venv-a                # Activate virtual environment
+pytest                # Run tests with pytest
+black                 # Format code with Black
 
 # Docker operations
 docker-ps             # Show running containers
 docker-images         # List Docker images
 docker-clean          # Clean unused containers/images
+
+# Arduino development
+arduino-compile       # Compile Arduino sketch
+arduino-upload        # Upload to board
+arduino-monitor       # Serial monitor
+
+# ESP development
+esp-build             # Build ESP-IDF project
+esp-flash             # Flash to ESP device
+esp-mon               # Serial monitor
 ```
 
 #### File Management
+
 ```bash
 # Enhanced listing
 ls                    # Colorized, detailed listing (via eza)
@@ -285,17 +308,48 @@ find-large            # Find large files
 ```
 
 #### Network Management
+
 ```bash
 # Network information
 myip                  # Show public IP address
 localip               # Show local IP addresses
+ips                   # Show all IPs in color
 netstat-listen        # Show listening ports
-ping-test             # Test connectivity
+ping                  # Ping with 5 packets (default)
 
 # Network tools
-speedtest             # Test internet speed
-dns-lookup            # DNS lookup
-port-scan             # Scan open ports
+bandwidth             # Internet speed test
+dns-dig               # DNS lookup
+port-scan             # Scan local ports
+wifi-list             # List WiFi networks
+```
+
+#### Database Management
+
+```bash
+# PostgreSQL
+psql                  # Connect to PostgreSQL
+psl                   # List all databases
+pgbackup              # Backup database
+pgrestore             # Restore database
+
+# Redis
+redis start           # Start Redis server
+redis stop            # Stop Redis server
+redis info            # Show Redis information
+redis-cli             # Open Redis CLI
+redis-get             # Get key value
+redis-set             # Set key value
+```
+
+#### ERP & Business Tools
+
+```bash
+# Odoo
+odoo                  # Start Odoo and open UI
+odoo stop             # Stop Odoo
+odoo logs             # Show Odoo logs
+odoo status           # Check Odoo status
 ```
 
 ### Configuration
@@ -316,12 +370,14 @@ alias grep='grep --color=auto'
 #### Configuration Files
 
 Alias Hub creates the following configuration files:
+
 - `~/.config/neofetch/config.conf` - Neofetch configuration
 - Shell RC files are modified to include Alias Hub sourcing
 
 #### Backup and Restore
 
 All original configurations are backed up with timestamps:
+
 - Original files: `filename.alias-hub-backup.YYYYMMDD_HHMMSS`
 - Restore backups manually or use `--uninstall` option
 
@@ -333,43 +389,149 @@ Alias Hub organizes aliases into categorized files for easy management and selec
 
 ### Core Alias Files
 
-| File | Description | Key Features |
-|------|-------------|--------------|
-| **`Development_Tools.alias`** | Development and coding shortcuts | Git operations, Python, Docker, build tools |
-| **`ESP_Development.alias`** | ESP32/ESP8266 development | Arduino IDE, ESP tools, flashing commands |
-| **`File_Management.alias`** | File and directory operations | Enhanced ls, file operations, compression |
-| **`Fun_and_Entertainment.alias`** | Entertainment and leisure | Games, media, fun commands |
-| **`global.alias`** | Cross-category utilities | Commonly used aliases, user customizations |
-| **`Media_and_Files.alias`** | Media file handling | Audio/video processing, conversion tools |
-| **`Navigations.alias`** | Directory navigation | Quick jumps, bookmarks, directory shortcuts |
-| **`Network_Management.alias`** | Network operations | Connectivity testing, network diagnostics |
-| **`Postgres.alias`** | PostgreSQL database | Database administration, queries, backups |
-| **`Search_Utilities.alias`** | Search and find operations | Enhanced grep, find, locate commands |
-| **`System_Management.alias`** | System administration | Updates, monitoring, maintenance tasks |
+| File                                      | Description                      | Key Features                                                     |
+| ----------------------------------------- | -------------------------------- | ---------------------------------------------------------------- |
+| **`Arduino_CLI.alias`**           | Arduino CLI development          | Board management, core/library installation, compilation, upload |
+| **`Development_Tools.alias`**     | Development and coding shortcuts | Git operations, Python, Docker, build tools, Kubernetes          |
+| **`ESP_Development.alias`**       | ESP32/ESP8266 development        | ESP-IDF tools, flashing, monitoring, configuration               |
+| **`File_Management.alias`**       | File and directory operations    | Enhanced ls, file operations, compression, archive tools         |
+| **`Fun_and_Entertainment.alias`** | Entertainment and leisure        | Games, media, fun commands, ASCII art                            |
+| **`General_Monitoring.alias`**    | System monitoring and analysis   | Hardware monitoring, performance analysis, resource tracking     |
+| **`Github.alias`**                | Git and GitHub operations        | Git shortcuts, GitHub CLI, version control workflows             |
+| **`Media_and_Files.alias`**       | Media file handling              | Audio/video processing, conversion tools, YouTube downloads      |
+| **`Navigations.alias`**           | Directory navigation             | Quick jumps, bookmarks, directory shortcuts                      |
+| **`Network_Management.alias`**    | Network operations               | Connectivity testing, network diagnostics, WiFi management       |
+| **`odoo.alias`**                  | Odoo ERP management              | Service control, logs, status monitoring, virtual environment    |
+| **`Postgres.alias`**              | PostgreSQL database              | Database administration, queries, backups, monitoring            |
+| **`Python.alias`**                | Python development               | Virtual environments, package management, testing, debugging     |
+| **`Redis.alias`**                 | Redis database management        | Server control, data operations, monitoring, pub/sub             |
+| **`Search_Utilities.alias`**      | Search and find operations       | Enhanced grep, find, locate commands, code search                |
+| **`System_Management.alias`**     | System administration            | Updates, monitoring, maintenance tasks, service management       |
 
 ### Configuration Files
 
-| File/Directory | Purpose |
-|----------------|---------|
-| **`config/neofetch/config.conf`** | Neofetch display configuration |
-| **`config/neofetch/`** | Neofetch ASCII art collection |
-| **`script/helpers.sh`** | Shared functions and utilities |
-| **`script/system_cleaner.sh`** | System cleanup automation |
-| **`script/update_system.sh`** | System update automation |
-| **`install.sh`** | Installation and setup script |
+| File/Directory                              | Purpose                                             |
+| ------------------------------------------- | --------------------------------------------------- |
+| **`config/neofetch/config.conf`**   | Neofetch display configuration                      |
+| **`config/fastfetch/config.jsonc`** | Fastfetch display configuration                     |
+| **`script/helpers.sh`**             | Main helper functions loader (modular architecture) |
+| **`script/sub_scripts/`**           | Modular helper function scripts                     |
+| **`script/system_cleaner.sh`**      | System cleanup automation                           |
+| **`script/update_system.sh`**       | System update automation                            |
+| **`install.sh`**                    | Installation and setup script                       |
+| **`LICENSE`**                       | MIT License file                                    |
 
 ### File Details
 
+#### Arduino_CLI.alias
+
+Comprehensive Arduino development aliases for embedded systems programming:
+
+- **Board Management**: Board discovery, attachment, selection
+- **Core Management**: Installation for Uno, Nano, Mega, ESP32, ESP8266, and more
+- **Library Management**: Library installation, updates, common libraries
+- **Compilation & Upload**: Build, verify, and upload commands
+- **Monitoring**: Serial monitor with common baud rates
+- **Quick Workflows**: Board-specific shortcuts and development helpers
+
 #### Development_Tools.alias
+
 Contains aliases for common development workflows:
+
 - **Git Operations**: Status, add, commit, push, pull, branching
-- **Python Development**: Virtual environments, package management, testing
 - **Docker**: Container management, image operations, networking
+- **Kubernetes**: K8s operations, pod management, deployments
 - **Build Tools**: Make, CMake, compiler shortcuts
+- **Android/iOS**: Mobile development tools
+- **CI/CD**: GitHub Actions, GitLab CI, Jenkins
+- **Cloud Development**: AWS, GCP, Azure CLI tools
 - **Debugging**: Process monitoring, log analysis, error checking
 
+#### ESP_Development.alias
+
+ESP32/ESP8266 embedded systems development:
+
+- **Environment Setup**: ESP-IDF initialization and updates
+- **Build Commands**: Compilation, size analysis, component management
+- **Flash Commands**: Upload to devices, erase flash, MAC reading
+- **Monitoring**: Serial monitor, logging, GDB debugging
+- **Configuration**: Menuconfig, partition management
+- **OTA Updates**: Over-the-air update management
+
+#### Github.alias
+
+Comprehensive Git and GitHub CLI operations:
+
+- **Quick Shortcuts**: Memory-friendly short aliases (gs, ga, gc, gp)
+- **Descriptive Aliases**: Clear long-form aliases (gstatus, gadd, gcommit)
+- **Branching & Merging**: Branch operations, merge strategies
+- **Remote Operations**: Push, pull, fetch with various options
+- **GitHub CLI**: Issue management, pull requests, repository operations
+- **Advanced Features**: Stashing, rebasing, cherry-picking, worktrees
+
+#### General_Monitoring.alias
+
+System monitoring and performance analysis:
+
+- **Hardware Monitoring**: CPU, GPU, memory, disk information
+- **Process Monitoring**: Process trees, resource usage, top processes
+- **Network Monitoring**: Network statistics, bandwidth usage
+- **Container Monitoring**: Docker and Kubernetes monitoring
+- **Performance Analysis**: System bottlenecks, I/O statistics
+- **Real-time Dashboards**: Live monitoring tools and views
+
+#### odoo.alias
+
+Odoo ERP system management function:
+
+- **Service Control**: Start, stop, restart Odoo service
+- **Service Management**: Enable/disable on boot
+- **Monitoring**: Logs tailing, status checking
+- **Environment**: Python virtual environment activation
+- **Interactive Helper**: Color-coded output with help system
+
+#### Postgres.alias
+
+PostgreSQL database management:
+
+- **Database Operations**: Create, drop, list databases
+- **Connection Management**: Connect to specific databases
+- **Backup & Restore**: Database backups and restoration
+- **Monitoring**: Process monitoring, database sizes, table analysis
+- **Service Management**: Start, stop, restart PostgreSQL service
+- **Logging**: Access to PostgreSQL logs
+
+#### Python.alias
+
+Comprehensive Python development aliases:
+
+- **Package Management**: Pip operations, requirements management
+- **Virtual Environments**: Venv creation, activation, management
+- **Code Quality**: Black, isort, pylint, mypy formatting and linting
+- **Testing**: Pytest, coverage, unittest operations
+- **Debugging**: PDB, profiling, memory analysis
+- **Data Science**: Jupyter, NumPy, Pandas, Matplotlib
+- **Web Development**: Django, Flask, FastAPI commands
+- **Deployment**: Package publishing, Docker integration
+
+#### Redis.alias
+
+Redis database management and operations:
+
+- **Server Management**: Start, stop, restart, status (function wrapper)
+- **Connection & CLI**: Multiple connection options and CLI modes
+- **Key Operations**: Key management, expiration, scanning
+- **Data Types**: Strings, Hashes, Lists, Sets, Sorted Sets operations
+- **Database Operations**: Database selection, flushing, copying
+- **Monitoring**: Real-time monitoring, slowlog, memory statistics
+- **Persistence**: Backup, restore, save operations
+- **Pub/Sub**: Publish/subscribe messaging
+- **Scripting**: Lua script execution and management
+
 #### System_Management.alias
+
 Essential system administration shortcuts:
+
 - **Package Management**: Update, upgrade, clean, search packages
 - **System Monitoring**: Process viewing, resource usage, system info
 - **Service Management**: Start/stop/restart services, status checks
@@ -377,7 +539,9 @@ Essential system administration shortcuts:
 - **Backup Operations**: System backup, configuration backup, recovery
 
 #### Network_Management.alias
+
 Network diagnostics and management tools:
+
 - **Connectivity Testing**: Ping, traceroute, speed tests
 - **Network Information**: IP addresses, routing tables, DNS lookup
 - **Port Management**: Open ports, listening services, firewall rules
@@ -385,7 +549,9 @@ Network diagnostics and management tools:
 - **Security**: Network scanning, security audits, encryption tools
 
 #### File_Management.alias
+
 Enhanced file and directory operations:
+
 - **Listing Commands**: Colorized ls, tree views, detailed information
 - **File Operations**: Copy, move, delete with progress indicators
 - **Compression**: Archive creation/extraction, multiple formats
@@ -393,7 +559,9 @@ Enhanced file and directory operations:
 - **Permissions**: Ownership changes, permission management
 
 #### Search_Utilities.alias
+
 Advanced search and discovery tools:
+
 - **Text Search**: Enhanced grep with context, file type filtering
 - **File Search**: Find by name, size, date, permissions
 - **Content Analysis**: Binary/hex search, encoding detection
@@ -441,6 +609,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/cust
 ```
 
 Update your `~/.zshrc`:
+
 ```bash
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 ZSH_THEME="agnoster"  # or your preferred theme
@@ -625,11 +794,13 @@ alias ssh-prod='ssh user@production-server'
 #### Installation Problems
 
 **Issue**: Package manager not detected
+
 ```
 Error: No supported package manager found
 ```
 
 **Solution**:
+
 ```bash
 # Install packages manually
 sudo apt install git curl  # Ubuntu/Debian
@@ -638,11 +809,13 @@ sudo dnf install git curl  # Fedora
 ```
 
 **Issue**: Permission denied during installation
+
 ```
 Error: Permission denied
 ```
 
 **Solution**:
+
 ```bash
 # Ensure you have sudo access
 sudo -v
@@ -654,11 +827,13 @@ sudo -v
 #### Alias Loading Issues
 
 **Issue**: Aliases not available after installation
+
 ```
 Command not found: alias-list
 ```
 
 **Solution**:
+
 ```bash
 # Reload your shell configuration
 source ~/.bashrc   # Bash
@@ -668,11 +843,13 @@ source ~/.zshrc    # Zsh
 ```
 
 **Issue**: Tab completion not working
+
 ```
 No completion for alias-list
 ```
 
 **Solution**:
+
 ```bash
 # Check if completion is loaded
 complete -p alias-list
@@ -684,11 +861,13 @@ source ~/.bashrc
 #### Neofetch Issues
 
 **Issue**: Neofetch shows errors
+
 ```
 Error: ASCII art not found
 ```
 
 **Solution**:
+
 ```bash
 # Reinstall Neofetch ASCII art
 curl -sSL https://raw.githubusercontent.com/1999AZZAR/neofetch_ascii/master/install.sh | bash
@@ -745,6 +924,7 @@ source ~/.bashrc
 #### Manual Cleanup
 
 If automatic uninstall fails:
+
 ```bash
 # Remove Alias Hub directory
 rm -rf ~/alias-hub
@@ -851,6 +1031,7 @@ shellcheck install.sh
 ### Recognition
 
 Contributors will be:
+
 - Listed in `CONTRIBUTORS.md`
 - Mentioned in release notes
 - Acknowledged in commit messages
@@ -859,16 +1040,6 @@ Contributors will be:
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-### MIT License Summary
-
-- **Permissions**: Commercial use, modification, distribution, private use
-- **Limitations**: Liability and warranty
-- **Conditions**: License and copyright notice
-
-The MIT License is a permissive license that allows you to use, modify, and distribute this software with minimal restrictions.
-
 ---
 
 **Enjoy an optimized and productive terminal experience with Alias Hub!**
-
-*For more information, visit the [GitHub repository](https://github.com/1999AZZAR/alias-hub).*
