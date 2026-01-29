@@ -40,6 +40,7 @@
 #   --dry-run           Preview installation without making changes
 #   --force             Force reinstallation, overwriting existing configurations
 #   --uninstall         Complete removal with backup restoration
+#   --minimal           Minimal installation (aliases + config + scripts only)
 #   --no-packages       Skip system package installation
 #   --verbose           Enable detailed logging and debug information
 #   --shell SHELL       Override automatic shell detection
@@ -555,6 +556,7 @@ OPTIONS:
     --dry-run           Show what would be done without making changes
     --force             Force reinstallation, overwriting existing configs
     --uninstall         Remove Alias Hub and restore original configurations
+    --minimal           Minimal installation (aliases + config + scripts only)
     --no-packages       Skip package installation
     --verbose           Enable verbose output
     --shell SHELL       Override shell detection (bash, zsh, fish, ash, dash)
@@ -564,6 +566,7 @@ EXAMPLES:
     $0 --dry-run          # Preview installation
     $0 --force            # Force reinstall
     $0 --uninstall        # Remove Alias Hub
+    $0 --minimal          # Minimal installation
     $0 --no-packages      # Install without packages
 
 For more information, visit: https://github.com/1999AZZAR/alias-hub
@@ -586,6 +589,9 @@ parse_arguments() {
                 ;;
             --uninstall)
                 UNINSTALL=true
+                ;;
+            --minimal)
+                SKIP_PACKAGES=true
                 ;;
             --no-packages)
                 SKIP_PACKAGES=true
