@@ -268,7 +268,7 @@ create_backup() {
         local backup_file="${file}${BACKUP_SUFFIX}"
         print_verbose "Creating backup: $file -> $backup_file"
         if [[ "$DRY_RUN" == false ]]; then
-            cp "$file" "$backup_file"
+            cp "$file" "$backup_file" || print_warning "Failed to backup $file"
         fi
         print_info "Backed up $file to $backup_file"
     fi
@@ -445,13 +445,17 @@ setup_configs() {
 
         # Special handling for neofetch ASCII art
         if [[ "$config_tool" == "neofetch" && "$config_name" == "config" ]]; then
-            print_info "Setting up Neofetch ASCII art..."
-            if [[ "$DRY_RUN" == false ]]; then
-                if ! curl -sSL "$NEOFETCH_ASCII_INSTALLER_URL" | bash; then
-                    print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
+            if command_exists neofetch && command_exists git; then
+                print_info "Setting up Neofetch ASCII art..."
+                if [[ "$DRY_RUN" == false ]]; then
+                    if ! curl -sSL "$NEOFETCH_ASCII_INSTALLER_URL" | bash; then
+                        print_warning "Neofetch ASCII installer failed. Neofetch might not display ASCII art correctly."
+                    fi
+                else
+                    print_info "Would run Neofetch ASCII installer"
                 fi
             else
-                print_info "Would run Neofetch ASCII installer"
+                print_verbose "Skipping Neofetch ASCII art setup (dependencies missing)"
             fi
         fi
     done
