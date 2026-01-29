@@ -82,6 +82,7 @@ The installer supports various command-line options for different use cases and 
 | `--dry-run`     | Preview installation without making changes               |
 | `--force`       | Force reinstallation, overwriting existing configurations |
 | `--uninstall`   | Remove Alias Hub and restore original configurations      |
+| `--minimal`     | Minimal installation (aliases + config + scripts only)    |
 | `--no-packages` | Skip system package installation                          |
 | `--verbose`     | Enable verbose output for debugging                       |
 | `--shell SHELL` | Override automatic shell detection                        |
@@ -100,6 +101,9 @@ The installer supports various command-line options for different use cases and 
 
 # Remove Alias Hub completely
 ./install.sh --uninstall
+
+# Minimal installation (aliases, config, scripts)
+./install.sh --minimal
 
 # Install with verbose output
 ./install.sh --verbose
