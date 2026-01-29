@@ -391,7 +391,8 @@ setup_configs() {
 
     for source_config in "${!config_files[@]}"; do
         local dest_config="${config_files[$source_config]}"
-        local config_name=$(basename "$source_config" .conf .jsonc)
+        local config_name=$(basename "$source_config")
+        config_name="${config_name%.*}"
         local config_tool=$(basename "$(dirname "$dest_config")")
 
         print_verbose "Processing $config_tool $config_name config..."

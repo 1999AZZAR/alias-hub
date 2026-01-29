@@ -44,13 +44,13 @@ The Alias Hub installer provides a seamless setup experience with automatic dete
 **Using `curl` (Recommended):**
 
 ```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
 ```
 
 **Using `wget`:**
 
 ```bash
-sh -c "$(wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/1999AZZAR/alias-hub/master/install.sh)"
 ```
 
 **Manual Installation:**
