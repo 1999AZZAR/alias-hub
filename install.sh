@@ -166,7 +166,7 @@ validate_config_files() {
         if [[ ! -f "$config_file" ]]; then
             print_warning "Required config file missing: ${required_configs[$config_file]}"
             print_warning "File: $config_file"
-            ((missing_configs++))
+            ((missing_configs+=1))
         else
             print_verbose "Found: ${required_configs[$config_file]}"
         fi
@@ -402,7 +402,7 @@ setup_configs() {
         if [[ "$DRY_RUN" == false ]]; then
             if ! mkdir -p "$config_dir"; then
                 print_warning "Failed to create directory: $config_dir"
-                ((failed_configs++))
+                ((failed_configs+=1))
                 continue
             fi
         else
@@ -412,7 +412,7 @@ setup_configs() {
         # Check if source config exists
         if [[ ! -f "$source_config" ]]; then
             print_warning "Source config not found: $source_config"
-            ((failed_configs++))
+            ((failed_configs+=1))
             continue
         fi
 
@@ -422,7 +422,7 @@ setup_configs() {
             if [[ "$DRY_RUN" == false ]]; then
                 rm "$dest_config" || {
                     print_warning "Failed to remove existing config: $dest_config"
-                    ((failed_configs++))
+                    ((failed_configs+=1))
                     continue
                 }
             fi
@@ -432,15 +432,15 @@ setup_configs() {
         if [[ "$DRY_RUN" == false ]]; then
             if cp "$source_config" "$dest_config"; then
                 print_verbose "$config_tool config installed to $dest_config"
-                ((installed_configs++))
+                ((installed_configs+=1))
             else
                 print_warning "Failed to install $config_tool config to $dest_config"
-                ((failed_configs++))
+                ((failed_configs+=1))
                 continue
             fi
         else
             print_info "Would install $config_tool config to $dest_config"
-            ((installed_configs++))
+            ((installed_configs+=1))
         fi
 
         # Special handling for neofetch ASCII art
