@@ -122,7 +122,7 @@ alias docker-redis='docker run -d --name redis -p 6379:6379 redis:7' # Redis
 
 ### Android Development (PRESERVED)
 alias scrcpy="scrcpy -b 8M --window-title='Pixel' --max-fps=55 --no-audio"  # PRESERVED - Screen mirroring
-alias ex-scrcpy='/home/azzar/Documents/script/scrcpy-scripts/virtual_display.sh'  # PRESERVED - Extended scrcpy
+alias ex-scrcpy='/home/azzar/project/script/android_scripting/scrcpy-scripts/virtual_display.sh'  # PRESERVED - Extended scrcpy
 alias adb-restart='adb kill-server && adb start-server'  # PRESERVED - Restart ADB
 alias adb-screenshot='adb exec-out screencap -p > screen-$(date +%s).png'  # PRESERVED - Take screenshot
 alias adb-record='adb shell screenrecord /sdcard/recording.mp4'  # PRESERVED - Record screen
