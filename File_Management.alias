@@ -51,25 +51,25 @@ alias 7z-list='7z l'                          # List 7zip contents
 # ==============================================================================
 
 ### Modern ls replacement with icons (ALL PRESERVED)
-alias ls='exa --icons --group-directories-first'                    # PRESERVED
-alias ll='exa -l --icons --group-directories-first'                 # PRESERVED - Long list
-alias la='exa -la --icons --group-directories-first'                # PRESERVED - Show hidden files
-alias lt='exa -T --icons --group-directories-first'                 # PRESERVED - Tree view
-alias lm='exa -l --sort=modified'                                   # PRESERVED - Sort by modification time
-alias lz='exa -l --sort=size'                                       # PRESERVED - Sort by size
-alias lr='exa -R'                                                   # PRESERVED - Recursive list
-alias lx='exa -l --sort=extension'                                  # PRESERVED - Sort by extension
-alias ld='exa -D'                                                   # PRESERVED - List directories only
-alias lf='exa -f'                                                   # PRESERVED - List files only
-alias l.='exa -d .*'                                                # PRESERVED - List hidden files only
+alias ls='eza --icons --group-directories-first'                    # PRESERVED
+alias ll='eza -l --icons --group-directories-first'                 # PRESERVED - Long list
+alias la='eza -la --icons --group-directories-first'                # PRESERVED - Show hidden files
+alias lt='eza -T --icons --group-directories-first'                 # PRESERVED - Tree view
+alias lm='eza -l --sort=modified'                                   # PRESERVED - Sort by modification time
+alias lz='eza -l --sort=size'                                       # PRESERVED - Sort by size
+alias lr='eza -R'                                                   # PRESERVED - Recursive list
+alias lx='eza -l --sort=extension'                                  # PRESERVED - Sort by extension
+alias ld='eza -D'                                                   # PRESERVED - List directories only
+alias lf='eza -f'                                                   # PRESERVED - List files only
+alias l.='eza -d .*'                                                # PRESERVED - List hidden files only
 
 ### Additional Listing Shortcuts (Safe to add - different from your muscle memory)
-alias l1='exa -1'                           # Single column
-alias lg='exa --git'                        # Show git status
-alias lh='exa -lh'                          # Human readable sizes
-alias lS='exa -l --sort=size --reverse'     # Largest files first
-alias lt5='exa -T --level=5'                # Tree with depth limit
-alias ltree='exa -T --git-ignore'           # Tree ignoring git files
+alias l1='eza -1'                           # Single column
+alias lg='eza --git'                        # Show git status
+alias lh='eza -lh'                          # Human readable sizes
+alias lS='eza -l --sort=size --reverse'     # Largest files first
+alias lt5='eza -T --level=5'                # Tree with depth limit
+alias ltree='eza -T --git-ignore'           # Tree ignoring git files
 
 # ==============================================================================
 # FILE OPERATIONS (Basic - Enhanced Safety)

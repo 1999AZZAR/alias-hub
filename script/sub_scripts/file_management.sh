@@ -8,28 +8,28 @@
 # COMPATIBILITY: Bash, Zsh, and other POSIX-compliant shells
 #
 # FUNCTIONS:
-# - cd() - Enhanced cd with automatic directory listing using exa or ls
+# - cd() - Enhanced cd with automatic directory listing using eza or ls
 # - mkcd() - Create directory and change into it
 # - findc() - Find files by content using grep
 # - rename_ext() - Batch rename file extensions
 #
 # DEPENDENCIES:
-# - exa (optional) - For enhanced directory listing
+# - eza (optional) - For enhanced directory listing
 # - find, grep - Standard Unix tools
 #
 # ==============================================================================
 
-# --- Enhanced cd with exa ---
+# --- Enhanced cd with eza ---
 cd() {
   if [ -n "$1" ]; then
     builtin cd "$@" || return $?
   else
     builtin cd ~ || return $?
   fi
-  if command -v exa &>/dev/null; then
-    exa --icons --group-directories-first
+  if command -v eza &>/dev/null; then
+    eza --icons --group-directories-first
   else
-    echo "Warning: exa not found, falling back to ls." >&2
+    echo "Warning: eza not found, falling back to ls." >&2
     ls --color=auto --group-directories-first
   fi
 }

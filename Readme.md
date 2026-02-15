@@ -747,7 +747,7 @@ fi
 
 # Tool-specific aliases (check if tool exists)
 command -v bat >/dev/null && alias cat='bat'
-command -v exa >/dev/null && alias ls='exa'
+command -v eza >/dev/null && alias ls='eza'
 ```
 
 #### Function-Based Aliases
