@@ -349,7 +349,22 @@ install_packages() {
 
     case "$PACKAGE_MANAGER" in
         apt)
-            if ! sudo apt update && sudo apt install -y "$packages_to_install"; then
+            # Special handling for eza on apt systems
+            if [[ "$packages_to_install" == *"eza"* ]]; then
+                if ! apt-cache show eza >/dev/null 2>&1; then
+                    print_info "eza not found in default repositories. Adding eza-community repository..."
+                    if [[ "$DRY_RUN" == false ]]; then
+                        sudo mkdir -p /etc/apt/keyrings
+                        curl -fsSL https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg || true
+                        echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list || true
+                        sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list || true
+                    else
+                        print_info "Would add eza-community repository and GPG key"
+                    fi
+                fi
+            fi
+
+            if ! sudo apt update && sudo apt install -y $packages_to_install; then
                 install_success=false
             fi
             ;;
