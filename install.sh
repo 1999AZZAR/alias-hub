@@ -276,13 +276,19 @@ create_backup() {
 
 restore_backup() {
     local file="$1"
-    local backup_file="${file}${BACKUP_SUFFIX}"
-    if [[ -f "$backup_file" ]]; then
-        print_verbose "Restoring backup: $backup_file -> $file"
+    local latest_backup
+    latest_backup=$(ls -t "${file}.alias-hub-backup."* 2>/dev/null | head -n 1)
+
+    if [[ -n "$latest_backup" && -f "$latest_backup" ]]; then
+        print_verbose "Restoring backup: $latest_backup -> $file"
         if [[ "$DRY_RUN" == false ]]; then
-            mv "$backup_file" "$file"
+            mv "$latest_backup" "$file"
+            # Remove any other backups for this file to keep it clean
+            rm -f "${file}.alias-hub-backup."* 2>/dev/null || true
         fi
         print_info "Restored $file from backup"
+    else
+        print_verbose "No backup found for $file"
     fi
 }
 
@@ -561,6 +567,7 @@ OPTIONS:
     --dry-run           Show what would be done without making changes
     --force             Force reinstallation, overwriting existing configs
     --uninstall         Remove Alias Hub and restore original configurations
+    --uninstall-script  Use the dedicated uninstall.sh script
     --minimal           Minimal installation (aliases + config + scripts only)
     --no-packages       Skip package installation
     --verbose           Enable verbose output

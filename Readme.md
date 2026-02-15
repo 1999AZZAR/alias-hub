@@ -64,6 +64,9 @@ cd ~/alias-hub
 
 # Run the installer
 ./install.sh
+
+# Run the uninstaller (if needed)
+./uninstall.sh
 ```
 
 ### Installation Options
@@ -100,6 +103,8 @@ The installer supports various command-line options for different use cases and 
 ./install.sh --no-packages
 
 # Remove Alias Hub completely
+./uninstall.sh
+# or
 ./install.sh --uninstall
 
 # Minimal installation (aliases, config, scripts)
@@ -919,7 +924,7 @@ source ~/.bashrc
 
 ```bash
 # Remove Alias Hub completely
-./install.sh --uninstall
+./uninstall.sh
 
 # Fresh installation
 ./install.sh
