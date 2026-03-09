@@ -150,8 +150,21 @@ fi
 
 # Flatpak
 if command -v flatpak &>/dev/null; then
-    run_cmd "flatpak uninstall --unused -y >/dev/null 2>&1"
-    log_success "Flatpak cleaned."
+    if [ "$DRY_RUN" = true ]; then
+        echo "  [DRY-RUN] Would repair and clean Flatpak (system + user scopes)."
+    else
+        # Keep Flatpak healthy before pruning unused refs.
+        # Handle system and target user installations separately.
+        flatpak repair --system >/dev/null 2>&1 || true
+        flatpak uninstall --unused --system -y >/dev/null 2>&1 || true
+
+        if [ -n "$SUDO_USER_NAME" ] && id "$SUDO_USER_NAME" >/dev/null 2>&1; then
+            sudo -u "$SUDO_USER_NAME" flatpak repair --user >/dev/null 2>&1 || true
+            sudo -u "$SUDO_USER_NAME" flatpak uninstall --unused --user -y >/dev/null 2>&1 || true
+        fi
+
+        log_success "Flatpak cleaned (system + user)."
+    fi
 else
     log_info "Flatpak not installed."
 fi
