@@ -3,7 +3,7 @@
 # ==============================================================================
 # System Cleanup Script for Linux
 # Author: Azzar Budiyanto (via FREA), Refined by Gemini
-# Version: 3.2
+# Version: 3.3
 #
 # Deep cleanup for APT, Snap, Flatpak, Docker, temp files, logs,
 # user-level cache (safe mode), broken symlinks, and old kernels.
@@ -79,11 +79,11 @@ format_bytes() {
     if ((bytes < 1024)); then
         echo "${bytes} B"
     elif ((bytes < 1048576)); then
-        printf "%.2f KB" "$(bc -l <<< "$bytes / 1024")"
+        awk -v b="$bytes" 'BEGIN { printf "%.2f KB", b / 1024 }'
     elif ((bytes < 1073741824)); then
-        printf "%.2f MB" "$(bc -l <<< "$bytes / 1048576")"
+        awk -v b="$bytes" 'BEGIN { printf "%.2f MB", b / 1048576 }'
     else
-        printf "%.2f GB" "$(bc -l <<< "$bytes / 1073741824")"
+        awk -v b="$bytes" 'BEGIN { printf "%.2f GB", b / 1073741824 }'
     fi
 }
 
@@ -91,7 +91,7 @@ format_bytes() {
 SUDO_USER_NAME=${SUDO_USER:-$(whoami)}
 USER_HOME=$(getent passwd "$SUDO_USER_NAME" | cut -d: -f6)
 
-echo -e "${C_BOLD}System Cleanup Initializing (v3.2)...${C_RESET}"
+echo -e "${C_BOLD}System Cleanup Initializing (v3.3)...${C_RESET}"
 if [ "$DRY_RUN" = true ]; then
     echo -e "${C_YELLOW}*** DRY RUN MODE ACTIVE: No changes will be made ***${C_RESET}"
 fi
@@ -136,12 +136,14 @@ if command -v snap &>/dev/null; then
     if [ "$DRY_RUN" = true ]; then
         echo "  [DRY-RUN] Would clean snap cache."
     else
-        # Simplified cleaning for brevity in script
-        snap list --all | awk '/disabled/{print $1, $3}' | \
-            while read -r snapname revision; do
-                snap remove "$snapname" --revision="$revision" >/dev/null 2>&1
-            done
-        rm -rf /var/cache/snapd/
+        # Remove old revisions of snaps
+        echo "  >> Removing old snap revisions..."
+        set +e
+        snap list --all | awk '/disabled/{print $1, $3}' | while read -r snapname revision; do
+            snap remove "$snapname" --revision="$revision" >/dev/null 2>&1
+        done
+        set -e
+        rm -rf /var/cache/snapd/*
         log_success "Snap cleaned."
     fi
 else
@@ -153,14 +155,16 @@ if command -v flatpak &>/dev/null; then
     if [ "$DRY_RUN" = true ]; then
         echo "  [DRY-RUN] Would repair and clean Flatpak (system + user scopes)."
     else
-        # Keep Flatpak healthy before pruning unused refs.
-        # Handle system and target user installations separately.
-        flatpak repair --system >/dev/null 2>&1 || true
-        flatpak uninstall --unused --system -y >/dev/null 2>&1 || true
+        echo "  >> Repairing system flatpaks..."
+        timeout 60s flatpak repair --system >/dev/null 2>&1 || true
+        echo "  >> Removing unused system flatpaks..."
+        timeout 60s flatpak uninstall --unused --system -y >/dev/null 2>&1 || true
 
         if [ -n "$SUDO_USER_NAME" ] && id "$SUDO_USER_NAME" >/dev/null 2>&1; then
-            sudo -u "$SUDO_USER_NAME" flatpak repair --user >/dev/null 2>&1 || true
-            sudo -u "$SUDO_USER_NAME" flatpak uninstall --unused --user -y >/dev/null 2>&1 || true
+            echo "  >> Repairing user flatpaks for $SUDO_USER_NAME..."
+            sudo -u "$SUDO_USER_NAME" timeout 60s flatpak repair --user >/dev/null 2>&1 || true
+            echo "  >> Removing unused user flatpaks for $SUDO_USER_NAME..."
+            sudo -u "$SUDO_USER_NAME" timeout 60s flatpak uninstall --unused --user -y >/dev/null 2>&1 || true
         fi
 
         log_success "Flatpak cleaned (system + user)."
@@ -190,6 +194,8 @@ if [ -d "$USER_HOME" ]; then
         "$USER_HOME/.cache/thumbnails"
         "$USER_HOME/.local/share/Trash"
         "$USER_HOME/.cache/pip"
+        "$USER_HOME/.cache/fontconfig"
+        "$USER_HOME/.cache/yarn"
         "$USER_HOME/.npm/_cacache"
     )
 
@@ -202,31 +208,41 @@ if [ -d "$USER_HOME" ]; then
             fi
         fi
     done
-    log_success "User trash and thumbnails cleaned."
+    log_success "User cache and trash cleaned."
 else
     log_warn "User home directory not found."
 fi
 
 # --- [5] Broken Symlinks Cleanup ---
-echo -e "\n${C_BOLD}${C_BLUE}[5/7] Cleaning broken symbolic links...${C_RESET}"
+echo -e "\n${C_BOLD}${C_BLUE}[5/7] Cleaning broken symbolic links (45s timeout per dir)...${C_RESET}"
 
 clean_symlinks_safe() {
     local dir="$1"
+    local extra_args="$2"
     if [ ! -d "$dir" ]; then return; fi
     
+    echo "  >> Checking $dir..."
     if [ "$DRY_RUN" = true ]; then
-        echo "  [DRY-RUN] Checking $dir for broken links..."
+        echo "  [DRY-RUN] find \"$dir\" -xdev $extra_args -xtype l"
     else
-        find "$dir" -xtype l -delete 2>/dev/null || true
+        # Use timeout to prevent hanging on slow/network filesystems
+        # -xdev prevents crossing filesystem boundaries
+        # -ignore_readdir_race handles files disappearing during scan
+        # eval is used to correctly parse quotes in extra_args
+        eval "timeout 45s find \"$dir\" -xdev $extra_args -xtype l -delete 2>/dev/null" || \
+            log_warn "Scan for $dir timed out or encountered issues."
     fi
 }
 
-clean_symlinks_safe "$USER_HOME"
+# Exclude common large/problematic dirs in home to speed up scan
+HOME_EXCLUSIONS="-not -path '*/.cache/*' -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/.venv/*'"
+
+clean_symlinks_safe "$USER_HOME" "$HOME_EXCLUSIONS"
 clean_symlinks_safe "/etc"
 clean_symlinks_safe "/var"
 clean_symlinks_safe "/usr/local"
 
-log_success "Symlinks cleaned."
+log_success "Symlinks cleanup process finished."
 
 # --- [6] Old Kernel Cleanup ---
 echo -e "\n${C_BOLD}${C_BLUE}[6/7] Cleaning old Linux kernels...${C_RESET}"

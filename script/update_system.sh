@@ -4,16 +4,14 @@
 # Smart System Update Script
 # Original Author: Azzar Budiyanto (via FREA)
 # Refined by: Gemini
-# Version: 3.2
+# Version: 3.3
 #
 # Comprehensive system update for Debian-based systems.
-# Handles APT, Snap, Flatpak, and Firmware.
+# Handles APT, Snap, Flatpak, Homebrew, and Firmware.
 #
-# Refinements in v3.2:
-# - Added Dry Run mode (-d / --dry-run).
-# - Better error handling for fwupdmgr.
-# - Improved formatting and checks.
-# - Added help flag.
+# Refinements in v3.3:
+# - Added Homebrew (Linuxbrew) update support.
+# - Improved multi-step progress tracking.
 # ==============================================================================
 
 # --- Settings ---
@@ -79,7 +77,7 @@ log_header() { echo -e "\n${C_BOLD}${C_BLUE}[$1] $2${C_RESET}"; }
 
 # --- Start ---
 echo -e "${C_BOLD}==================================================${C_RESET}"
-echo -e "${C_BOLD}  Smart System Update (v3.2)                  ${C_RESET}"
+echo -e "${C_BOLD}  Smart System Update (v3.3)                  ${C_RESET}"
 if [ "$DRY_RUN" = true ]; then
     echo -e "${C_YELLOW}  *** DRY RUN MODE ***                        ${C_RESET}"
 fi
@@ -87,7 +85,7 @@ echo -e "${C_BOLD}==================================================${C_RESET}"
 sleep 1
 
 # --- 1. APT ---
-log_header "1/4" "Handling APT packages..."
+log_header "1/5" "Handling APT packages..."
 
 run_cmd "apt-get update -y"
 
@@ -114,7 +112,7 @@ echo "-> Cleaning up..."
 run_cmd "apt-get autoremove --purge -y"
 
 # --- 2. Snap ---
-log_header "2/4" "Handling Snap packages..."
+log_header "2/5" "Handling Snap packages..."
 if command -v snap &>/dev/null; then
     run_cmd "snap refresh"
 else
@@ -122,7 +120,7 @@ else
 fi
 
 # --- 3. Flatpak ---
-log_header "3/4" "Handling Flatpak packages..."
+log_header "3/5" "Handling Flatpak packages..."
 if command -v flatpak &>/dev/null; then
     if [ "$DRY_RUN" = true ]; then
         echo "  [DRY-RUN] Would update flatpaks."
@@ -137,8 +135,27 @@ else
     echo "Flatpak not installed."
 fi
 
-# --- 4. Firmware ---
-log_header "4/4" "Handling Firmware updates..."
+# --- 4. Homebrew ---
+log_header "4/5" "Handling Homebrew packages..."
+# Brew should not be run as root. We use the original user if available.
+SUDO_USER_NAME=${SUDO_USER:-$(whoami)}
+
+if sudo -u "$SUDO_USER_NAME" command -v brew &>/dev/null; then
+    echo "-> Running as user: $SUDO_USER_NAME"
+    if [ "$DRY_RUN" = true ]; then
+        echo "  [DRY-RUN] Would update and upgrade brew formulas."
+    else
+        # Run brew as the non-root user
+        sudo -u "$SUDO_USER_NAME" brew update
+        sudo -u "$SUDO_USER_NAME" brew upgrade
+        sudo -u "$SUDO_USER_NAME" brew cleanup
+    fi
+else
+    echo "Homebrew not installed for user $SUDO_USER_NAME."
+fi
+
+# --- 5. Firmware ---
+log_header "5/5" "Handling Firmware updates..."
 if command -v fwupdmgr &>/dev/null; then
     if [ "$DRY_RUN" = true ]; then
          echo "  [DRY-RUN] Would check and update firmware."

@@ -68,7 +68,7 @@ clean() {
 
   # Execute the script with a 15-minute (900s) timeout.
   echo "--- Launching the System Cleanup Script ---"
-  "$CLEAN_SCRIPT_PATH"
+  timeout 900s "$CLEAN_SCRIPT_PATH" || echo "Error: Cleanup script timed out after 15 minutes." >&2
   echo "--- Script finished. ---"
 }
 
