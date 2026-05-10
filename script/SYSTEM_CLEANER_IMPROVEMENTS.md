@@ -1,8 +1,17 @@
-# System Cleaner v4.0 - Improvements
+# System Cleaner - Improvements
 
-## Fixed Timeout Issues
+## Version History
 
-### Key Changes
+### v4.1 (Latest)
+Fixed critical hang in Flatpak operations:
+- **Removed `flatpak repair`** - This operation frequently hangs indefinitely
+- **Aggressive timeout** - Uses `timeout --kill-after=5 15` to force-kill after 15s
+- **Added `--noninteractive` flag** - Prevents waiting for user input
+- **Environment variable** - Set `SKIP_FLATPAK=1` to skip Flatpak entirely if problematic
+- Reduced Flatpak timeout from 30s to 15s with 5s kill grace period
+
+### v4.0
+Fixed timeout issues and improved robustness:
 
 1. **Removed `set -e` flag**
    - Previous behavior: Script would exit immediately on any error
@@ -61,6 +70,12 @@ Run with `--dry-run` to verify operations without making changes:
 
 ```bash
 sudo ./script/system_cleaner.sh --dry-run
+```
+
+Skip Flatpak if it causes issues:
+
+```bash
+sudo SKIP_FLATPAK=1 ./script/system_cleaner.sh
 ```
 
 ## Version History

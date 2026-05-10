@@ -3,11 +3,14 @@
 # ==============================================================================
 # System Cleanup Script for Linux
 # Author: Azzar Budiyanto (via FREA)
-# Version: 4.0
+# Version: 4.1
 #
 # Deep cleanup for APT, Snap, Flatpak, Docker, temp files, logs,
 # user-level cache (safe mode), broken symlinks, and old kernels.
 # Optimized for timeout resistance and robust error handling.
+#
+# Environment Variables:
+#   SKIP_FLATPAK=1    Skip Flatpak cleanup entirely (useful if it hangs)
 # ==============================================================================
 
 # --- Script settings ---
@@ -129,9 +132,12 @@ if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
     USER_HOME=""
 fi
 
-echo -e "${C_BOLD}System Cleanup Initializing (v4.0)...${C_RESET}"
+echo -e "${C_BOLD}System Cleanup Initializing (v4.1)...${C_RESET}"
 if [ "$DRY_RUN" = true ]; then
     echo -e "${C_YELLOW}*** DRY RUN MODE ACTIVE: No changes will be made ***${C_RESET}"
+fi
+if [ "${SKIP_FLATPAK:-0}" = "1" ]; then
+    echo -e "${C_YELLOW}*** Flatpak cleanup disabled (SKIP_FLATPAK=1) ***${C_RESET}"
 fi
 echo "Target user for cache cleaning: $SUDO_USER_NAME"
 echo "User home directory: ${USER_HOME:-N/A}"
@@ -203,17 +209,20 @@ fi
 
 # Flatpak
 if command -v flatpak &>/dev/null; then
-    if [ "$DRY_RUN" = true ]; then
-        echo "  [DRY-RUN] Would repair and clean Flatpak (system + user scopes)."
+    if [ "${SKIP_FLATPAK:-0}" = "1" ]; then
+        log_info "Flatpak cleanup skipped (SKIP_FLATPAK=1)"
+    elif [ "$DRY_RUN" = true ]; then
+        echo "  [DRY-RUN] Would clean Flatpak (system + user scopes)."
     else
-        echo "  >> Repairing and cleaning system flatpaks..."
-        safe_timeout 30 flatpak repair --system >/dev/null 2>&1
-        safe_timeout 30 flatpak uninstall --unused --system -y >/dev/null 2>&1
+        echo "  >> Cleaning system flatpaks..."
+        # Skip repair - it often hangs. Just remove unused packages with aggressive timeout.
+        timeout --kill-after=5 15 flatpak uninstall --unused --system -y --noninteractive >/dev/null 2>&1 || \
+            log_warn "Flatpak system cleanup timed out or failed."
 
         if [ -n "$SUDO_USER_NAME" ] && id "$SUDO_USER_NAME" >/dev/null 2>&1; then
-            echo "  >> Repairing and cleaning user flatpaks for $SUDO_USER_NAME..."
-            sudo -u "$SUDO_USER_NAME" bash -c "timeout 30 flatpak repair --user >/dev/null 2>&1 || true"
-            sudo -u "$SUDO_USER_NAME" bash -c "timeout 30 flatpak uninstall --unused --user -y >/dev/null 2>&1 || true"
+            echo "  >> Cleaning user flatpaks for $SUDO_USER_NAME..."
+            sudo -u "$SUDO_USER_NAME" bash -c "timeout --kill-after=5 15 flatpak uninstall --unused --user -y --noninteractive >/dev/null 2>&1" || \
+                log_warn "Flatpak user cleanup timed out or failed."
         fi
 
         log_success "Flatpak cleaned (system + user)."
