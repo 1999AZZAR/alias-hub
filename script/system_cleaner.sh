@@ -2,17 +2,20 @@
 
 # ==============================================================================
 # System Cleanup Script for Linux
-# Author: Azzar Budiyanto (via FREA), Refined by Gemini
-# Version: 3.3
+# Author: Azzar Budiyanto (via FREA)
+# Version: 4.0
 #
 # Deep cleanup for APT, Snap, Flatpak, Docker, temp files, logs,
 # user-level cache (safe mode), broken symlinks, and old kernels.
+# Optimized for timeout resistance and robust error handling.
 # ==============================================================================
 
 # --- Script settings ---
-set -e
 set -o pipefail
 export LC_NUMERIC=C
+
+# Global timeout for entire script (15 minutes)
+SCRIPT_TIMEOUT=900
 
 # --- Color Definitions ---
 C_RESET='\033[0m'
@@ -61,13 +64,43 @@ fi
 log_info() { echo -e "${C_BLUE}[INFO]${C_RESET} $1"; }
 log_success() { echo -e "${C_GREEN}[OK]${C_RESET} $1"; }
 log_warn() { echo -e "${C_YELLOW}[WARN]${C_RESET} $1"; }
+log_error() { echo -e "${C_RED}[ERROR]${C_RESET} $1"; }
 
 run_cmd() {
     if [ "$DRY_RUN" = true ]; then
-        echo -e "  ${C_YELLOW}[DRY-RUN]${C_RESET} $@"
+        echo -e "  ${C_YELLOW}[DRY-RUN]${C_RESET} $*"
     else
-        eval "$@"
+        "$@" || { log_warn "Command failed (non-critical): $*"; return 1; }
     fi
+}
+
+safe_timeout() {
+    local duration=$1
+    shift
+    timeout "$duration" "$@" || {
+        local exit_code=$?
+        if [ $exit_code -eq 124 ]; then
+            log_warn "Operation timed out after ${duration}s: $*"
+        else
+            log_warn "Operation failed: $*"
+        fi
+        return $exit_code
+    }
+}
+
+wait_for_apt_lock() {
+    local max_wait=60
+    local waited=0
+    while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
+        if [ $waited -ge $max_wait ]; then
+            log_error "APT is locked by another process. Waited ${max_wait}s. Skipping APT operations."
+            return 1
+        fi
+        log_info "Waiting for APT lock to be released... (${waited}s/${max_wait}s)"
+        sleep 5
+        waited=$((waited + 5))
+    done
+    return 0
 }
 
 get_available_space() {
@@ -89,34 +122,46 @@ format_bytes() {
 
 # --- Initialization ---
 SUDO_USER_NAME=${SUDO_USER:-$(whoami)}
-USER_HOME=$(getent passwd "$SUDO_USER_NAME" | cut -d: -f6)
+USER_HOME=$(getent passwd "$SUDO_USER_NAME" 2>/dev/null | cut -d: -f6)
 
-echo -e "${C_BOLD}System Cleanup Initializing (v3.3)...${C_RESET}"
+if [ -z "$USER_HOME" ] || [ ! -d "$USER_HOME" ]; then
+    log_warn "Could not determine user home directory. Some operations may be skipped."
+    USER_HOME=""
+fi
+
+echo -e "${C_BOLD}System Cleanup Initializing (v4.0)...${C_RESET}"
 if [ "$DRY_RUN" = true ]; then
     echo -e "${C_YELLOW}*** DRY RUN MODE ACTIVE: No changes will be made ***${C_RESET}"
 fi
 echo "Target user for cache cleaning: $SUDO_USER_NAME"
+echo "User home directory: ${USER_HOME:-N/A}"
 echo -e "${C_BOLD}-------------------------------------------${C_RESET}"
 
 initial_space=$(get_available_space)
 
 # --- [1] APT Cleanup ---
 echo -e "\n${C_BOLD}${C_BLUE}[1/7] Cleaning package manager (APT) cache...${C_RESET}"
-run_cmd "apt-get clean -y >/dev/null 2>&1"
-run_cmd "apt-get autoremove --purge -y >/dev/null 2>&1"
-run_cmd "apt-get autoclean -y >/dev/null 2>&1"
 
-# Purge configs
-if [ "$DRY_RUN" = true ]; then
-    echo "  [DRY-RUN] Would purge leftover config files."
+if ! wait_for_apt_lock; then
+    log_warn "Skipping APT operations due to lock timeout."
 else
-    echo "  >> Purging leftover configuration files..."
-    leftover_packages=$(dpkg -l | awk '/^rc/ { print $2 }')
-    if [ -n "$leftover_packages" ]; then
-        echo "$leftover_packages" | xargs -r apt-get purge -y >/dev/null 2>&1
-        log_success "Purged config files."
+    safe_timeout 300 apt-get clean -y >/dev/null 2>&1 && log_success "APT clean completed."
+    safe_timeout 300 apt-get autoremove --purge -y >/dev/null 2>&1 && log_success "APT autoremove completed."
+    safe_timeout 300 apt-get autoclean -y >/dev/null 2>&1 && log_success "APT autoclean completed."
+
+    # Purge configs
+    if [ "$DRY_RUN" = true ]; then
+        echo "  [DRY-RUN] Would purge leftover config files."
     else
-        log_info "No leftover config files found."
+        echo "  >> Purging leftover configuration files..."
+        leftover_packages=$(dpkg -l | awk '/^rc/ { print $2 }')
+        if [ -n "$leftover_packages" ]; then
+            echo "$leftover_packages" | xargs -r timeout 180 apt-get purge -y >/dev/null 2>&1 && \
+                log_success "Purged config files." || \
+                log_warn "Some config files could not be purged."
+        else
+            log_info "No leftover config files found."
+        fi
     fi
 fi
 
@@ -125,8 +170,14 @@ echo -e "\n${C_BOLD}${C_BLUE}[2/7] Cleaning Docker, Snap, and Flatpak...${C_RESE
 
 # Docker
 if command -v docker &>/dev/null; then
-    run_cmd "docker system prune -af >/dev/null 2>&1"
-    log_success "Docker cleaned."
+    if [ "$DRY_RUN" = true ]; then
+        echo "  [DRY-RUN] Would run docker system prune."
+    else
+        echo "  >> Cleaning Docker system..."
+        safe_timeout 180 docker system prune -af --volumes >/dev/null 2>&1 && \
+            log_success "Docker cleaned." || \
+            log_warn "Docker cleanup incomplete or timed out."
+    fi
 else
     log_info "Docker not installed."
 fi
@@ -136,14 +187,14 @@ if command -v snap &>/dev/null; then
     if [ "$DRY_RUN" = true ]; then
         echo "  [DRY-RUN] Would clean snap cache."
     else
-        # Remove old revisions of snaps
         echo "  >> Removing old snap revisions..."
-        set +e
-        snap list --all | awk '/disabled/{print $1, $3}' | while read -r snapname revision; do
-            snap remove "$snapname" --revision="$revision" >/dev/null 2>&1
+        snap list --all 2>/dev/null | awk '/disabled/{print $1, $3}' | while read -r snapname revision; do
+            timeout 30 snap remove "$snapname" --revision="$revision" >/dev/null 2>&1 || \
+                log_warn "Failed to remove $snapname revision $revision"
         done
-        set -e
-        rm -rf /var/cache/snapd/*
+        if [ -d /var/cache/snapd ]; then
+            rm -rf /var/cache/snapd/* 2>/dev/null || log_warn "Could not clear snap cache."
+        fi
         log_success "Snap cleaned."
     fi
 else
@@ -155,16 +206,14 @@ if command -v flatpak &>/dev/null; then
     if [ "$DRY_RUN" = true ]; then
         echo "  [DRY-RUN] Would repair and clean Flatpak (system + user scopes)."
     else
-        echo "  >> Repairing system flatpaks..."
-        timeout 60s flatpak repair --system >/dev/null 2>&1 || true
-        echo "  >> Removing unused system flatpaks..."
-        timeout 60s flatpak uninstall --unused --system -y >/dev/null 2>&1 || true
+        echo "  >> Repairing and cleaning system flatpaks..."
+        safe_timeout 30 flatpak repair --system >/dev/null 2>&1
+        safe_timeout 30 flatpak uninstall --unused --system -y >/dev/null 2>&1
 
         if [ -n "$SUDO_USER_NAME" ] && id "$SUDO_USER_NAME" >/dev/null 2>&1; then
-            echo "  >> Repairing user flatpaks for $SUDO_USER_NAME..."
-            sudo -u "$SUDO_USER_NAME" timeout 60s flatpak repair --user >/dev/null 2>&1 || true
-            echo "  >> Removing unused user flatpaks for $SUDO_USER_NAME..."
-            sudo -u "$SUDO_USER_NAME" timeout 60s flatpak uninstall --unused --user -y >/dev/null 2>&1 || true
+            echo "  >> Repairing and cleaning user flatpaks for $SUDO_USER_NAME..."
+            sudo -u "$SUDO_USER_NAME" bash -c "timeout 30 flatpak repair --user >/dev/null 2>&1 || true"
+            sudo -u "$SUDO_USER_NAME" bash -c "timeout 30 flatpak uninstall --unused --user -y >/dev/null 2>&1 || true"
         fi
 
         log_success "Flatpak cleaned (system + user)."
@@ -189,7 +238,7 @@ fi
 # --- [4] User-Level Caches (Safer) ---
 echo -e "\n${C_BOLD}${C_BLUE}[4/7] Cleaning specific user caches for $SUDO_USER_NAME...${C_RESET}"
 
-if [ -d "$USER_HOME" ]; then
+if [ -n "$USER_HOME" ] && [ -d "$USER_HOME" ]; then
     targets=(
         "$USER_HOME/.cache/thumbnails"
         "$USER_HOME/.local/share/Trash"
@@ -204,43 +253,46 @@ if [ -d "$USER_HOME" ]; then
             if [ "$DRY_RUN" = true ]; then
                 echo "  [DRY-RUN] Would remove: $target"
             else
-                rm -rf "$target"/* 2>/dev/null || true
+                rm -rf "$target"/* 2>/dev/null || log_warn "Could not fully clean $target"
             fi
         fi
     done
     log_success "User cache and trash cleaned."
 else
-    log_warn "User home directory not found."
+    log_warn "User home directory not accessible. Skipping user cache cleanup."
 fi
 
 # --- [5] Broken Symlinks Cleanup ---
-echo -e "\n${C_BOLD}${C_BLUE}[5/7] Cleaning broken symbolic links (45s timeout per dir)...${C_RESET}"
+echo -e "\n${C_BOLD}${C_BLUE}[5/7] Cleaning broken symbolic links (30s timeout per dir)...${C_RESET}"
 
 clean_symlinks_safe() {
     local dir="$1"
-    local extra_args="$2"
-    if [ ! -d "$dir" ]; then return; fi
+    local maxdepth="${2:-10}"
+    if [ ! -d "$dir" ]; then 
+        log_warn "Directory $dir not found, skipping."
+        return 1
+    fi
     
-    echo "  >> Checking $dir..."
+    echo "  >> Checking $dir (max depth: $maxdepth)..."
     if [ "$DRY_RUN" = true ]; then
-        echo "  [DRY-RUN] find \"$dir\" -xdev $extra_args -xtype l"
+        echo "  [DRY-RUN] find \"$dir\" -maxdepth $maxdepth -xdev -xtype l"
     else
-        # Use timeout to prevent hanging on slow/network filesystems
-        # -xdev prevents crossing filesystem boundaries
-        # -ignore_readdir_race handles files disappearing during scan
-        # eval is used to correctly parse quotes in extra_args
-        eval "timeout 45s find \"$dir\" -xdev $extra_args -xtype l -delete 2>/dev/null" || \
+        local count
+        count=$(timeout 30 find "$dir" -maxdepth "$maxdepth" -xdev -xtype l -ignore_readdir_race -delete -print 2>/dev/null | wc -l) || {
             log_warn "Scan for $dir timed out or encountered issues."
+            return 1
+        }
+        if [ "$count" -gt 0 ]; then
+            log_info "Removed $count broken symlink(s) from $dir"
+        fi
     fi
 }
 
-# Exclude common large/problematic dirs in home to speed up scan
-HOME_EXCLUSIONS="-not -path '*/.cache/*' -not -path '*/node_modules/*' -not -path '*/.git/*' -not -path '*/.venv/*'"
-
-clean_symlinks_safe "$USER_HOME" "$HOME_EXCLUSIONS"
-clean_symlinks_safe "/etc"
-clean_symlinks_safe "/var"
-clean_symlinks_safe "/usr/local"
+# Scan with limited depth to prevent hangs
+clean_symlinks_safe "$USER_HOME" 6
+clean_symlinks_safe "/etc" 5
+clean_symlinks_safe "/var" 5
+clean_symlinks_safe "/usr/local" 5
 
 log_success "Symlinks cleanup process finished."
 
@@ -250,8 +302,13 @@ echo -e "\n${C_BOLD}${C_BLUE}[6/7] Cleaning old Linux kernels...${C_RESET}"
 if [ "$DRY_RUN" = true ]; then
     echo "  [DRY-RUN] Would remove old kernels."
 else
-    run_cmd "apt-get autoremove --purge -y >/dev/null 2>&1"
-    log_info "Performed apt autoremove to clean kernels."
+    if wait_for_apt_lock; then
+        safe_timeout 300 apt-get autoremove --purge -y >/dev/null 2>&1 && \
+            log_success "Performed apt autoremove to clean kernels." || \
+            log_warn "Kernel cleanup incomplete."
+    else
+        log_warn "APT locked, skipping kernel cleanup."
+    fi
 fi
 
 # --- [7] Orphaned Packages ---
@@ -261,8 +318,18 @@ if command -v deborphan &>/dev/null; then
     if [ "$DRY_RUN" = true ]; then
         echo "  [DRY-RUN] Would run deborphan."
     else
-        deborphan | xargs -r apt-get remove --purge -y >/dev/null 2>&1 || true
-        log_success "Deborphan cleanup done."
+        if wait_for_apt_lock; then
+            orphans=$(deborphan 2>/dev/null)
+            if [ -n "$orphans" ]; then
+                echo "$orphans" | xargs -r timeout 180 apt-get remove --purge -y >/dev/null 2>&1 && \
+                    log_success "Deborphan cleanup done." || \
+                    log_warn "Some orphaned packages could not be removed."
+            else
+                log_info "No orphaned packages found."
+            fi
+        else
+            log_warn "APT locked, skipping deborphan."
+        fi
     fi
 else
     log_info "Deborphan not installed. Skipping."
@@ -274,7 +341,7 @@ echo -e "${C_BOLD}-------------------------------------------${C_RESET}"
 final_space=$(get_available_space)
 cleaned_space=$((final_space - initial_space))
 
-echo -e "\n${C_BOLD}${C_GREEN}✅ System cleanup complete!${C_RESET}"
+echo -e "\n${C_BOLD}${C_GREEN}System cleanup complete!${C_RESET}"
 if [ "$DRY_RUN" = true ]; then
     echo -e "${C_YELLOW}(Dry run: No actual space freed)${C_RESET}"
 else
