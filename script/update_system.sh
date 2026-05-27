@@ -77,7 +77,7 @@ log_header() { echo -e "\n${C_BOLD}${C_BLUE}[$1] $2${C_RESET}"; }
 
 # --- Start ---
 echo -e "${C_BOLD}==================================================${C_RESET}"
-echo -e "${C_BOLD}  Smart System Update (v3.3)                  ${C_RESET}"
+echo -e "${C_BOLD}  Smart System Update (v3.4)                  ${C_RESET}"
 if [ "$DRY_RUN" = true ]; then
     echo -e "${C_YELLOW}  *** DRY RUN MODE ***                        ${C_RESET}"
 fi
@@ -140,18 +140,30 @@ log_header "4/5" "Handling Homebrew packages..."
 # Brew should not be run as root. We use the original user if available.
 SUDO_USER_NAME=${SUDO_USER:-$(whoami)}
 
+# Better detection for Homebrew (Linuxbrew)
+BREW_CMD=""
 if sudo -u "$SUDO_USER_NAME" command -v brew &>/dev/null; then
+    BREW_CMD="brew"
+elif [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+    BREW_CMD="/home/linuxbrew/.linuxbrew/bin/brew"
+elif [ -f "/home/$SUDO_USER_NAME/.linuxbrew/bin/brew" ]; then
+    BREW_CMD="/home/$SUDO_USER_NAME/.linuxbrew/bin/brew"
+fi
+
+if [ -n "$BREW_CMD" ]; then
+    echo "-> Found Homebrew at: $BREW_CMD"
     echo "-> Running as user: $SUDO_USER_NAME"
     if [ "$DRY_RUN" = true ]; then
         echo "  [DRY-RUN] Would update and upgrade brew formulas."
     else
         # Run brew as the non-root user
-        sudo -u "$SUDO_USER_NAME" brew update
-        sudo -u "$SUDO_USER_NAME" brew upgrade
-        sudo -u "$SUDO_USER_NAME" brew cleanup
+        sudo -u "$SUDO_USER_NAME" "$BREW_CMD" update
+        sudo -u "$SUDO_USER_NAME" "$BREW_CMD" upgrade
+        sudo -u "$SUDO_USER_NAME" "$BREW_CMD" cleanup
     fi
 else
     echo "Homebrew not installed for user $SUDO_USER_NAME."
+    echo "-> To install: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
 fi
 
 # --- 5. Firmware ---
@@ -176,6 +188,7 @@ if command -v fwupdmgr &>/dev/null; then
     fi
 else
     echo "fwupdmgr not installed."
+    echo "-> To install: apt-get install fwupd -y"
 fi
 
 # --- Final ---
@@ -183,4 +196,6 @@ echo -e "\n${C_BOLD}${C_GREEN}✅ Update complete!${C_RESET}"
 
 if [ -f /var/run/reboot-required ]; then
     echo -e "${C_RED}${C_BOLD}*** REBOOT REQUIRED ***${C_RESET}"
+fi
+*${C_RESET}"
 fi
