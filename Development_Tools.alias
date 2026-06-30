@@ -6,11 +6,11 @@
 # Includes Kubernetes, Android, Node.js, Docker, Cloud, CI/CD, and more
 #
 # Sections:
-# - Kubernetes Operations (PRESERVED)
+# - Kubernetes Operations
 # - Docker Development
-# - Android Development (PRESERVED + Enhanced)
+# - Android Development
 # - iOS Development
-# - Node.js/NPM Development (PRESERVED + Enhanced)
+# - Node.js/NPM Development
 # - React/Vue/Angular Development
 # - Python Development Tools
 # - Database Development
@@ -29,17 +29,17 @@
 # ==============================================================================
 
 # ==============================================================================
-# KUBERNETES OPERATIONS (PRESERVED - Your K8s Shortcuts)
+# KUBERNETES OPERATIONS (Your K8s Shortcuts)
 # ==============================================================================
 
-### Kubernetes Shortcuts (via helper k()) (ALL PRESERVED)
-alias kctx='k config use-context'      # PRESERVED - Switch contexts
-alias kns='k config set-context --current --namespace' # PRESERVED - Set namespace
-alias kget='k get'                     # PRESERVED - Get Kubernetes resources
-alias kdesc='k describe'               # PRESERVED - Describe resources
-alias kdel='k delete'                  # PRESERVED - Delete resources
-alias klogs='k logs'                   # PRESERVED - View pod logs
-alias kexec='k exec -it'               # PRESERVED - Exec into a pod
+### Kubernetes Shortcuts (via helper k())
+alias kctx='k config use-context'                       # Switch contexts
+alias kns='k config set-context --current --namespace'  # Set namespace
+alias kget='k get'                                      # Get Kubernetes resources
+alias kdesc='k describe'                                # Describe resources
+alias kdel='k delete'                                   # Delete resources
+alias klogs='k logs'                                    # View pod logs
+alias kexec='k exec -it'                                # Exec into a pod
 
 ### Advanced Kubernetes Operations
 alias kctx-list='k config get-contexts'              # List all contexts
@@ -101,44 +101,44 @@ alias docker-build='docker build -t'                # Build image with tag
 
 ### Docker Development Workflow
 alias docker-compose-up='docker-compose up -d'      # Start services
-alias docker-compose-down='docker-compose down'    # Stop services
-alias docker-compose-logs='docker-compose logs -f' # Follow logs
-alias docker-compose-build='docker-compose build'  # Build services
-alias docker-compose-exec='docker-compose exec'    # Execute in service
-alias docker-clean='docker system prune -f'        # Clean unused resources
-alias docker-clean-all='docker system prune -a -f' # Clean everything
+alias docker-compose-down='docker-compose down'     # Stop services
+alias docker-compose-logs='docker-compose logs -f'  # Follow logs
+alias docker-compose-build='docker-compose build'   # Build services
+alias docker-compose-exec='docker-compose exec'     # Execute in service
+alias docker-clean='docker system prune -f'         # Clean unused resources
+alias docker-clean-all='docker system prune -a -f'  # Clean everything
 
 ### Docker Development Tools
-alias docker-dev='docker run -it --rm -v $(pwd):/app -w /app' # Development container
-alias docker-python='docker run -it --rm python:3.9' # Python development
-alias docker-node='docker run -it --rm node:18'     # Node.js development
-alias docker-postgres='docker run -d --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 postgres:13' # PostgreSQL
-alias docker-mysql='docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 mysql:8' # MySQL
-alias docker-redis='docker run -d --name redis -p 6379:6379 redis:7' # Redis
+alias docker-dev='docker run -it --rm -v $(pwd):/app -w /app'             # Development container
+alias docker-python='docker run -it --rm python:3.9'                      # Python development
+alias docker-node='docker run -it --rm node:18'                           # Node.js development
+alias docker-redis='docker run -d --name redis -p 6379:6379 redis:7'      # Redis
+alias docker-postgres='docker run -d --name postgres -e POSTGRES_PASSWORD=password -p 5432:5432 postgres:13'  # PostgreSQL
+alias docker-mysql='docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 mysql:8'          # MySQL
 
 # ==============================================================================
-# ANDROID DEVELOPMENT (PRESERVED + Enhanced)
+# ANDROID DEVELOPMENT
 # ==============================================================================
 
-### Android Development (PRESERVED)
-alias scrcpy="scrcpy -b 8M --window-title='Pixel' --max-fps=55 --no-audio"  # PRESERVED - Screen mirroring
-alias ex-scrcpy='/home/azzar/project/script/android_scripting/scrcpy-scripts/virtual_display.sh'  # PRESERVED - Extended scrcpy
-alias adb-restart='adb kill-server && adb start-server'  # PRESERVED - Restart ADB
-alias adb-screenshot='adb exec-out screencap -p > screen-$(date +%s).png'  # PRESERVED - Take screenshot
-alias adb-record='adb shell screenrecord /sdcard/recording.mp4'  # PRESERVED - Record screen
+### Android Development
+alias scrcpy="scrcpy -b 8M --window-title='Pixel' --max-fps=55 --no-audio"                          # Screen mirroring
+alias ex-scrcpy='/home/azzar/project/script/android_scripting/scrcpy-scripts/virtual_display.sh'    # Extended scrcpy
+alias adb-restart='adb kill-server && adb start-server'                                             # Restart ADB
+alias adb-screenshot='adb exec-out screencap -p > screen-$(date +%s).png'                           # Take screenshot
+alias adb-record='adb shell screenrecord /sdcard/recording.mp4'                                     # Record screen
 
 ### Advanced Android Development
-alias adb-devices='adb devices'                     # List devices
-alias adb-install='adb install'                     # Install APK
-alias adb-uninstall='adb uninstall'                 # Uninstall app
-alias adb-push='adb push'                           # Push file to device
-alias adb-pull='adb pull'                           # Pull file from device
-alias adb-shell='adb shell'                         # Open shell on device
-alias adb-logcat='adb logcat'                       # View device logs
-alias adb-bugreport='adb bugreport'                 # Generate bug report
-alias adb-reboot='adb reboot'                       # Reboot device
-alias adb-reboot-recovery='adb reboot recovery'     # Reboot to recovery
-alias adb-reboot-bootloader='adb reboot bootloader' # Reboot to bootloader
+alias adb-devices='adb devices'                         # List devices
+alias adb-install='adb install'                         # Install APK
+alias adb-uninstall='adb uninstall'                     # Uninstall app
+alias adb-push='adb push'                               # Push file to device
+alias adb-pull='adb pull'                               # Pull file from device
+alias adb-shell='adb shell'                             # Open shell on device
+alias adb-logcat='adb logcat'                           # View device logs
+alias adb-bugreport='adb bugreport'                     # Generate bug report
+alias adb-reboot='adb reboot'                           # Reboot device
+alias adb-reboot-recovery='adb reboot recovery'         # Reboot to recovery
+alias adb-reboot-bootloader='adb reboot bootloader'     # Reboot to bootloader
 
 ### Android Studio & Build Tools
 alias gradle-clean='gradle clean'                   # Clean Gradle build
@@ -176,15 +176,15 @@ alias ios-build='xcodebuild -workspace'              # Build workspace
 alias ios-test='xcodebuild test'                     # Run tests
 
 # ==============================================================================
-# NODE.JS/NPM DEVELOPMENT (PRESERVED + Enhanced)
+# NODE.JS/NPM DEVELOPMENT
 # ==============================================================================
 
-### Node.js/NPM Shortcuts (ALL PRESERVED)
-alias ni='npm install'                       # PRESERVED - Install dependencies
-alias nr='npm run'                           # PRESERVED - Run scripts
-alias ns='npm start'                         # PRESERVED - Start the app
-alias nt='npm test'                          # PRESERVED - Run tests
-alias nl='npm list --depth=0'                # PRESERVED - List installed packages
+### Node.js/NPM Shortcuts
+alias ni='npm install'                       # Install dependencies
+alias nr='npm run'                           # Run scripts
+alias ns='npm start'                         # Start the app
+alias nt='npm test'                          # Run tests
+alias nl='npm list --depth=0'                # List installed packages
 
 ### Advanced NPM Operations
 alias nci='npm ci'                           # Clean install (production)
@@ -223,7 +223,7 @@ alias pnpm-build='pnpm build'                # Build project
 # ==============================================================================
 
 ### React Development
-alias create-react-app='npx create-react-app'      # Create React app
+alias create-react-app='npx create-react-app'     # Create React app
 alias react-scripts-start='npm start'             # Start React app
 alias react-scripts-build='npm run build'         # Build React app
 alias react-scripts-test='npm test'               # Test React app
@@ -236,7 +236,7 @@ alias vue-build='npm run build'                   # Build Vue app
 alias vue-lint='npm run lint'                     # Lint Vue code
 
 ### Angular Development
-alias ng-new='ng new'                             # Create Angular app
+alias ng-new='ng new'                              # Create Angular app
 alias ng-serve='ng serve'                          # Serve Angular app
 alias ng-build='ng build'                          # Build Angular app
 alias ng-test='ng test'                            # Test Angular app
@@ -254,10 +254,10 @@ alias vite-build='vite build'                      # Vite build
 # PYTHON DEVELOPMENT TOOLS (Enhanced)
 # ==============================================================================
 
-### Python Tools (PRESERVED + Enhanced)
-alias poetry='poetry'                         # PRESERVED - Poetry shortcut
-alias tox='tox'                               # PRESERVED - Test environments
-alias pyinstaller='pyinstaller --onefile'     # PRESERVED - Standalone executables
+### Python Tools
+alias poetry='poetry'                         # Poetry shortcut
+alias tox='tox'                               # Test environments
+alias pyinstaller='pyinstaller --onefile'     # Standalone executables
 
 ### Advanced Python Tools
 alias pipenv-install='pipenv install'          # Pipenv install
@@ -268,10 +268,10 @@ alias conda-activate='conda activate'          # Activate conda env
 alias conda-deactivate='conda deactivate'      # Deactivate conda env
 
 ### Python Build Tools
-alias setuptools-build='python setup.py build' # Setuptools build
-alias setuptools-install='python setup.py install' # Install package
-alias setuptools-develop='python setup.py develop' # Development install
-alias twine-upload='twine upload dist/*'       # Upload to PyPI
+alias setuptools-build='python setup.py build'          # Setuptools build
+alias setuptools-install='python setup.py install'      # Install package
+alias setuptools-develop='python setup.py develop'      # Development install
+alias twine-upload='twine upload dist/*'                # Upload to PyPI
 
 # ==============================================================================
 # DATABASE DEVELOPMENT
@@ -333,11 +333,11 @@ alias gql-codegen='gql codegen'                 # Generate GraphQL code
 # ==============================================================================
 
 ### AWS CLI
-alias aws-configure='aws configure'             # Configure AWS
-alias aws-s3-ls='aws s3 ls'                     # List S3 buckets
-alias aws-s3-cp='aws s3 cp'                     # Copy to/from S3
-alias aws-ec2-list='aws ec2 describe-instances' # List EC2 instances
-alias aws-lambda-deploy='aws lambda update-function-code' # Deploy Lambda
+alias aws-configure='aws configure'                         # Configure AWS
+alias aws-s3-ls='aws s3 ls'                                 # List S3 buckets
+alias aws-s3-cp='aws s3 cp'                                 # Copy to/from S3
+alias aws-ec2-list='aws ec2 describe-instances'             # List EC2 instances
+alias aws-lambda-deploy='aws lambda update-function-code'   # Deploy Lambda
 
 ### Google Cloud
 alias gcloud-auth='gcloud auth login'           # Authenticate
@@ -371,8 +371,8 @@ alias glab-ci-status='glab ci status'           # CI status
 alias glab-ci-lint='glab ci lint'               # Lint CI config
 
 ### Jenkins
-alias jenkins-cli='java -jar jenkins-cli.jar'   # Jenkins CLI
-alias jenkins-build='curl -X POST $JENKINS_URL/job/$JOB/build' # Trigger build
+alias jenkins-cli='java -jar jenkins-cli.jar'                   # Jenkins CLI
+alias jenkins-build='curl -X POST $JENKINS_URL/job/$JOB/build'  # Trigger build
 
 ### Docker CI/CD
 alias docker-push='docker push'                 # Push image
@@ -465,23 +465,6 @@ alias svn-update='svn update'                  # SVN update
 alias svn-add='svn add'                        # SVN add
 
 # ==============================================================================
-# COLLABORATION & COMMUNICATION
-# ==============================================================================
-
-### Slack
-alias slack='slack'                            # Open Slack
-alias slack-status='slack status'              # Set status
-
-### Discord
-alias discord='discord'                        # Open Discord
-
-### Microsoft Teams
-alias teams='teams'                            # Open Teams
-
-### Zoom
-alias zoom='zoom'                              # Open Zoom
-
-# ==============================================================================
 # MONITORING & DEBUGGING
 # ==============================================================================
 
@@ -508,23 +491,18 @@ alias valgrind='valgrind'                      # Memory debugger
 # ==============================================================================
 
 ### Heroku
-alias heroku-login='heroku login'              # Login to Heroku
-alias heroku-create='heroku create'            # Create Heroku app
 alias heroku-deploy='git push heroku main'     # Deploy to Heroku
 alias heroku-logs='heroku logs --tail'         # View Heroku logs
 
 ### Vercel
-alias vercel-login='vercel login'              # Login to Vercel
 alias vercel-deploy='vercel --prod'            # Deploy to Vercel
 alias vercel-dev='vercel dev'                  # Local development
 
 ### Netlify
-alias netlify-login='netlify login'            # Login to Netlify
 alias netlify-deploy='netlify deploy --prod'   # Deploy to Netlify
 alias netlify-dev='netlify dev'                # Local development
 
 ### Railway
-alias railway-login='railway login'            # Login to Railway
 alias railway-deploy='railway up'              # Deploy to Railway
 
 # ==============================================================================
