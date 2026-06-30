@@ -10,7 +10,8 @@
       "color": {
         "keys": "yellow",
         "title": "green",
-        "separator": "red"    }
+        "separator": "red",
+      }
     },
     "modules": [
       // --- Title ---
@@ -51,7 +52,9 @@
       },
       {
           "type": "packages",
-          "key": "Packages_"
+          "combined": true,
+          "key": "Packages_",
+          "format": "{1}"
       },
       {
           "type": "localip",
@@ -158,6 +161,16 @@
       {
           "type": "sound",
           "key": "Sound____"
+      },
+      {
+          "type": "separator",
+          "string": "=",
+          "outputColor": "blue"
+      },
+      {
+          "type": "command",
+          "key": "Fortune__",
+          "text": "/usr/games/fortune -n 40 -s | paste -sd ' ' -"
       },
       {
           "type": "separator",
