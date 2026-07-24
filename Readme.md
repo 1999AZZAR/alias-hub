@@ -1,5 +1,7 @@
 # Alias Hub
 
+![Blotcat managing a massive vintage switchboard of terminal shortcuts](assets/blotcat-hero.jpg)
+
 **Alias Hub** is a comprehensive collection of shell aliases designed to enhance your terminal productivity. This repository organizes aliases into logical categories, making it easy to find and use commands for specific tasks.
 
 ## Table of Contents
@@ -118,6 +120,8 @@ The installer supports various command-line options for different use cases and 
 ```
 
 ### What Gets Installed
+
+![Blotcat detecting system environment and plugging the right adapter into the computer block](assets/blotcat-install.jpg)
 
 The installer performs the following operations automatically:
 
@@ -246,6 +250,8 @@ alias-help [alias-name]
 ```
 
 ### Alias Categories
+
+![Blotcat sorting raw terminal commands neatly into categorized alias boxes](assets/blotcat-modular.jpg)
 
 Alias Hub organizes aliases into logical categories for easy discovery:
 
