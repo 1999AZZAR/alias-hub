@@ -717,6 +717,8 @@ sudo systemctl enable fstrim.timer
 
 ## Customization
 
+![Blotcat wearing a welding mask and welding a new custom shortcut button into a global.alias dashboard slot](assets/blotcat-customization.jpg)
+
 ### Personal Aliases
 
 The `global.alias` file is your personal customization space. Add frequently used aliases here:
