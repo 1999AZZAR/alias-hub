@@ -39,15 +39,22 @@ update() {
     chmod +x "$UPDATE_SCRIPT_PATH"
   fi
 
-  # Execute the advanced update script.
-  # The script itself handles sudo elevation, so we don't need it here.
+  # Forward options and preserve the updater's exit status. Individual updater
+  # operations have their own timeouts, so valid long upgrades are not killed.
   echo "--- Launching the Smart System Update Script ---"
-  "$UPDATE_SCRIPT_PATH"
+  "$UPDATE_SCRIPT_PATH" "$@"
+  local status=$?
+
+  if [[ $status -ne 0 ]]; then
+    echo "Error: Update script failed with exit status $status." >&2
+  fi
+
   echo "--- Script finished. ---"
+  return "$status"
 }
 
 # --- System Cleanup Alias ---
-# This function calls the external clean_system.sh script.
+# This function calls the external system_cleaner.sh script.
 clean() {
   # Determine the absolute path to the script directory (parent of sub_scripts).
   local SCRIPT_DIR
@@ -66,10 +73,19 @@ clean() {
     chmod +x "$CLEAN_SCRIPT_PATH"
   fi
 
-  # Execute the script with a 15-minute (900s) timeout.
+  # Forward options and preserve the cleaner's exit status.
   echo "--- Launching the System Cleanup Script ---"
-  timeout 900s "$CLEAN_SCRIPT_PATH" || echo "Error: Cleanup script timed out after 15 minutes." >&2
+  timeout --foreground --kill-after=10s 900s "$CLEAN_SCRIPT_PATH" "$@"
+  local status=$?
+
+  if [[ $status -eq 124 || $status -eq 137 ]]; then
+    echo "Error: Cleanup script timed out after 15 minutes." >&2
+  elif [[ $status -ne 0 ]]; then
+    echo "Error: Cleanup script failed with exit status $status." >&2
+  fi
+
   echo "--- Script finished. ---"
+  return "$status"
 }
 
 # --- Distribution upgrade including OS release upgrade ---
@@ -82,4 +98,3 @@ dis_update() {
     return 1
   fi
 }
-
