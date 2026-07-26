@@ -5,7 +5,7 @@
 set -o pipefail
 export LC_ALL=C
 
-readonly VERSION="4.0"
+readonly VERSION="4.1"
 readonly APT_LOCK_WAIT=60
 
 C_RESET='\033[0m'
@@ -20,6 +20,7 @@ FULL_UPGRADE=false
 FAILURE_COUNT=0
 WARNING_COUNT=0
 ORIGINAL_ARGS=("$@")
+TEMP_DIR=""
 
 log_info() { printf '%b[INFO]%b %s\n' "$C_BLUE" "$C_RESET" "$*"; }
 log_success() { printf '%b[OK]%b %s\n' "$C_GREEN" "$C_RESET" "$*"; }
@@ -60,6 +61,7 @@ run_update() {
         return 0
     fi
 
+    log_info "$label (timeout: ${duration}s)..."
     if timeout --foreground --kill-after=15 "$duration" "$@"; then
         log_success "$label"
         return 0
@@ -73,6 +75,100 @@ run_update() {
         log_error "$label failed (exit $status)."
     fi
     return "$status"
+}
+
+run_logged_update() {
+    local label="$1"
+    local duration="$2"
+    local log_file="$3"
+    local status
+    shift 3
+
+    if [[ "$DRY_RUN" == true ]]; then
+        print_command "$@"
+        return 0
+    fi
+
+    log_info "$label (timeout: ${duration}s)..."
+    if timeout --foreground --kill-after=15 "$duration" "$@" 2>&1 | tee "$log_file"; then
+        log_success "$label"
+        return 0
+    else
+        status=${PIPESTATUS[0]}
+    fi
+
+    if ((status == 124 || status == 137)); then
+        log_error "$label timed out after ${duration}s."
+    else
+        log_error "$label failed (exit $status)."
+    fi
+    return "$status"
+}
+
+cleanup() {
+    [[ -z "$TEMP_DIR" ]] || rm -rf "$TEMP_DIR"
+}
+
+diagnose_dpkg_failure() {
+    local audit_output
+    local dkms_log
+    local dkms_module
+    local dkms_status
+    local error_lines
+
+    audit_output=$(dpkg --audit 2>/dev/null || true)
+    if [[ -n "$audit_output" ]]; then
+        log_warn "dpkg has unfinished package configuration:"
+        printf '%s\n' "$audit_output" | sed 's/^/  /' >&2
+    fi
+
+    if command -v dkms >/dev/null 2>&1; then
+        dkms_status=$(dkms status 2>/dev/null || true)
+        if [[ -n "$dkms_status" ]]; then
+            log_warn "DKMS state:"
+            printf '%s\n' "$dkms_status" | sed 's/^/  /' >&2
+        fi
+    fi
+
+    dkms_log=$(find /var/lib/dkms -path '*/build/make.log' -type f -printf '%T@ %p\n' 2>/dev/null \
+        | sort -nr | awk 'NR == 1 { sub(/^[^ ]+ /, ""); print; exit }')
+    if [[ -n "$dkms_log" ]]; then
+        dkms_module=${dkms_log#/var/lib/dkms/}
+        dkms_module=${dkms_module%%/build/make.log}
+        error_lines=$(grep -E -m 3 '(^|: )(fatal )?error:|Error!|Bad return status' "$dkms_log" 2>/dev/null || true)
+        if [[ -n "$error_lines" ]]; then
+            log_warn "Latest DKMS build failure for $dkms_module ($dkms_log):"
+            printf '%s\n' "$error_lines" | sed 's/^/  /' >&2
+        fi
+    fi
+
+    log_warn "APT recovery stopped to avoid removing packages automatically. Fix the reported package or DKMS compatibility issue, then run: sudo dpkg --configure -a"
+}
+
+repair_dpkg_if_needed() {
+    local audit_output
+
+    audit_output=$(dpkg --audit 2>/dev/null || true)
+    [[ -n "$audit_output" ]] || return 0
+
+    log_warn "Detected an unfinished dpkg transaction; attempting configuration recovery before upgrading."
+    if run_update "Unfinished packages configured." 900 env DEBIAN_FRONTEND=noninteractive \
+        dpkg --configure -a; then
+        return 0
+    fi
+
+    diagnose_dpkg_failure
+    return 1
+}
+
+report_apt_notices() {
+    local log_file="$1"
+    local unsupported_arch_count
+
+    unsupported_arch_count=$(grep -c "doesn't support architecture" "$log_file" 2>/dev/null || true)
+    if ((unsupported_arch_count > 0)); then
+        log_warn "$unsupported_arch_count APT source(s) do not publish a configured foreign architecture. This is harmless; add arch=$(dpkg --print-architecture) to those source entries if they only serve this architecture."
+    fi
 }
 
 wait_for_apt_lock() {
@@ -131,12 +227,20 @@ if [[ "$EUID" -ne 0 && "$DRY_RUN" == false ]]; then
     exec sudo "$(readlink -f "$0")" "${ORIGINAL_ARGS[@]}"
 fi
 
-for required_command in timeout id getent awk; do
+for required_command in timeout id getent awk sed grep sort find mktemp tee; do
     command -v "$required_command" >/dev/null 2>&1 || {
         printf '%b[ERROR]%b Required command not found: %s\n' "$C_RED" "$C_RESET" "$required_command" >&2
         exit 1
     }
 done
+
+if [[ "$DRY_RUN" == false ]]; then
+    TEMP_DIR=$(mktemp -d -t alias-hub-update.XXXXXX) || {
+        printf '%b[ERROR]%b Could not create a temporary directory.\n' "$C_RED" "$C_RESET" >&2
+        exit 1
+    }
+    trap cleanup EXIT
+fi
 
 if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != root ]]; then
     TARGET_USER="$SUDO_USER"
@@ -163,7 +267,20 @@ header 1 "APT packages"
 if ! command -v apt-get >/dev/null 2>&1; then
     log_warn "APT is unavailable; skipping."
 elif [[ "$DRY_RUN" == true ]] || wait_for_apt_lock; then
-    if run_update "APT package indexes refreshed." 300 env DEBIAN_FRONTEND=noninteractive apt-get update; then
+    apt_update_log="$TEMP_DIR/apt-update.log"
+    apt_upgrade_log="$TEMP_DIR/apt-upgrade.log"
+    apt_options=(-o Dpkg::Use-Pty=0 -o DPkg::Lock::Timeout="$APT_LOCK_WAIT")
+
+    if [[ "$DRY_RUN" == true ]] || repair_dpkg_if_needed; then
+        apt_ready=true
+    else
+        apt_ready=false
+        log_warn "Skipping APT update and upgrade until dpkg is repaired. Other package ecosystems will continue."
+    fi
+
+    if [[ "$apt_ready" == true ]] && run_logged_update "APT package indexes refreshed." 300 "$apt_update_log" \
+        env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" update; then
+        [[ "$DRY_RUN" == true ]] || report_apt_notices "$apt_update_log"
         if [[ "$FULL_UPGRADE" == true ]]; then
             apt_upgrade=(apt-get full-upgrade -y)
             apt_upgrade_label="APT full upgrade completed."
@@ -172,9 +289,12 @@ elif [[ "$DRY_RUN" == true ]] || wait_for_apt_lock; then
             apt_upgrade_label="APT upgrade completed."
         fi
 
-        if run_update "$apt_upgrade_label" 1800 env DEBIAN_FRONTEND=noninteractive "${apt_upgrade[@]}"; then
-            run_update "Unused APT packages removed." 600 env DEBIAN_FRONTEND=noninteractive apt-get autoremove --purge -y
+        if run_logged_update "$apt_upgrade_label" 1800 "$apt_upgrade_log" env DEBIAN_FRONTEND=noninteractive \
+            "${apt_upgrade[@]:0:1}" "${apt_options[@]}" "${apt_upgrade[@]:1}"; then
+            run_update "Unused APT packages removed." 600 env DEBIAN_FRONTEND=noninteractive \
+                apt-get "${apt_options[@]}" autoremove --purge -y
         else
+            diagnose_dpkg_failure
             log_warn "Skipping APT autoremove because the upgrade failed."
         fi
 
@@ -182,7 +302,7 @@ elif [[ "$DRY_RUN" == true ]] || wait_for_apt_lock; then
             upgradable_count=$(apt list --upgradable 2>/dev/null | awk 'NR > 1 { count++ } END { print count + 0 }')
             ((upgradable_count == 0)) || log_warn "$upgradable_count package(s) remain upgradable, possibly due to phasing or dependency constraints."
         fi
-    else
+    elif [[ "$apt_ready" == true ]]; then
         log_warn "Skipping APT upgrade because package indexes could not be refreshed."
     fi
 fi

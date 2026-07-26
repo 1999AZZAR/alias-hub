@@ -7,7 +7,7 @@
 set -o pipefail
 export LC_ALL=C
 
-readonly VERSION="5.0"
+readonly VERSION="5.0.1"
 readonly APT_LOCK_WAIT=60
 readonly COMMAND_TIMEOUT=300
 
@@ -57,7 +57,8 @@ run_timed() {
     local status
     shift 2
 
-    if timeout --kill-after=10 "$duration" "$@" >/dev/null 2>&1; then
+    log_info "$label (timeout: ${duration}s)..."
+    if timeout --foreground --kill-after=10 "$duration" "$@"; then
         log_success "$label"
         return 0
     else
@@ -223,13 +224,14 @@ elif [[ "$DRY_RUN" == true ]]; then
     print_command apt-get autoclean
     log_info "Would purge packages left in the config-files state."
 elif wait_for_apt_lock; then
-    run_timed "APT cache cleaned." "$COMMAND_TIMEOUT" apt-get clean
-    run_timed "Unused APT packages removed." "$COMMAND_TIMEOUT" apt-get autoremove --purge -y
-    run_timed "Obsolete APT packages cleaned." "$COMMAND_TIMEOUT" apt-get autoclean
+    run_timed "Cleaning the APT cache" "$COMMAND_TIMEOUT" env DEBIAN_FRONTEND=noninteractive apt-get clean
+    run_timed "Removing unused APT packages" "$COMMAND_TIMEOUT" env DEBIAN_FRONTEND=noninteractive apt-get autoremove --purge -y
+    run_timed "Cleaning obsolete APT packages" "$COMMAND_TIMEOUT" env DEBIAN_FRONTEND=noninteractive apt-get autoclean
 
     mapfile -t leftover_packages < <(dpkg-query -W -f='${db:Status-Abbrev} ${binary:Package}\n' 2>/dev/null | awk '$1 ~ /^rc/ { print $2 }')
     if ((${#leftover_packages[@]})); then
-        run_timed "Leftover package configurations purged." 180 apt-get purge -y -- "${leftover_packages[@]}"
+        run_timed "Purging leftover package configurations" 180 env DEBIAN_FRONTEND=noninteractive \
+            apt-get purge -y -- "${leftover_packages[@]}"
     else
         log_info "No leftover package configurations found."
     fi
@@ -320,13 +322,7 @@ clean_symlinks /var 5
 clean_symlinks /usr/local 5
 
 printf '\n%b[6/7] Old kernels%b\n' "$C_BOLD$C_BLUE" "$C_RESET"
-if ! command -v apt-get >/dev/null 2>&1; then
-    log_info "APT is unavailable; skipping."
-elif [[ "$DRY_RUN" == true ]]; then
-    print_command apt-get autoremove --purge -y
-elif wait_for_apt_lock; then
-    run_timed "Kernel-related unused packages removed." "$COMMAND_TIMEOUT" apt-get autoremove --purge -y
-fi
+log_info "Handled by the APT autoremove step; no duplicate operation needed."
 
 printf '\n%b[7/7] Orphaned packages%b\n' "$C_BOLD$C_BLUE" "$C_RESET"
 if ! command -v deborphan >/dev/null 2>&1; then
@@ -337,7 +333,8 @@ elif [[ "$DRY_RUN" == true ]]; then
 elif wait_for_apt_lock; then
     mapfile -t orphaned_packages < <(deborphan 2>/dev/null)
     if ((${#orphaned_packages[@]})); then
-        run_timed "Orphaned packages removed." 180 apt-get remove --purge -y -- "${orphaned_packages[@]}"
+        run_timed "Removing orphaned packages" 180 env DEBIAN_FRONTEND=noninteractive \
+            apt-get remove --purge -y -- "${orphaned_packages[@]}"
     else
         log_info "No orphaned packages found."
     fi
