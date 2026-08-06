@@ -195,6 +195,9 @@ package_installed() {
         apk)
             apk info -e "$package" &>/dev/null
             ;;
+        emerge)
+            qlist -I "$package" &>/dev/null
+            ;;
         *)
             return 1
             ;;
@@ -318,6 +321,9 @@ install_packages() {
         zypper)
             packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick perl-Image-ExifTool mediainfo jq fzf fd-find bat ripgrep tldr wget bind-utils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm-sensors hddtemp acpi tlp redis postgresql sqlite gh tmux"
             ;;
+        emerge)
+            packages="eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof dev-python/pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick exiftool mediainfo jq fzf fd bat ripgrep tldr wget bind-tools whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm_sensors hddtemp acpi tlp redis postgresql sqlite gh tmux"
+            ;;
         *)
             print_warning "Unsupported package manager for installation"
             return 1
@@ -385,6 +391,11 @@ install_packages() {
             ;;
         zypper)
             if ! sudo zypper install -y "$packages_to_install"; then
+                install_success=false
+            fi
+            ;;
+        emerge)
+            if ! sudo emerge --ask=n --quiet "$packages_to_install"; then
                 install_success=false
             fi
             ;;

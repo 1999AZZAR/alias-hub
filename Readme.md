@@ -406,9 +406,9 @@ Alias Hub organizes aliases into categorized files for easy management and selec
 
 | File                                      | Description                      | Key Features                                                     |
 | ----------------------------------------- | -------------------------------- | ---------------------------------------------------------------- |
-| **`Arduino_CLI.alias`**           | Arduino CLI development          | Board management, core/library installation, compilation, upload |
+| **`MCU_arduino.alias`**          | Arduino CLI development          | Board management, core/library installation, compilation, upload |
 | **`Development_Tools.alias`**     | Development and coding shortcuts | Git operations, Python, Docker, build tools, Kubernetes          |
-| **`ESP_Development.alias`**       | ESP32/ESP8266 development        | ESP-IDF tools, flashing, monitoring, configuration               |
+| **`MCU_esp_idf.alias`**          | ESP32/ESP8266 development        | ESP-IDF tools, flashing, monitoring, configuration               |
 | **`File_Management.alias`**       | File and directory operations    | Enhanced ls, file operations, compression, archive tools         |
 | **`Fun_and_Entertainment.alias`** | Entertainment and leisure        | Games, media, fun commands, ASCII art                            |
 | **`General_Monitoring.alias`**    | System monitoring and analysis   | Hardware monitoring, performance analysis, resource tracking     |
@@ -438,7 +438,7 @@ Alias Hub organizes aliases into categorized files for easy management and selec
 
 ### File Details
 
-#### Arduino_CLI.alias
+#### MCU_arduino.alias
 
 Comprehensive Arduino development aliases for embedded systems programming:
 
@@ -462,7 +462,7 @@ Contains aliases for common development workflows:
 - **Cloud Development**: AWS, GCP, Azure CLI tools
 - **Debugging**: Process monitoring, log analysis, error checking
 
-#### ESP_Development.alias
+#### MCU_esp_idf.alias
 
 ESP32/ESP8266 embedded systems development:
 
