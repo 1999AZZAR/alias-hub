@@ -304,19 +304,19 @@ install_packages() {
     local packages=""
     case "$PACKAGE_MANAGER" in
         apt)
-            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip python3-venv snapd flatpak fastfetch"
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip python3-venv snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick libimage-exiftool-perl mediainfo jq fzf fd-find bat ripgrep tldr wget dnsutils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm-sensors hddtemp acpi tlp redis-server redis-tools postgresql-client sqlite3 gh tmux"
             ;;
         dnf)
-            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof python3-pip snapd flatpak fastfetch"
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof python3-pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick perl-Image-ExifTool mediainfo jq fzf fd-find bat ripgrep tldr wget bind-utils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm-sensors hddtemp acpi tlp redis postgresql sqlite gh tmux"
             ;;
         pacman)
-            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof python-pip snapd flatpak fastfetch"
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof python-pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick perl-image-exiftool mediainfo jq fzf fd bat ripgrep tldr wget bind-tools whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm_sensors hddtemp acpi tlp redis postgresql sqlite github-cli tmux"
             ;;
         apk)
-            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof py3-pip snapd flatpak fastfetch"
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof py3-pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick perl-image-exiftool mediainfo jq fzf fd bat ripgrep tldr wget bind-tools whois mtr traceroute iotop iftop nethogs bmon vnstat smartmontools lm_sensors hddtemp acpi redis postgresql-client sqlite gh tmux"
             ;;
         zypper)
-            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip snapd flatpak fastfetch"
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick perl-Image-ExifTool mediainfo jq fzf fd-find bat ripgrep tldr wget bind-utils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm-sensors hddtemp acpi tlp redis postgresql sqlite gh tmux"
             ;;
         *)
             print_warning "Unsupported package manager for installation"
