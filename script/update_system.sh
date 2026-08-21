@@ -285,7 +285,9 @@ elif [[ "$DRY_RUN" == true ]] || wait_for_apt_lock; then
             apt_upgrade=(apt-get full-upgrade -y)
             apt_upgrade_label="APT full upgrade completed."
         else
-            apt_upgrade=(apt-get upgrade -y)
+            # --with-new-pkgs is required so kernel updates (which arrive as new
+            # versioned packages like linux-image-<ver>) are not silently skipped.
+            apt_upgrade=(apt-get upgrade -y --with-new-pkgs)
             apt_upgrade_label="APT upgrade completed."
         fi
 
