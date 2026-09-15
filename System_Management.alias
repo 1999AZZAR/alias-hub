@@ -195,5 +195,14 @@ alias fullcharge='sudo tlp fullcharge'    # charge Battery to 100 percen
 alias chargeone='sudo tlp chargeonce'     # charge now
 
 # ==============================================================================
+# NETWORK SPEEDTEST
+# ==============================================================================
+alias netspeed='netspeedtest'                          # Full network speedtest with complete stats
+alias netspeed-simple='netspeedtest --simple'          # Quick speedtest without interface counters
+alias netspeed-latency='netspeedtest --latency-only'   # Latency/packet-loss check only
+alias netspeed-json='netspeedtest --json'              # Speedtest with machine-readable JSON summary
+alias speedtest-full='netspeedtest'                    # Shorthand for full network speedtest
+
+# ==============================================================================
 # END OF SYSTEM MANAGEMENT ALIASES
 # ==============================================================================

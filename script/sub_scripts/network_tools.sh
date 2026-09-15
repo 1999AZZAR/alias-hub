@@ -64,3 +64,35 @@ trending_coins() {
   cw https://api.coingecko.com/api/v3/search/trending | jq .
 }
 
+# --- Network speedtest with complete stats ---
+# Calls the external network_speedtest.sh script (latency, loss,
+# download/upload, DNS, IP/ISP info, interface counters).
+netspeedtest() {
+  local SCRIPT_DIR
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
+
+  local SPEED_SCRIPT_PATH="$SCRIPT_DIR/network_speedtest.sh"
+
+  if [[ ! -f "$SPEED_SCRIPT_PATH" ]]; then
+    echo "Error: The 'network_speedtest.sh' script was not found." >&2
+    echo "Expected at: $SPEED_SCRIPT_PATH" >&2
+    return 1
+  fi
+
+  if [[ ! -x "$SPEED_SCRIPT_PATH" ]]; then
+    echo "Notice: Making the speedtest script executable for the first time."
+    chmod +x "$SPEED_SCRIPT_PATH"
+  fi
+
+  echo "--- Launching the Network Speedtest Script ---"
+  "$SPEED_SCRIPT_PATH" "$@"
+  local status=$?
+
+  if [[ $status -ne 0 ]]; then
+    echo "Error: Speedtest script failed with exit status $status." >&2
+  fi
+
+  echo "--- Script finished. ---"
+  return "$status"
+}
+
