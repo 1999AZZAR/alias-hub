@@ -3,7 +3,7 @@
 # Bounded system updates for Debian/Ubuntu, Snap, Flatpak, Homebrew, and fwupd.
 
 set -o pipefail
-export LC_ALL=C
+export LC_ALL=C.UTF-8
 
 readonly VERSION="4.1"
 readonly APT_LOCK_WAIT=60
@@ -161,6 +161,28 @@ repair_dpkg_if_needed() {
     return 1
 }
 
+upgrade_backports_candidates() {
+    local entry pkg rest version
+    local targets=()
+
+    # repos like trixie-backports are pinned at priority 100, so plain
+    # upgrade never selects their candidates; force-install them by version.
+    while IFS= read -r entry; do
+        entry=${entry#"${entry%%[![:space:]]*}"}
+        case "$entry" in '' | 'Listing'*) continue ;; esac
+        pkg=${entry%%/*}
+        rest=${entry#* }
+        version=${rest%% *}
+        [[ "$version" == *~bpo* ]] || continue
+        targets+=("$pkg=$version")
+    done < <(apt list --upgradable 2>/dev/null)
+
+    ((${#targets[@]})) || return 0
+    log_info "Backports-pinned packages detected: ${targets[*]}"
+    run_update "Backports-pinned packages upgraded." 1800 \
+        env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y "${targets[@]}"
+}
+
 report_apt_notices() {
     local log_file="$1"
     local unsupported_arch_count
@@ -293,6 +315,9 @@ elif [[ "$DRY_RUN" == true ]] || wait_for_apt_lock; then
 
         if run_logged_update "$apt_upgrade_label" 1800 "$apt_upgrade_log" env DEBIAN_FRONTEND=noninteractive \
             "${apt_upgrade[@]:0:1}" "${apt_options[@]}" "${apt_upgrade[@]:1}"; then
+            if [[ "$DRY_RUN" == false ]]; then
+                upgrade_backports_candidates
+            fi
             run_update "Unused APT packages removed." 600 env DEBIAN_FRONTEND=noninteractive \
                 apt-get "${apt_options[@]}" autoremove --purge -y
         else
@@ -302,7 +327,7 @@ elif [[ "$DRY_RUN" == true ]] || wait_for_apt_lock; then
 
         if [[ "$DRY_RUN" == false ]] && command -v apt >/dev/null 2>&1; then
             upgradable_count=$(apt list --upgradable 2>/dev/null | awk 'NR > 1 { count++ } END { print count + 0 }')
-            ((upgradable_count == 0)) || log_warn "$upgradable_count package(s) remain upgradable, possibly due to phasing or dependency constraints."
+            ((upgradable_count == 0)) || log_warn "$upgradable_count package(s) remain upgradable (phased updates, repository pinning, or dependency constraints)."
         fi
     elif [[ "$apt_ready" == true ]]; then
         log_warn "Skipping APT upgrade because package indexes could not be refreshed."
@@ -344,9 +369,10 @@ if [[ -z "$BREW_CMD" ]]; then
 elif ((${#RUN_AS_USER[@]} == 0)); then
     log_warn "Homebrew cannot run as root or without a user-switching command; skipping."
 else
-    run_update "Homebrew metadata updated." 600 "${RUN_AS_USER[@]}" "$BREW_CMD" update
-    run_update "Homebrew packages upgraded." 1800 "${RUN_AS_USER[@]}" "$BREW_CMD" upgrade
-    run_update "Homebrew cache cleaned." 600 "${RUN_AS_USER[@]}" "$BREW_CMD" cleanup
+    brew_env=(env HOMEBREW_NO_ENV_HINTS=1 HOMEBREW_NO_ASK=1 NONINTERACTIVE=1)
+    run_update "Homebrew metadata updated." 600 "${RUN_AS_USER[@]}" "${brew_env[@]}" "$BREW_CMD" update
+    run_update "Homebrew packages upgraded." 1800 "${RUN_AS_USER[@]}" "${brew_env[@]}" "$BREW_CMD" upgrade -y
+    run_update "Homebrew cache cleaned." 600 "${RUN_AS_USER[@]}" "${brew_env[@]}" "$BREW_CMD" cleanup
 fi
 
 header 5 "Firmware"
