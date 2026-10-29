@@ -17,7 +17,7 @@
 #   script/sub_scripts/
 #
 # Available modules:
-# - package_managers.sh    - Package manager wrappers (apt, snap, flatpak)
+# - package_managers.sh    - Package manager wrappers (apt, snap, flatpak, nix)
 # - system_updates.sh      - System update and cleanup functions
 # - development_tools.sh   - Development tool wrappers (kubectl, ESP-IDF, etc.)
 # - system_utilities.sh    - System utility functions (boot splash, etc.)
@@ -43,7 +43,7 @@
 #   source /path/to/alias-hub/script/sub_scripts/archive_tools.sh
 #
 # AUTHOR: Alias Hub Community
-# VERSION: 2.1.0 (Modular Architecture)
+# VERSION: 2.2.0 (Modular Architecture)
 # LICENSE: MIT
 #
 # ==============================================================================

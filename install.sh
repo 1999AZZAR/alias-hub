@@ -15,6 +15,7 @@
 #
 # FEATURES:
 # - Multi-package manager support (apt, dnf, pacman, apk, zypper, emerge)
+# - Nix profile support for package managers with Nix installed (per-user, unprivileged)
 # - Multi-shell support (bash, zsh, fish, ash, dash)
 # - Intelligent environment detection
 # - Safe installation with automatic backups
@@ -74,7 +75,7 @@ set -euo pipefail
 readonly REPO_URL="https://github.com/1999AZZAR/alias-hub.git"
 readonly ALIASES_DIR="$HOME/alias-hub"
 readonly NEOFETCH_ASCII_INSTALLER_URL="https://raw.githubusercontent.com/1999AZZAR/neofetch_ascii/master/install.sh"
-readonly SCRIPT_VERSION="2.1.0"
+readonly SCRIPT_VERSION="2.2.0"
 
 # Generate backup suffix
 BACKUP_SUFFIX=".alias-hub-backup.$(date +%Y%m%d_%H%M%S)"
@@ -85,8 +86,10 @@ DRY_RUN=false
 FORCE=false
 UNINSTALL=false
 SKIP_PACKAGES=false
+SKIP_NIX=false
 VERBOSE=false
 PACKAGE_MANAGER=""
+NIX_AVAILABLE=false
 CURRENT_SHELL=""
 SHELL_RC=""
 
@@ -198,6 +201,9 @@ package_installed() {
         emerge)
             qlist -I "$package" &>/dev/null
             ;;
+        nix)
+            nix profile list 2>/dev/null | grep -qE "^Name:[[:space:]]+$package\$"
+            ;;
         *)
             return 1
             ;;
@@ -225,9 +231,19 @@ detect_package_manager() {
     elif command_exists emerge; then
         PACKAGE_MANAGER="emerge"
         print_verbose "Detected emerge package manager"
+    elif command_exists nix; then
+        PACKAGE_MANAGER="nix"
+        print_verbose "Detected nix package manager"
     else
         print_warning "No supported package manager found. Package installation will be skipped."
         PACKAGE_MANAGER=""
+    fi
+
+    # Nix is handled as a supplemental per-user profile, never replacing the
+    # detected system package manager.
+    if command_exists nix; then
+        NIX_AVAILABLE=true
+        print_verbose "Detected nix profile support"
     fi
 }
 
@@ -324,6 +340,10 @@ install_packages() {
         emerge)
             packages="eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof dev-python/pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick exiftool mediainfo jq fzf fd bat ripgrep tldr wget bind-tools whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm_sensors hddtemp acpi tlp redis postgresql sqlite gh tmux"
             ;;
+        nix)
+            # Attribute names for nix profile install (nixpkgs#<name>)
+            packages="at eza htop ncdu tree zip unzip p7zip curl nmap lsof fastfetch figlet toilet lolcat cowsay fortune cmatrix glances sysstat pv mpv yt-dlp ffmpeg imagemagick mediainfo jq fzf bat ripgrep tldr wget dnsutils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtopPackages.full smartmontools lm_sensors acpi sqlite gh tmux"
+            ;;
         *)
             print_warning "Unsupported package manager for installation"
             return 1
@@ -399,6 +419,15 @@ install_packages() {
                 install_success=false
             fi
             ;;
+        nix)
+            local nix_args=()
+            for package in $packages_to_install; do
+                nix_args+=("nixpkgs#$package")
+            done
+            if ! nix profile install "${nix_args[@]}"; then
+                install_success=false
+            fi
+            ;;
     esac
 
     if [[ "$install_success" == true ]]; then
@@ -406,6 +435,56 @@ install_packages() {
     else
         print_warning "Some packages may not have installed correctly"
         print_warning "You can try installing them manually or run the installer again"
+    fi
+}
+
+# Check whether a package name is present in the current Nix profile.
+package_installed_nix() {
+    nix profile list 2>/dev/null | grep -qE "^Name:[[:space:]]+${1//./\\.}\$"
+}
+
+install_nix_packages() {
+    if [[ "$SKIP_PACKAGES" == true || "$SKIP_NIX" == true ]]; then
+        return 0
+    fi
+    if [[ "$NIX_AVAILABLE" != true ]]; then
+        print_verbose "Nix is unavailable; skipping the Nix profile step"
+        return 0
+    fi
+
+    print_info "Installing required packages into the Nix profile..."
+
+    local packages="at eza htop ncdu tree zip unzip p7zip curl nmap lsof fastfetch figlet toilet lolcat cowsay fortune cmatrix glances sysstat pv mpv yt-dlp ffmpeg imagemagick mediainfo jq fzf bat ripgrep tldr wget dnsutils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtopPackages.full smartmontools lm_sensors acpi sqlite gh tmux"
+
+    local packages_to_install=""
+    for package in $packages; do
+        if ! package_installed_nix "$package"; then
+            packages_to_install="$packages_to_install $package"
+        else
+            print_verbose "Nix package $package is already installed"
+        fi
+    done
+
+    if [[ -z "$packages_to_install" ]]; then
+        print_verbose "All Nix packages are already installed"
+        return 0
+    fi
+
+    print_info "Installing Nix packages:$packages_to_install"
+
+    if [[ "$DRY_RUN" == true ]]; then
+        return 0
+    fi
+
+    local nix_args=()
+    for package in $packages_to_install; do
+        nix_args+=("nixpkgs#$package")
+    done
+
+    if nix profile install "${nix_args[@]}"; then
+        print_success "Nix package installation completed successfully"
+    else
+        print_warning "Some Nix packages may not have installed correctly"
     fi
 }
 
@@ -596,6 +675,7 @@ OPTIONS:
     --uninstall-script  Use the dedicated uninstall.sh script
     --minimal           Minimal installation (aliases + config + scripts only)
     --no-packages       Skip package installation
+    --no-nix            Skip the Nix profile installation step
     --verbose           Enable verbose output
     --shell SHELL       Override shell detection (bash, zsh, fish, ash, dash)
 
@@ -606,6 +686,7 @@ EXAMPLES:
     $0 --uninstall        # Remove Alias Hub
     $0 --minimal          # Minimal installation
     $0 --no-packages      # Install without packages
+    $0 --no-nix           # Install without the Nix profile step
 
 For more information, visit: https://github.com/1999AZZAR/alias-hub
 EOF
@@ -633,6 +714,9 @@ parse_arguments() {
                 ;;
             --no-packages)
                 SKIP_PACKAGES=true
+                ;;
+            --no-nix)
+                SKIP_NIX=true
                 ;;
             --verbose)
                 VERBOSE=true
@@ -719,6 +803,9 @@ main() {
 
     # Install packages
     install_packages
+
+    # Install supplemental packages into the Nix profile (unprivileged)
+    install_nix_packages
 
     # Configure aliases
     setup_aliases

@@ -2,12 +2,13 @@
 
 # System cleanup for Debian/Ubuntu systems.
 # Destructive symlink removal is opt-in; package, cache, log, and temp cleanup
-# remains bounded by per-operation timeouts.
+# remains bounded by per-operation timeouts. Nix garbage collection runs
+# strictly as the target user.
 
 set -o pipefail
 export LC_ALL=C
 
-readonly VERSION="5.0.1"
+readonly VERSION="5.1.0"
 readonly APT_LOCK_WAIT=60
 readonly COMMAND_TIMEOUT=300
 
@@ -237,7 +238,7 @@ elif wait_for_apt_lock; then
     fi
 fi
 
-printf '\n%b[2/7] Docker, Snap, and Flatpak%b\n' "$C_BOLD$C_BLUE" "$C_RESET"
+printf '\n%b[2/7] Docker, Snap, Flatpak, and Nix%b\n' "$C_BOLD$C_BLUE" "$C_RESET"
 if command -v docker >/dev/null 2>&1; then
     if [[ "$DRY_RUN" == true ]]; then
         print_command docker system prune -af
@@ -277,6 +278,19 @@ else
         run_timed "Unused Flatpaks for $TARGET_USER cleaned." 30 sudo -H -u "$TARGET_USER" \
             flatpak uninstall --unused --user -y --noninteractive
     fi
+fi
+
+if [[ -z "$USER_HOME" || ! -x "$USER_HOME/.nix-profile/bin/nix" && ! -x /nix/var/nix/profiles/default/bin/nix ]]; then
+    log_info "Nix is unavailable for $TARGET_USER; skipping."
+elif [[ "$DRY_RUN" == true ]]; then
+    print_command sudo -H -u "$TARGET_USER" nix-collect-garbage -d
+else
+    # -d deletes profile generations older than the current one, then collects
+    # every store path unreachable from the remaining roots. Runs strictly as
+    # the target user; store ownership must never be touched by root.
+    run_timed "Nix generations and garbage collected" 1800 \
+        sudo -H -u "$TARGET_USER" env HOME="$USER_HOME" PATH="$USER_HOME/.nix-profile/bin:$PATH" \
+        nix-collect-garbage -d
 fi
 
 printf '\n%b[3/7] Logs and temporary files%b\n' "$C_BOLD$C_BLUE" "$C_RESET"

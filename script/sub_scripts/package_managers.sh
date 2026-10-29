@@ -1,8 +1,8 @@
 # ==============================================================================
 # PACKAGE MANAGER WRAPPERS
 # ==============================================================================
-# Wrapper functions for package managers (apt, snap, flatpak) that automatically
-# handle sudo elevation when needed.
+# Wrapper functions for package managers (apt, snap, flatpak, nix) that
+# automatically handle sudo elevation when needed.
 #
 # MODULE: package_managers.sh
 # LOCATION: script/sub_scripts/package_managers.sh
@@ -12,6 +12,7 @@
 # - apt() - Wrapper for apt with automatic sudo
 # - snap() - Wrapper for snap with automatic sudo
 # - flatpak() - Wrapper for flatpak with conditional sudo
+# - nix() - Wrapper for nix (always per-user; never elevated)
 #
 # ==============================================================================
 
@@ -49,5 +50,33 @@ flatpak() {
     /usr/bin/flatpak "$@"
     ;;
   esac
+}
+
+# --- Wrapper for 'nix' (single-user profile, never elevated) ---
+# Nix profiles are per-user; running it under sudo would corrupt ownership of
+# the profile and the daemon connection, so this wrapper never elevates.
+# Unqualified package arguments are resolved against nixpkgs automatically,
+# e.g. `nix profile install fzf` installs nixpkgs#fzf.
+nix() {
+  if ! command -v nix &>/dev/null; then
+    echo "Error: nix command not found. Install the Nix package manager first." >&2
+    return 1
+  fi
+  if [[ "$1" == "profile" && "$2" =~ ^(install|remove|rename|rollback|upgrade)$ ]]; then
+    shift # profile
+    local subcommand="$1"
+    shift
+    local args=()
+    for arg in "$@"; do
+      if [[ "$subcommand" == install && "$arg" != *'#'* ]]; then
+        args+=("nixpkgs#$arg")
+      else
+        args+=("$arg")
+      fi
+    done
+    command nix profile "$subcommand" "${args[@]}"
+    return
+  fi
+  command nix "$@"
 }
 

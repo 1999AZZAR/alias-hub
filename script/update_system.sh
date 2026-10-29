@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# Bounded system updates for Debian/Ubuntu, Snap, Flatpak, Homebrew, and fwupd.
+# Bounded system updates for Debian/Ubuntu, Snap, Flatpak, Homebrew, Nix profiles, and fwupd.
 
 set -o pipefail
 export LC_ALL=C.UTF-8
 
-readonly VERSION="4.1"
+readonly VERSION="4.2"
 readonly APT_LOCK_WAIT=60
 
 C_RESET='\033[0m'
@@ -229,7 +229,7 @@ wait_for_apt_lock() {
 }
 
 header() {
-    printf '\n%b[%s/5] %s%b\n' "$C_BOLD$C_BLUE" "$1" "$2" "$C_RESET"
+    printf '\n%b[%s/6] %s%b\n' "$C_BOLD$C_BLUE" "$1" "$2" "$C_RESET"
 }
 
 while (($#)); do
@@ -375,7 +375,30 @@ else
     run_update "Homebrew cache cleaned." 600 "${RUN_AS_USER[@]}" "${brew_env[@]}" "$BREW_CMD" cleanup
 fi
 
-header 5 "Firmware"
+header 5 "Nix packages"
+NIX_BIN=""
+for nix_candidate in \
+    "$USER_HOME/.nix-profile/bin/nix" \
+    /nix/var/nix/profiles/default/bin/nix; do
+    if [[ -n "$USER_HOME" && -x "$nix_candidate" ]]; then
+        NIX_BIN="$nix_candidate"
+        break
+    fi
+done
+if [[ -z "$NIX_BIN" ]]; then
+    log_info "Nix is unavailable for $TARGET_USER; skipping."
+elif ((${#RUN_AS_USER[@]} == 0)); then
+    log_warn "Nix profiles are per-user and cannot be updated as root; skipping."
+else
+    # PATH is scoped so the elevated shell resolves the user's nix toolchain
+    # instead of the invoking root environment.
+    run_update "Nix profile packages upgraded." 1800 "${RUN_AS_USER[@]}" \
+        env PATH="$USER_HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH" \
+        NIXPKGS_ALLOW_UNFREE=1 \
+        "$NIX_BIN" profile upgrade --all --impure
+fi
+
+header 6 "Firmware"
 if ! command -v fwupdmgr >/dev/null 2>&1; then
     log_info "fwupdmgr is unavailable; skipping."
 elif [[ "$DRY_RUN" == true ]]; then

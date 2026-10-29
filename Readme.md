@@ -128,6 +128,7 @@ The installer performs the following operations automatically:
 1. **Environment Detection**
 
    - Identifies your package manager (apt, dnf, pacman, apk, zypper, emerge)
+   - Detects a Nix installation and maintains a companion per-user profile (never elevated)
    - Detects your shell environment (bash, zsh, fish, ash, dash)
    - Checks for required dependencies
 2. **Repository Setup**
@@ -199,6 +200,7 @@ Alias Hub supports the following package managers:
 - **apk** - Alpine Linux
 - **zypper** - openSUSE, SUSE Linux Enterprise
 - **emerge** - Gentoo Linux
+- **nix** - Supplemental per-user profile on any distribution with the Nix package manager installed. The installer fills the Nix profile alongside (not instead of) the system package manager; `update` upgrades the profile and `clean` garbage-collects it as the owning user.
 
 #### Supported Shells
 

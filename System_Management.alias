@@ -45,6 +45,12 @@ alias snap-list='snap list'                                                   # 
 alias snap-find='snap find'                                                   # Find snap packages
 alias flatpak-list='flatpak list'                                             # List flatpak packages
 alias flatpak-update='flatpak update'                                         # Update flatpak packages
+alias nix-list='nix profile list'                                             # List nix profile packages
+alias nix-i='nix profile install'                                             # Install package (helper auto-prefixes nixpkgs#)
+alias nix-r='nix profile remove'                                              # Remove nix profile package
+alias nix-upgrade='nix profile upgrade --all'                                  # Upgrade all nix profile packages
+alias nix-search='nix search nixpkgs'                                         # Search nixpkgs packages
+alias nix-gc='nix-collect-garbage -d'                                         # Delete old nix generations and collect garbage
 
 # ==============================================================================
 # SYSTEM POWER MANAGEMENT
