@@ -210,5 +210,10 @@ alias netspeed-json='netspeedtest --json'              # Speedtest with machine-
 alias speedtest-full='netspeedtest'                    # Shorthand for full network speedtest
 
 # ==============================================================================
+# AUDIO ROUTING & SYSTEM FIXES
+# ==============================================================================
+alias fix-audio='~/.local/bin/fix-audio'                # Synchronize and fix headphone/speaker/mic routing
+
+# ==============================================================================
 # END OF SYSTEM MANAGEMENT ALIASES
 # ==============================================================================
