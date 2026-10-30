@@ -15,7 +15,8 @@
 #
 # FEATURES:
 # - Multi-package manager support (apt, dnf, pacman, apk, zypper, emerge)
-# - Nix profile support for package managers with Nix installed (per-user, unprivileged)
+# - Automated multi-user Nix setup for non-NixOS systems (flakes & nix-command enabled)
+# - Nix companion profile support with allowUnfree packages (per-user, unprivileged)
 # - Multi-shell support (bash, zsh, fish, ash, dash)
 # - Intelligent environment detection
 # - Safe installation with automatic backups
@@ -75,7 +76,7 @@ set -euo pipefail
 readonly REPO_URL="https://github.com/1999AZZAR/alias-hub.git"
 readonly ALIASES_DIR="$HOME/alias-hub"
 readonly NEOFETCH_ASCII_INSTALLER_URL="https://raw.githubusercontent.com/1999AZZAR/neofetch_ascii/master/install.sh"
-readonly SCRIPT_VERSION="2.2.0"
+readonly SCRIPT_VERSION="2.3.0"
 
 # Generate backup suffix
 BACKUP_SUFFIX=".alias-hub-backup.$(date +%Y%m%d_%H%M%S)"
@@ -438,6 +439,105 @@ install_packages() {
     fi
 }
 
+# Ensure Nix configuration (allowUnfree and experimental flakes/nix-command)
+ensure_nix_config() {
+    print_verbose "Ensuring Nix allowUnfree configuration..."
+    local nixpkgs_cfg_dir="$HOME/.config/nixpkgs"
+    local nixpkgs_cfg="$nixpkgs_cfg_dir/config.nix"
+    if [[ ! -f "$nixpkgs_cfg" ]]; then
+        if [[ "$DRY_RUN" == false ]]; then
+            mkdir -p "$nixpkgs_cfg_dir"
+            echo '{ allowUnfree = true; }' > "$nixpkgs_cfg"
+        fi
+        print_verbose "Created $nixpkgs_cfg with allowUnfree = true"
+    fi
+
+    local user_nix_dir="$HOME/.config/nix"
+    local user_nix_cfg="$user_nix_dir/nix.conf"
+    if [[ ! -f "/etc/nix/nix.conf" ]] || ! grep -q "flakes" "/etc/nix/nix.conf" 2>/dev/null; then
+        if [[ ! -f "$user_nix_cfg" ]] || ! grep -q "flakes" "$user_nix_cfg" 2>/dev/null; then
+            if [[ "$DRY_RUN" == false ]]; then
+                mkdir -p "$user_nix_dir"
+                echo "experimental-features = nix-command flakes" >> "$user_nix_cfg"
+            fi
+            print_verbose "Configured flakes and nix-command in $user_nix_cfg"
+        fi
+    fi
+}
+
+# Setup Nix multi-user daemon on non-NixOS Linux distributions
+setup_nix() {
+    if [[ "$SKIP_PACKAGES" == true || "$SKIP_NIX" == true ]]; then
+        print_verbose "Skipping Nix setup step (--no-nix requested)"
+        return 0
+    fi
+
+    # Check if Nix is already installed
+    if command_exists nix; then
+        print_verbose "Nix is already installed on this system"
+        ensure_nix_config
+        NIX_AVAILABLE=true
+        return 0
+    fi
+
+    # Check if running on native NixOS
+    if [[ -f /etc/NIXOS ]] || [[ -f /etc/nixos/configuration.nix ]]; then
+        print_verbose "Running on native NixOS"
+        ensure_nix_config
+        NIX_AVAILABLE=true
+        return 0
+    fi
+
+    print_info "Nix is not installed on this non-NixOS system."
+    print_info "Setting up multi-user Nix daemon (with flakes and nix-command enabled)..."
+
+    if [[ "$DRY_RUN" == true ]]; then
+        print_info "[DRY-RUN] Would install multi-user Nix daemon and configure unfree packages"
+        NIX_AVAILABLE=true
+        return 0
+    fi
+
+    local install_success=false
+
+    # Attempt 1: Determinate Systems Nix installer (recommended for all standard Linux distributions)
+    if curl -s --connect-timeout 5 https://install.determinate.systems >/dev/null 2>&1; then
+        print_info "Installing via Determinate Systems Nix installer..."
+        if curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install linux --no-confirm; then
+            install_success=true
+        fi
+    fi
+
+    # Attempt 2: Official multi-user daemon installer fallback
+    if [[ "$install_success" == false ]]; then
+        print_info "Falling back to official Nix multi-user installer..."
+        if sh <(curl -L https://nixos.org/nix/install) --daemon --yes; then
+            install_success=true
+        fi
+    fi
+
+    if [[ "$install_success" == true ]]; then
+        # Source the Nix environment for the current process
+        if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+            # shellcheck source=/dev/null
+            . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+        elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+            # shellcheck source=/dev/null
+            . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+        fi
+
+        if command_exists nix; then
+            print_success "Nix multi-user daemon installed successfully!"
+            ensure_nix_config
+            NIX_AVAILABLE=true
+        else
+            print_warning "Nix was installed, but the 'nix' binary is not yet available in current session."
+            print_warning "Please source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh or restart your shell."
+        fi
+    else
+        print_warning "Failed to automatically install Nix. You can install it manually from https://nixos.org/download.html"
+    fi
+}
+
 # Check whether a package name is present in the current Nix profile.
 package_installed_nix() {
     nix profile list 2>/dev/null | grep -qE "^Name:[[:space:]]+${1//./\\.}\$"
@@ -607,6 +707,13 @@ setup_aliases() {
     # Add Alias Hub configuration
     local config_block="
 # --- Alias Hub Configuration ---
+# Multi-user Nix daemon environment support (non-NixOS)
+if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+elif [ -e \"\$HOME/.nix-profile/etc/profile.d/nix.sh\" ]; then
+    . \"\$HOME/.nix-profile/etc/profile.d/nix.sh\"
+fi
+
 export ALIASES_DIR=\"$ALIASES_DIR\"
 source \"\$ALIASES_DIR/script/helpers.sh\"
 for file in \"\$ALIASES_DIR\"/*.alias; do source \"\$file\"; done
@@ -675,7 +782,7 @@ OPTIONS:
     --uninstall-script  Use the dedicated uninstall.sh script
     --minimal           Minimal installation (aliases + config + scripts only)
     --no-packages       Skip package installation
-    --no-nix            Skip the Nix profile installation step
+    --no-nix            Skip Nix setup and Nix profile package installation
     --verbose           Enable verbose output
     --shell SHELL       Override shell detection (bash, zsh, fish, ash, dash)
 
@@ -686,7 +793,7 @@ EXAMPLES:
     $0 --uninstall        # Remove Alias Hub
     $0 --minimal          # Minimal installation
     $0 --no-packages      # Install without packages
-    $0 --no-nix           # Install without the Nix profile step
+    $0 --no-nix           # Install without setting up Nix or Nix profile
 
 For more information, visit: https://github.com/1999AZZAR/alias-hub
 EOF
@@ -803,6 +910,9 @@ main() {
 
     # Install packages
     install_packages
+
+    # Setup Nix multi-user daemon on non-NixOS if needed
+    setup_nix
 
     # Install supplemental packages into the Nix profile (unprivileged)
     install_nix_packages

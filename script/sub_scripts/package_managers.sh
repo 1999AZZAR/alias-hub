@@ -53,6 +53,15 @@ flatpak() {
 }
 
 # --- Wrapper for 'nix' (single-user profile, never elevated) ---
+# Auto-source Nix daemon environment if present on non-NixOS but not yet in PATH
+if ! command -v nix &>/dev/null; then
+  if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
+    . '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
+  elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+  fi
+fi
+
 # Nix profiles are per-user; running it under sudo would corrupt ownership of
 # the profile and the daemon connection, so this wrapper never elevates.
 # Unqualified package arguments are resolved against nixpkgs automatically,
