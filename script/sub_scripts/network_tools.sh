@@ -69,7 +69,7 @@ trending_coins() {
 # download/upload, DNS, IP/ISP info, interface counters).
 netspeedtest() {
   local SCRIPT_DIR
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
+  SCRIPT_DIR="$(builtin cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd)"
 
   local SPEED_SCRIPT_PATH="$SCRIPT_DIR/network_speedtest.sh"
 
