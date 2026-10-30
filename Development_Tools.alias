@@ -470,13 +470,9 @@ alias svn-add='svn add'                        # SVN add
 
 ### System Monitoring
 alias htop='htop'                              # Process monitor
-alias iotop='iotop'                            # I/O monitor
-alias nethogs='nethogs'                        # Network monitor
-alias glances='glances'                        # System monitor
 
 ### Network Debugging
 alias wireshark='wireshark'                    # Packet analyzer
-alias tcpdump='tcpdump'                        # Command-line packet analyzer
 alias nmap='nmap'                              # Network scanner
 alias mtr='mtr'                                # Network diagnostic tool
 

@@ -76,7 +76,6 @@ alias lolcat='lolcat'                        # Rainbow color output
 # ==============================================================================
 
 ### Text Effects (Enhanced)
-alias speedtest='speedtest-cli'                                                               # PRESERVED - Test internet speed
 alias cowsay-meme='fortune | cowsay -f $(ls /usr/share/cowsay/cows/ | shuf -n 1) | lolcat'    # PRESERVED - Colorful cowsay
 alias shuftext='echo $1 | fold -w1 | shuf | tr -d "\n"'                                       # PRESERVED - Shuffle characters
 alias banner='echo "$1" | figlet | lolcat'                                                    # PRESERVED - Colorful banner

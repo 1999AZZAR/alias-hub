@@ -208,11 +208,30 @@ lvm_info()       { sudo lvdisplay; }
 # ==============================================================================
 
 ### Network Monitoring (Enhanced)
+unalias nethogs iftop netstatinfo pingtest speedtest speedtest-cli nettop ipinfo macinfo routes tcpdump dnscheck openports bwmon neterror wireless 2>/dev/null || true
 nethogs() { sudo nethogs "$@"; }
 iftop() { sudo iftop "$@"; }
 netstatinfo() { netstat -tuln "$@"; }
 pingtest() { ping google.com -c 4 "$@"; }
-speedtest() { speedtest-cli "$@"; }
+speedtest() {
+  if command -v speedtest &>/dev/null; then
+    command speedtest "$@"
+  elif command -v speedtest-cli &>/dev/null; then
+    command speedtest-cli "$@"
+  elif command -v nix &>/dev/null; then
+    nix run nixpkgs#speedtest-cli -- "$@"
+  elif type netspeedtest &>/dev/null; then
+    netspeedtest "$@"
+  elif [[ -n "${ALIASES_DIR:-}" && -x "$ALIASES_DIR/script/network_speedtest.sh" ]]; then
+    "$ALIASES_DIR/script/network_speedtest.sh" "$@"
+  else
+    echo "speedtest: no speedtest tool, nix, or netspeedtest found." >&2
+    return 1
+  fi
+}
+if ! command -v speedtest-cli &>/dev/null; then
+  alias speedtest-cli='speedtest'
+fi
 nettop() { htop --sort NET_IO "$@"; }
 ipinfo() { ip a "$@"; }
 macinfo() { ip link show "$@"; }
