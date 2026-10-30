@@ -1055,6 +1055,11 @@ Contributors will be:
 - Mentioned in release notes
 - Acknowledged in commit messages
 
+### Authors & Contributors
+
+- **1999AZZAR** - [GitHub](https://github.com/1999AZZAR)
+- **clownwe** - [GitHub](https://github.com/clownwe)
+
 ## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
