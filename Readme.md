@@ -200,7 +200,7 @@ Alias Hub supports the following package managers:
 - **apk** - Alpine Linux
 - **zypper** - openSUSE, SUSE Linux Enterprise
 - **emerge** - Gentoo Linux
-- **nix** - Automated multi-user daemon setup on non-NixOS distributions (via Determinate Systems / official multi-user daemon with flakes and nix-command enabled). The installer maintains an unprivileged companion per-user profile alongside the host package manager; `update` upgrades the profile and `clean` garbage-collects it as the owning user.
+- **nix** - Automated multi-user daemon setup on non-NixOS distributions (via Determinate Systems / official multi-user daemon with flakes and nix-command enabled). The installer maintains an unprivileged companion per-user profile alongside the host package manager; any tool the profile owns is skipped by the host manager, so only one copy reaches `PATH`; `update` upgrades the profile and `clean` garbage-collects it as the owning user.
 
 #### Supported Shells
 

@@ -312,6 +312,24 @@ restore_backup() {
     fi
 }
 
+# Distro package name -> nix attribute installed by install_nix_packages().
+# Every entry here is owned by the Nix profile: the distro copy is skipped so a
+# single copy sits on PATH and apt cannot pull back tools that were migrated.
+declare -A NIX_PROVIDED=(
+    [at]=at [htop]=htop [glances]=glances [sysstat]=sysstat [ncdu]=ncdu
+    [tree]=tree [zip]=zip [unzip]=unzip [p7zip-full]=p7zip [p7zip]=p7zip
+    [curl]=curl [nmap]=nmap [lsof]=lsof [fastfetch]=fastfetch [figlet]=figlet
+    [toilet]=toilet [lolcat]=lolcat [cowsay]=cowsay [fortune-mod]=fortune
+    [cmatrix]=cmatrix [pv]=pv [mpv]=mpv [yt-dlp]=yt-dlp [ffmpeg]=ffmpeg
+    [imagemagick]=imagemagick [mediainfo]=mediainfo [jq]=jq [fzf]=fzf
+    [fd-find]=fd [fd]=fd [bat]=bat [ripgrep]=ripgrep [tldr]=tldr [wget]=wget
+    [dnsutils]=dnsutils [bind-utils]=dnsutils [whois]=whois [mtr]=mtr
+    [traceroute]=traceroute [iotop]=iotop [iftop]=iftop [nethogs]=nethogs
+    [bmon]=bmon [vnstat]=vnstat [nvtop]=nvtopPackages.full
+    [smartmontools]=smartmontools [lm-sensors]=lm_sensors [acpi]=acpi
+    [sqlite3]=sqlite [sql]=sqlite [gh]=gh [tmux]=tmux
+)
+
 install_packages() {
     if [[ "$SKIP_PACKAGES" == true || -z "$PACKAGE_MANAGER" ]]; then
         print_info "Skipping package installation"
@@ -324,7 +342,7 @@ install_packages() {
     local packages=""
     case "$PACKAGE_MANAGER" in
         apt)
-            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip python3-venv snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick libimage-exiftool-perl mediainfo jq fzf fd-find bat ripgrep tldr wget dnsutils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm-sensors hddtemp acpi tlp redis-server redis-tools postgresql-client sqlite3 gh tmux"
+            packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip-full curl nmap lsof python3-pip python3-venv flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick libimage-exiftool-perl mediainfo jq fzf fd-find bat ripgrep tldr wget dnsutils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm-sensors hddtemp acpi tlp redis-server redis-tools postgresql-client sqlite3 gh tmux"
             ;;
         dnf)
             packages="at eza htop net-tools glances sysstat neofetch inxi ncdu tree zip unzip p7zip curl nmap lsof python3-pip snapd flatpak fastfetch figlet toilet lolcat cowsay fortune-mod cmatrix pv mpg123 mpv yt-dlp ffmpeg imagemagick perl-Image-ExifTool mediainfo jq fzf fd-find bat ripgrep tldr wget bind-utils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtop smartmontools lm-sensors hddtemp acpi tlp redis postgresql sqlite gh tmux"
@@ -350,6 +368,23 @@ install_packages() {
             return 1
             ;;
     esac
+
+    # Drop anything the Nix profile owns. Without this the installer would put a
+    # second copy of every CLI tool on PATH and reintroduce packages that were
+    # deliberately migrated away from the distro manager.
+    if [[ "$NIX_AVAILABLE" == true && "$SKIP_NIX" != true && "$PACKAGE_MANAGER" != nix ]]; then
+        local kept_packages=()
+        local package nix_attr
+        for package in $packages; do
+            nix_attr="${NIX_PROVIDED[$package]:-}"
+            if [[ -n "$nix_attr" ]]; then
+                print_verbose "Skipping $package: provided by the Nix profile (nixpkgs#$nix_attr)"
+            else
+                kept_packages+=("$package")
+            fi
+        done
+        packages="${kept_packages[*]}"
+    fi
 
     # Check which packages are not installed
     local packages_to_install=""
@@ -554,7 +589,7 @@ install_nix_packages() {
 
     print_info "Installing required packages into the Nix profile..."
 
-    local packages="at eza htop ncdu tree zip unzip p7zip curl nmap lsof fastfetch figlet toilet lolcat cowsay fortune cmatrix glances sysstat pv mpv yt-dlp ffmpeg imagemagick mediainfo jq fzf bat ripgrep tldr wget dnsutils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtopPackages.full smartmontools lm_sensors acpi sqlite gh tmux"
+    local packages="at htop ncdu tree zip unzip p7zip curl nmap lsof fastfetch figlet toilet lolcat cowsay fortune cmatrix glances sysstat pv mpv yt-dlp ffmpeg imagemagick mediainfo jq fzf bat ripgrep tldr wget dnsutils whois mtr traceroute iotop iftop nethogs bmon vnstat nvtopPackages.full smartmontools lm_sensors acpi sqlite gh tmux"
 
     local packages_to_install=""
     for package in $packages; do
@@ -908,11 +943,12 @@ main() {
     # Setup configuration files
     setup_configs
 
+    # Setup Nix multi-user daemon on non-NixOS if needed. Runs before the
+    # distro install so the Nix-owned package filter has a profile to defer to.
+    setup_nix
+
     # Install packages
     install_packages
-
-    # Setup Nix multi-user daemon on non-NixOS if needed
-    setup_nix
 
     # Install supplemental packages into the Nix profile (unprivileged)
     install_nix_packages
