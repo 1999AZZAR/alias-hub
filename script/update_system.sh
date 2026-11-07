@@ -392,10 +392,56 @@ elif ((${#RUN_AS_USER[@]} == 0)); then
 else
     # PATH is scoped so the elevated shell resolves the user's nix toolchain
     # instead of the invoking root environment.
-    run_update "Nix profile packages upgraded." 1800 "${RUN_AS_USER[@]}" \
-        env PATH="$USER_HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH" \
-        NIXPKGS_ALLOW_UNFREE=1 \
-        "$NIX_BIN" profile upgrade --all --impure
+    nix_env=(
+        env PATH="$USER_HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+        NIXPKGS_ALLOW_UNFREE=1
+    )
+    if [[ "$DRY_RUN" == true ]]; then
+        print_command "${RUN_AS_USER[@]}" "${nix_env[@]}" "$NIX_BIN" profile upgrade --all --impure --max-jobs 0
+    else
+        nix_upgrade_log="$TEMP_DIR/nix-profile-upgrade.log"
+        log_info "Nix profile packages upgraded (timeout: 600s)..."
+        if timeout --foreground --kill-after=15 600 \
+            "${RUN_AS_USER[@]}" "${nix_env[@]}" \
+            "$NIX_BIN" profile upgrade --all --impure --max-jobs 0 >"$nix_upgrade_log" 2>&1; then
+            log_success "Nix profile packages upgraded."
+        else
+            nix_status=$?
+            # If failed due to local builds being disabled (uncached packages wanting multi-hour source builds)
+            if grep -q "Reason: local builds are disabled (max-jobs = 0)" "$nix_upgrade_log" 2>/dev/null && command -v jq >/dev/null 2>&1; then
+                mapfile -t all_elements < <("${RUN_AS_USER[@]}" "${nix_env[@]}" "$NIX_BIN" profile list --json 2>/dev/null | jq -r '.elements | keys[]' 2>/dev/null || true)
+                valid_elements=()
+                for el in "${all_elements[@]}"; do
+                    if grep -Eq -- "[-/]${el}[-.]" "$nix_upgrade_log" 2>/dev/null; then
+                        log_warn "Skipped Nix package '$el': no binary substitute in cache (avoided long source build)."
+                    else
+                        valid_elements+=("$el")
+                    fi
+                done
+                if ((${#valid_elements[@]} > 0)); then
+                    if timeout --foreground --kill-after=15 600 \
+                        "${RUN_AS_USER[@]}" "${nix_env[@]}" \
+                        "$NIX_BIN" profile upgrade "${valid_elements[@]}" --impure --max-jobs 0; then
+                        log_success "Nix profile packages upgraded (cached packages)."
+                    else
+                        log_error "Nix profile packages upgrade failed (exit $?)."
+                    fi
+                else
+                    log_warn "All Nix profile packages requiring updates lack binary substitutes; skipped."
+                fi
+            elif ((nix_status == 124 || nix_status == 137)); then
+                log_error "Nix profile packages upgrade timed out."
+            else
+                log_error "Nix profile packages upgrade failed (exit $nix_status)."
+                [[ ! -s "$nix_upgrade_log" ]] || sed 's/^/  /' "$nix_upgrade_log" >&2
+            fi
+        fi
+
+        # Sync shims across system after profile upgrade
+        if [[ -x /usr/local/sbin/nix-shim-sync ]]; then
+            /usr/local/sbin/nix-shim-sync >/dev/null 2>&1 || true
+        fi
+    fi
 fi
 
 header 6 "Firmware"
