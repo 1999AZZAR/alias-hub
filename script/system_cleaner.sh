@@ -8,7 +8,7 @@
 set -o pipefail
 export LC_ALL=C
 
-readonly VERSION="5.1.0"
+readonly VERSION="5.2.0"
 readonly APT_LOCK_WAIT=60
 readonly COMMAND_TIMEOUT=300
 
@@ -169,6 +169,73 @@ clean_symlinks() {
     fi
 }
 
+prune_stale_desktop_and_dbus_services() {
+    local base_dir="$1"
+    local removed=0
+    [[ -n "$base_dir" && -d "$base_dir" ]] || return 0
+
+    log_info "Checking for stale desktop and D-Bus integration entries in $base_dir..."
+
+    local dirs=(
+        "$base_dir/.local/share/dbus-1/services"
+        "$base_dir/.local/share/applications"
+        "$base_dir/.config/autostart"
+        "$base_dir/.local/bin"
+    )
+
+    for d in "${dirs[@]}"; do
+        [[ -d "$d" ]] || continue
+        # 1. Clean broken symlinks in critical desktop/CLI integration directories
+        while IFS= read -r -d '' link; do
+            if [[ "$DRY_RUN" == true ]]; then
+                print_command rm -f "$link"
+            else
+                rm -f "$link" 2>/dev/null || true
+                removed=$((removed + 1))
+            fi
+        done < <(find "$d" -maxdepth 1 -xtype l -print0 2>/dev/null)
+
+        # 2. Clean regular .desktop and .service files pointing to dead /nix/store paths
+        while IFS= read -r -d '' file; do
+            [[ -f "$file" ]] || continue
+            while IFS= read -r line; do
+                local exec_target="${line#*=}"
+                exec_target="${exec_target#\"}"
+                exec_target="${exec_target%%\"*}"
+                exec_target="${exec_target%% *}"
+                if [[ "$exec_target" == /nix/store/* && ! -e "$exec_target" ]]; then
+                    if [[ "$DRY_RUN" == true ]]; then
+                        print_command rm -f "$file"
+                    else
+                        rm -f "$file" 2>/dev/null || true
+                        removed=$((removed + 1))
+                    fi
+                    break
+                fi
+            done < <(grep -E '^(Exec|TryExec)=/nix/store/' "$file" 2>/dev/null || true)
+        done < <(find "$d" -maxdepth 1 -type f \( -name '*.desktop' -o -name '*.service' \) -print0 2>/dev/null)
+    done
+
+    if [[ "$DRY_RUN" == false ]]; then
+        if ((removed > 0)); then
+            log_success "Cleaned $removed stale desktop/service integration file(s) or dead link(s)."
+        else
+            log_info "No stale desktop or D-Bus integration entries found."
+        fi
+        # Refresh desktop database and KDE sycoca cache if available
+        if [[ -n "$TARGET_USER" && "$TARGET_USER" != root ]]; then
+            if command -v update-desktop-database >/dev/null 2>&1 && [[ -d "$base_dir/.local/share/applications" ]]; then
+                sudo -H -u "$TARGET_USER" update-desktop-database "$base_dir/.local/share/applications" 2>/dev/null || true
+            fi
+            if command -v kbuildsycoca6 >/dev/null 2>&1; then
+                sudo -H -u "$TARGET_USER" kbuildsycoca6 --noincremental 2>/dev/null || true
+            elif command -v kbuildsycoca5 >/dev/null 2>&1; then
+                sudo -H -u "$TARGET_USER" kbuildsycoca5 --noincremental 2>/dev/null || true
+            fi
+        fi
+    fi
+}
+
 while (($#)); do
     case "$1" in
         -d|--dry-run) DRY_RUN=true ;;
@@ -280,17 +347,28 @@ else
     fi
 fi
 
-if [[ -z "$USER_HOME" || ! -x "$USER_HOME/.nix-profile/bin/nix" && ! -x /nix/var/nix/profiles/default/bin/nix ]]; then
+if [[ -z "$USER_HOME" || ( ! -x "$USER_HOME/.nix-profile/bin/nix" && ! -x /nix/var/nix/profiles/default/bin/nix ) ]]; then
     log_info "Nix is unavailable for $TARGET_USER; skipping."
 elif [[ "$DRY_RUN" == true ]]; then
     print_command sudo -H -u "$TARGET_USER" nix-collect-garbage -d
+    [[ ! -x /usr/local/sbin/nix-shim-sync ]] || print_command /usr/local/sbin/nix-shim-sync
+    prune_stale_desktop_and_dbus_services "$USER_HOME"
 else
     # -d deletes profile generations older than the current one, then collects
     # every store path unreachable from the remaining roots. Runs strictly as
     # the target user; store ownership must never be touched by root.
-    run_timed "Nix generations and garbage collected" 1800 \
+    run_timed "Nix generations and garbage collected" 600 \
         sudo -H -u "$TARGET_USER" env HOME="$USER_HOME" PATH="$USER_HOME/.nix-profile/bin:$PATH" \
         nix-collect-garbage -d
+
+    if [[ -x /usr/local/sbin/nix-shim-sync ]]; then
+        /usr/local/sbin/nix-shim-sync >/dev/null 2>&1 || true
+        log_success "Nix system shims synchronized."
+    fi
+
+    if [[ -n "$USER_HOME" ]]; then
+        prune_stale_desktop_and_dbus_services "$USER_HOME"
+    fi
 fi
 
 printf '\n%b[3/7] Logs and temporary files%b\n' "$C_BOLD$C_BLUE" "$C_RESET"
@@ -299,17 +377,11 @@ if [[ "$DRY_RUN" == true ]]; then
     print_command journalctl --vacuum-time=2weeks
     print_command find /tmp /var/tmp -xdev -type f -mtime +7 -delete
 else
-    if find /var/log -xdev -type f \( -name '*.gz' -o -name '*.1' -o -name '*.old' \) -delete 2>/dev/null; then
-        log_success "Rotated logs cleaned."
-    else
-        log_warn "Some rotated logs could not be removed."
-    fi
-    command -v journalctl >/dev/null 2>&1 && run_timed "Journal entries older than two weeks removed." 60 journalctl --vacuum-time=2weeks
-    if find /tmp /var/tmp -xdev -type f -mtime +7 -delete 2>/dev/null; then
-        log_success "Temporary files older than seven days cleaned."
-    else
-        log_warn "Some old temporary files could not be removed."
-    fi
+    run_timed "Rotated logs cleaned" 60 \
+        find /var/log -xdev -type f \( -name '*.gz' -o -name '*.1' -o -name '*.old' \) -delete
+    command -v journalctl >/dev/null 2>&1 && run_timed "Journal entries older than two weeks removed" 60 journalctl --vacuum-time=2weeks
+    run_timed "Temporary files older than seven days cleaned" 120 \
+        find /tmp /var/tmp -xdev -type f -mtime +7 -delete
 fi
 
 printf '\n%b[4/7] User caches%b\n' "$C_BOLD$C_BLUE" "$C_RESET"
