@@ -8,7 +8,7 @@
 set -o pipefail
 export LC_ALL=C
 
-readonly VERSION="5.2.0"
+readonly VERSION="5.3.0"
 readonly APT_LOCK_WAIT=60
 readonly COMMAND_TIMEOUT=300
 
@@ -351,6 +351,7 @@ if [[ -z "$USER_HOME" || ( ! -x "$USER_HOME/.nix-profile/bin/nix" && ! -x /nix/v
     log_info "Nix is unavailable for $TARGET_USER; skipping."
 elif [[ "$DRY_RUN" == true ]]; then
     print_command sudo -H -u "$TARGET_USER" nix-collect-garbage -d
+    print_command sudo -H -u "$TARGET_USER" nix-store --optimise
     [[ ! -x /usr/local/sbin/nix-shim-sync ]] || print_command /usr/local/sbin/nix-shim-sync
     prune_stale_desktop_and_dbus_services "$USER_HOME"
 else
@@ -358,8 +359,21 @@ else
     # every store path unreachable from the remaining roots. Runs strictly as
     # the target user; store ownership must never be touched by root.
     run_timed "Nix generations and garbage collected" 600 \
-        sudo -H -u "$TARGET_USER" env HOME="$USER_HOME" PATH="$USER_HOME/.nix-profile/bin:$PATH" \
+        sudo -H -u "$TARGET_USER" env HOME="$USER_HOME" PATH="$USER_HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH" \
         nix-collect-garbage -d
+
+    NIX_STORE_BIN=""
+    for store_cand in "$USER_HOME/.nix-profile/bin/nix-store" /nix/var/nix/profiles/default/bin/nix-store; do
+        if [[ -x "$store_cand" ]]; then
+            NIX_STORE_BIN="$store_cand"
+            break
+        fi
+    done
+    if [[ -n "$NIX_STORE_BIN" ]]; then
+        run_timed "Nix store deduplicated and optimised" 300 \
+            sudo -H -u "$TARGET_USER" env HOME="$USER_HOME" PATH="$USER_HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH" \
+            "$NIX_STORE_BIN" --optimise
+    fi
 
     if [[ -x /usr/local/sbin/nix-shim-sync ]]; then
         /usr/local/sbin/nix-shim-sync >/dev/null 2>&1 || true
@@ -393,6 +407,10 @@ if [[ -n "$USER_HOME" ]]; then
         "$USER_HOME/.cache/fontconfig"
         "$USER_HOME/.cache/yarn"
         "$USER_HOME/.npm/_cacache"
+        "$USER_HOME/.cache/go-build"
+        "$USER_HOME/.cache/uv"
+        "$USER_HOME/.cache/drkonqi/crashes"
+        "$USER_HOME/.cache/nix/tarball-cache-v2"
     )
     for target in "${cache_targets[@]}"; do
         clean_directory_contents "$target"

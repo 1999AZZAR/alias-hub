@@ -5,7 +5,7 @@
 set -o pipefail
 export LC_ALL=C.UTF-8
 
-readonly VERSION="4.2"
+readonly VERSION="4.3"
 readonly APT_LOCK_WAIT=60
 
 C_RESET='\033[0m'
@@ -394,8 +394,12 @@ else
     # instead of the invoking root environment.
     nix_env=(
         env PATH="$USER_HOME/.nix-profile/bin:/nix/var/nix/profiles/default/bin:$PATH"
+        HOME="$USER_HOME"
         NIXPKGS_ALLOW_UNFREE=1
     )
+    if [[ -f "$USER_HOME/.config/nixpkgs/config.nix" ]]; then
+        nix_env+=(NIXPKGS_CONFIG="$USER_HOME/.config/nixpkgs/config.nix")
+    fi
     if [[ "$DRY_RUN" == true ]]; then
         print_command "${RUN_AS_USER[@]}" "${nix_env[@]}" "$NIX_BIN" profile upgrade --all --impure --max-jobs 0
     else
@@ -407,30 +411,84 @@ else
             log_success "Nix profile packages upgraded."
         else
             nix_status=$?
-            # If failed due to local builds being disabled (uncached packages wanting multi-hour source builds)
-            if grep -q "Reason: local builds are disabled (max-jobs = 0)" "$nix_upgrade_log" 2>/dev/null && command -v jq >/dev/null 2>&1; then
-                mapfile -t all_elements < <("${RUN_AS_USER[@]}" "${nix_env[@]}" "$NIX_BIN" profile list --json 2>/dev/null | jq -r '.elements | keys[]' 2>/dev/null || true)
-                valid_elements=()
-                for el in "${all_elements[@]}"; do
-                    if grep -Eq -- "[-/]${el}[-.]" "$nix_upgrade_log" 2>/dev/null; then
-                        log_warn "Skipped Nix package '$el': no binary substitute in cache (avoided long source build)."
-                    else
-                        valid_elements+=("$el")
-                    fi
-                done
-                if ((${#valid_elements[@]} > 0)); then
-                    if timeout --foreground --kill-after=15 600 \
-                        "${RUN_AS_USER[@]}" "${nix_env[@]}" \
-                        "$NIX_BIN" profile upgrade "${valid_elements[@]}" --impure --max-jobs 0; then
-                        log_success "Nix profile packages upgraded (cached packages)."
-                    else
-                        log_error "Nix profile packages upgrade failed (exit $?)."
-                    fi
-                else
-                    log_warn "All Nix profile packages requiring updates lack binary substitutes; skipped."
-                fi
-            elif ((nix_status == 124 || nix_status == 137)); then
+            if ((nix_status == 124 || nix_status == 137)); then
                 log_error "Nix profile packages upgrade timed out."
+            elif command -v jq >/dev/null 2>&1; then
+                # Batch upgrade failed (e.g. uncached source build, insecure package, or broken upstream).
+                # Extract all installed elements and attempt resilient recovery.
+                mapfile -t all_elements < <("${RUN_AS_USER[@]}" "${nix_env[@]}" "$NIX_BIN" profile list --json 2>/dev/null | jq -r '.elements | keys[]' 2>/dev/null || true)
+                if ((${#all_elements[@]} == 0)); then
+                    log_error "Nix profile packages upgrade failed (exit $nix_status); no profile elements found."
+                    [[ ! -s "$nix_upgrade_log" ]] || sed 's/^/  /' "$nix_upgrade_log" >&2
+                else
+                    diagnose_nix_log() {
+                        local log="$1"
+                        if grep -q "Reason: local builds are disabled (max-jobs = 0)" "$log" 2>/dev/null; then
+                            printf 'no binary substitute in cache (avoided source build)'
+                        elif grep -q "marked as insecure" "$log" 2>/dev/null; then
+                            local cve
+                            cve=$(grep -oE 'CVE-[0-9]+-[0-9]+' "$log" 2>/dev/null | head -n1 || true)
+                            printf 'marked as insecure%s (check ~/.config/nixpkgs/config.nix)' "${cve:+: $cve}"
+                        elif grep -q "is marked as broken" "$log" 2>/dev/null; then
+                            printf 'marked as broken upstream'
+                        else
+                            local err_msg
+                            err_msg=$(grep -E '^(error|eval-error):' "$log" 2>/dev/null | head -n1 | sed 's/^error: *//' || true)
+                            printf '%s' "${err_msg:-evaluation/build error}"
+                        fi
+                    }
+
+                    # Filter elements that caused the initial batch failure
+                    valid_elements=()
+                    skipped_count=0
+                    for el in "${all_elements[@]}"; do
+                        if grep -Eq -- "[-/'.\"]${el}[-. '\"]" "$nix_upgrade_log" 2>/dev/null; then
+                            reason=$(diagnose_nix_log "$nix_upgrade_log")
+                            log_warn "Skipped Nix package '$el': $reason."
+                            skipped_count=$((skipped_count + 1))
+                        else
+                            valid_elements+=("$el")
+                        fi
+                    done
+
+                    # Attempt batch upgrade for the unaffected elements
+                    batch_success=false
+                    if ((${#valid_elements[@]} > 0 && skipped_count > 0)); then
+                        batch_log="$TEMP_DIR/nix-profile-batch.log"
+                        if timeout --foreground --kill-after=15 600 \
+                            "${RUN_AS_USER[@]}" "${nix_env[@]}" \
+                            "$NIX_BIN" profile upgrade "${valid_elements[@]}" --impure --max-jobs 0 >"$batch_log" 2>&1; then
+                            log_success "Nix profile packages upgraded (${#valid_elements[@]} packages upgraded, $skipped_count skipped)."
+                            batch_success=true
+                        fi
+                    fi
+
+                    # If batch upgrade still failed or no specific element was isolated from initial log,
+                    # fall back to upgrading elements individually so all working packages succeed.
+                    if [[ "$batch_success" == false && ((${#valid_elements[@]} > 0)) ]]; then
+                        log_info "Retrying Nix profile upgrades individually..."
+                        upgraded_count=0
+                        for el in "${valid_elements[@]}"; do
+                            single_log="$TEMP_DIR/nix-profile-$el.log"
+                            if timeout --foreground --kill-after=10 180 \
+                                "${RUN_AS_USER[@]}" "${nix_env[@]}" \
+                                "$NIX_BIN" profile upgrade "$el" --impure --max-jobs 0 >"$single_log" 2>&1; then
+                                upgraded_count=$((upgraded_count + 1))
+                            else
+                                reason=$(diagnose_nix_log "$single_log")
+                                log_warn "Skipped Nix package '$el': $reason."
+                                skipped_count=$((skipped_count + 1))
+                            fi
+                        done
+                        if ((upgraded_count > 0)); then
+                            log_success "Nix profile packages upgraded ($upgraded_count packages upgraded, $skipped_count skipped)."
+                        else
+                            log_error "All Nix profile packages failed to upgrade."
+                        fi
+                    elif [[ "$batch_success" == false && ((${#valid_elements[@]} == 0)) ]]; then
+                        log_warn "All Nix profile packages requiring updates were skipped."
+                    fi
+                fi
             else
                 log_error "Nix profile packages upgrade failed (exit $nix_status)."
                 [[ ! -s "$nix_upgrade_log" ]] || sed 's/^/  /' "$nix_upgrade_log" >&2
